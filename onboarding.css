@@ -1,0 +1,366 @@
+/* Onboarding Window Styles matching Peeky Notes Screenshots 1, 2, 3 */
+:root {
+  --bg-dark: #191C22;
+  --bg-surface: #21252D;
+  --text-main: #FFFFFF;
+  --text-muted: #8E9BAE;
+  --accent-purple: #4F46E5;
+  --accent-hover: #4338CA;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-dark);
+  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+}
+
+.onboarding-window {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  padding: 12px 24px 20px 24px;
+}
+
+.window-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+}
+
+.window-title {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.window-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.window-close-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+/* Slides */
+.slide {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px 30px;
+}
+
+.slide.active {
+  display: flex;
+}
+
+.slide-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 580px;
+  gap: 14px;
+}
+
+/* Slide 1 App Icon */
+.app-icon-badge {
+  width: 68px;
+  height: 68px;
+  border-radius: 16px;
+  background: #252A34;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  margin-bottom: 8px;
+}
+
+.badge-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.slide-title {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #FFFFFF;
+}
+
+.slide-description {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  max-width: 520px;
+}
+
+.feature-pills-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.feature-pill {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #D1D5DB;
+}
+
+.pill-icon {
+  font-size: 14px;
+  color: #818CF8;
+}
+
+/* Slide 2 Mockup */
+.preview-card-frame {
+  width: 440px;
+  height: 180px;
+  background: #1C2028;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.mockup-sidebar {
+  width: 130px;
+  background: #181B22;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mockup-pill {
+  font-size: 11px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  color: #9CA3AF;
+}
+
+.mockup-pill.active {
+  background: #3730A3;
+  color: #fff;
+  font-weight: 600;
+}
+
+.mockup-editor {
+  flex: 1;
+  padding: 14px;
+  color: #2A3442;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.mockup-title {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.mockup-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: "Segoe Print", "Ink Free", sans-serif;
+  font-size: 12px;
+}
+
+/* Slide 3 Sticky Note Mockup */
+.mockup-sticky {
+  width: 380px;
+  height: 160px;
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #2A3442;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  text-align: left;
+}
+
+.sticky-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(42, 52, 66, 0.12);
+  padding-bottom: 6px;
+}
+
+.sticky-title {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.sticky-status {
+  font-size: 11px;
+  color: rgba(42, 52, 66, 0.6);
+}
+
+.sticky-body {
+  font-family: "Segoe Print", "Ink Free", sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.helper-syntax-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 6px;
+}
+
+.syntax-badge {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  color: #9CA3AF;
+}
+
+.syntax-badge code {
+  color: #818CF8;
+  font-weight: 700;
+}
+
+/* Edge Choice Selector */
+.edge-choice-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.edge-choice-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.edge-toggle-group {
+  display: flex;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 4px;
+}
+
+.edge-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.edge-toggle-btn:hover {
+  color: #FFFFFF;
+}
+
+.edge-toggle-btn.active {
+  background: #4F46E5;
+  color: #FFFFFF;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.4);
+}
+
+/* Footer Controls */
+.onboarding-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+}
+
+.dots-indicator {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dot.active {
+  width: 18px;
+  border-radius: 4px;
+  background: #818CF8;
+}
+
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-step-back {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13.5px;
+  cursor: pointer;
+  padding: 8px 14px;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+}
+
+.btn-step-back:hover {
+  color: #FFFFFF;
+}
+
+.btn-step-next {
+  background: #4F46E5;
+  border: none;
+  color: #FFFFFF;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 8px 22px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.btn-step-next:hover {
+  background: #4338CA;
+  transform: scale(1.02);
+}

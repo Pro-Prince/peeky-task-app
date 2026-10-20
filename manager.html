@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peeky Task</title>
+  <link rel="stylesheet" href="manager.css">
+</head>
+<body>
+  <div class="app-window">
+    <!-- Top Trial Banner -->
+    <header class="trial-banner" id="trialBanner">
+      <div class="banner-left">
+        <div class="clock-icon-wrapper">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div class="banner-text">
+          <span class="banner-headline">7 days left in your free trial</span>
+          <span class="banner-subtext">Everything is unlocked until Tuesday 27 October. After that your tasks stay readable and exportable, but editing is locked.</span>
+        </div>
+      </div>
+      <div class="banner-right">
+        <button class="banner-btn-secondary" id="btnEnterKey">Enter a key</button>
+        <button class="banner-btn-primary" id="btnBuyNotes">Buy Peeky Task</button>
+      </div>
+    </header>
+
+    <!-- Main 3-Column Workspace -->
+    <div class="workspace-layout">
+
+      <!-- Column 1: Left Navigation Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-section-title">Tasks</div>
+        <nav class="sidebar-nav">
+          <button class="nav-item active" data-filter="all" id="navAllNotes">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>All tasks</span>
+          </button>
+
+          <button class="nav-item" data-filter="deck" id="navOnDeck">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+              <line x1="16" y1="4" x2="16" y2="20"></line>
+            </svg>
+            <span>On the deck</span>
+          </button>
+
+          <button class="nav-item" data-filter="completed" id="navCompleted">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Completed</span>
+          </button>
+
+          <button class="nav-item" data-filter="archive" id="navArchive">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="21 8 21 21 3 21 3 8"></polyline>
+              <rect x="1" y="3" width="22" height="5"></rect>
+              <line x1="10" y1="12" x2="14" y2="12"></line>
+            </svg>
+            <span>Archive</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-spacer"></div>
+
+        <div class="sidebar-bottom">
+          <button class="sidebar-link-btn" id="btnSidebarSettings">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            <span>Settings</span>
+          </button>
+
+          <button class="sidebar-link-btn" id="btnSidebarAbout">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>About</span>
+          </button>
+
+          <div class="sidebar-account">
+            <div class="account-avatar">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <div class="account-details">
+              <span class="account-name">Not signed in</span>
+              <span class="account-sub">Sign in</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Column 2: Tasks List Column -->
+      <section class="notes-column">
+        <div class="notes-search-bar">
+          <div class="search-input-wrapper">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search tasks..." />
+          </div>
+          <button class="btn-icon-action" id="btnSortNotes" title="Sort tasks">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </button>
+          <button class="btn-add-primary" id="btnNewNotePrimary" title="New Task">+</button>
+        </div>
+
+        <div class="notes-list-header">
+          <h2 class="notes-list-title" id="notesListTitle">All tasks</h2>
+          <span class="notes-count-badge" id="notesCountBadge">5</span>
+        </div>
+
+        <div class="notes-list-scroll" id="notesListContainer">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+      <!-- Column 3: Large Active Task Editor -->
+      <main class="note-editor-column" id="noteEditorPane">
+        <div class="editor-top-bar">
+          <div class="editor-status-left">
+            <div class="deck-status-badge" id="deckStatusBadge">
+              <span class="status-indicator-dot"></span>
+              <span class="status-indicator-label">Active · on the deck</span>
+            </div>
+            <span class="task-progress-pill" id="managerProgressPill" style="display: none;">0/0 done</span>
+          </div>
+
+          <div class="editor-header-actions">
+            <button class="editor-tool-btn" id="btnExportNote" title="Export Markdown / Copy">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                <polyline points="16 6 12 2 8 6"></polyline>
+                <line x1="12" y1="2" x2="12" y2="15"></line>
+              </svg>
+            </button>
+            <button class="editor-tool-btn" id="btnToggleDeck" title="Pin / Unpin on edge Deck">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </button>
+            <button class="editor-tool-btn del" id="btnDeleteNote" title="Delete task">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="editor-title-row">
+          <input type="text" class="editor-title-input" id="editorTitleInput" placeholder="Untitled Task" />
+          <span class="editor-meta-time" id="editorMetaTime">edited 3h</span>
+        </div>
+
+        <div class="editor-body-wrapper">
+          <textarea class="editor-body-textarea" id="editorBodyTextarea" placeholder="Write tasks, checklist, or thoughts..."></textarea>
+        </div>
+
+        <!-- Bottom Formatting Bar & Color Swatches -->
+        <footer class="editor-bottom-bar">
+          <div class="format-toolbar">
+            <button class="fmt-btn" data-format="bold" title="Bold"><b>B</b></button>
+            <button class="fmt-btn" data-format="italic" title="Italic"><i>I</i></button>
+            <button class="fmt-btn" data-format="underline" title="Underline"><u>U</u></button>
+            <button class="fmt-btn" data-format="strike" title="Strikethrough"><s>S</s></button>
+            <span class="fmt-divider"></span>
+            <button class="fmt-btn" data-format="checklist" title="Insert Checklist Item">☑</button>
+            <button class="fmt-btn" data-format="bullets" title="Bullet list">•≡</button>
+            <button class="fmt-btn" data-format="link" title="Insert link">🔗</button>
+            <button class="fmt-btn" data-format="font" title="Font style">Aa</button>
+          </div>
+
+          <div class="editor-date-stamp" id="editorDateStamp">Created 20 Oct 2026 · Updated 3h ago</div>
+
+          <div class="color-palette-tray">
+            <div class="palette-dots" id="paletteDots">
+              <span class="palette-dot" data-color="mint" style="background:#B9E7D0" title="Mint"></span>
+              <span class="palette-dot" data-color="sky" style="background:#BAE4E7" title="Sky"></span>
+              <span class="palette-dot" data-color="butter" style="background:#FBE08D" title="Butter"></span>
+              <span class="palette-dot" data-color="peach" style="background:#FBD4A8" title="Peach"></span>
+              <span class="palette-dot" data-color="blush" style="background:#F9C9D6" title="Blush"></span>
+              <span class="palette-dot" data-color="lilac" style="background:#DCC9F2" title="Lilac"></span>
+              <span class="palette-dot" data-color="blue" style="background:#C2DDF6" title="Blue"></span>
+              <span class="palette-dot" data-color="slate" style="background:#D9DFE8" title="Slate"></span>
+            </div>
+            <button class="palette-more-btn" title="More options">···</button>
+          </div>
+        </footer>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- License Key Modal -->
+  <div class="modal-overlay" id="licenseModal" style="display: none;">
+    <div class="modal-box">
+      <h3>Enter License Key</h3>
+      <p>Enter the license key received after purchasing Peeky Task.</p>
+      <input type="text" class="modal-input" id="inputLicenseKey" placeholder="XXXX-XXXX-XXXX-XXXX" />
+      <div class="modal-actions">
+        <button class="modal-btn-cancel" id="btnCancelLicense">Cancel</button>
+        <button class="modal-btn-confirm" id="btnConfirmLicense">Activate Key</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="manager.js"></script>
+</body>
+</html>

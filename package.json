@@ -1,0 +1,59 @@
+{
+  "name": "peeky-task",
+  "version": "1.0.0",
+  "description": "Minimalist floating daily task widget for Windows",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win",
+    "build:msix": "electron-builder --win appx"
+  },
+  "keywords": [
+    "todo",
+    "tasks",
+    "windows",
+    "floating",
+    "widget",
+    "productivity"
+  ],
+  "author": "Peeky Task",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.peekytask.app",
+    "productName": "Peeky Task",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer.js",
+      "manager.js",
+      "onboarding.js",
+      "index.html",
+      "manager.html",
+      "onboarding.html",
+      "styles.css",
+      "manager.css",
+      "onboarding.css",
+      "assets/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "appx"
+      ],
+      "icon": "assets/app-icon.ico"
+    },
+    "appx": {
+      "identityName": "PeekyTask",
+      "publisher": "CN=PeekyTask",
+      "publisherDisplayName": "Peeky Task",
+      "applicationId": "PeekyTask"
+    }
+  }
+}

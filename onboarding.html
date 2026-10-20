@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peeky Task</title>
+  <link rel="stylesheet" href="onboarding.css">
+</head>
+<body>
+  <div class="onboarding-window">
+    <!-- Window Header -->
+    <header class="window-header">
+      <span class="window-title">Peeky Task</span>
+      <button class="window-close-btn" id="btnCloseOnboarding">✕</button>
+    </header>
+
+    <!-- Slide 1: Your tasks, in your order -->
+    <div class="slide active" id="slide1">
+      <div class="slide-content">
+        <div class="app-icon-badge">
+          <img src="assets/app-icon.png" alt="Peeky Task Icon" class="badge-img" />
+        </div>
+
+        <h1 class="slide-title">Your tasks, in your order</h1>
+        <p class="slide-description">
+          Two things to make the deck yours: arrange your tasks by dragging them, and start a list just by typing one. Everything else works exactly as it did.
+        </p>
+
+        <div class="feature-pills-row">
+          <div class="feature-pill">
+            <span class="pill-icon">⇅</span>
+            <span>Drag to reorder</span>
+          </div>
+          <div class="feature-pill">
+            <span class="pill-icon">≡</span>
+            <span>Lists as you type</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 2: Drag tasks into the order you want -->
+    <div class="slide" id="slide2">
+      <div class="slide-content">
+        <div class="preview-card-frame">
+          <div class="mockup-sidebar">
+            <div class="mockup-pill active">All tasks</div>
+            <div class="mockup-pill">On the deck</div>
+          </div>
+          <div class="mockup-editor" style="background:#FBE08D">
+            <div class="mockup-title">Groceries</div>
+            <div class="mockup-lines">
+              <span>- oat milk</span>
+              <span>- rye bread</span>
+              <span>- coffee, the good one</span>
+            </div>
+          </div>
+        </div>
+
+        <h1 class="slide-title">Drag tasks into the order you want</h1>
+        <p class="slide-description">
+          On the deck, hold a tab by its title and drop it higher or lower. In All Tasks, use the handle on the right of a task. Either way, the other follows.
+        </p>
+      </div>
+    </div>
+
+    <!-- Slide 3: Lists start themselves -->
+    <div class="slide" id="slide3">
+      <div class="slide-content">
+        <div class="mockup-sticky" style="background:#F9C9D6">
+          <div class="sticky-head">
+            <span class="sticky-title">Grocery shopping</span>
+            <span class="sticky-status">Saved · now</span>
+          </div>
+          <div class="sticky-body">
+            <div>1. egg</div>
+            <div>2. milk</div>
+            <div>3. bread</div>
+            <div>4. lettuce</div>
+          </div>
+        </div>
+
+        <h1 class="slide-title">Lists start themselves</h1>
+        <p class="slide-description">
+          Begin a line with a dash, 1. or [ ] and a space, and it becomes a bullet, a numbered list or a checklist. Backspace straight after gives you back what you typed.
+        </p>
+
+        <div class="helper-syntax-row">
+          <span class="syntax-badge"><code>-</code> then Space bullets</span>
+          <span class="syntax-badge"><code>1.</code> then Space numbers</span>
+          <span class="syntax-badge"><code>[ ]</code> then Space checklist</span>
+        </div>
+
+        <div class="edge-choice-row">
+          <span class="edge-choice-label">Dock sticky tasks on:</span>
+          <div class="edge-toggle-group">
+            <button type="button" class="edge-toggle-btn active" data-edge="right" id="btnChooseRight">Right (Default) ◨</button>
+            <button type="button" class="edge-toggle-btn" data-edge="left" id="btnChooseLeft">Left ◧</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <footer class="onboarding-footer">
+      <div class="dots-indicator">
+        <span class="dot active" data-slide="1"></span>
+        <span class="dot" data-slide="2"></span>
+        <span class="dot" data-slide="3"></span>
+      </div>
+
+      <div class="footer-actions">
+        <button class="btn-step-back" id="btnBack" style="display: none;">Back</button>
+        <button class="btn-step-next" id="btnNext">Next</button>
+      </div>
+    </footer>
+  </div>
+
+  <script src="onboarding.js"></script>
+</body>
+</html>

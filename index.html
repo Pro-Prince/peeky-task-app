@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peeky Task</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="edge-right">
+  <!-- Desktop Overlay Stage: 100% transparent background -->
+  <div class="overlay-stage" id="overlayStage">
+
+    <!-- Active Floating Note Card (Floats beside the active tab matching Screenshot 5) -->
+    <div class="note-card-container" id="noteCardContainer">
+      <div class="note-card" id="noteCard">
+        <!-- Main Card Content Area -->
+        <div class="card-content">
+          <!-- Card Header: Title & Quick Actions -->
+          <div class="card-header">
+            <input 
+              type="text" 
+              class="card-title-input" 
+              id="cardTitleInput" 
+              value="Untitled list" 
+              placeholder="List title..." 
+              autocomplete="off"
+            />
+            <div class="card-header-actions">
+              <span class="task-progress-pill" id="cardProgressPill" style="display: none;">0/0 done</span>
+              <span class="card-save-status" id="cardSaveStatus">Saved · now</span>
+              <button class="card-header-btn" id="btnMinimizeCard" title="Minimize">−</button>
+              <button class="card-header-btn" id="btnTuckCard" title="Close">✕</button>
+            </div>
+          </div>
+
+          <div class="card-header-divider"></div>
+          <div class="card-progress-bar-track" id="cardProgressBarTrack">
+            <div class="card-progress-bar-fill" id="cardProgressBarFill"></div>
+          </div>
+
+          <!-- Card Body: Multi-line task / note editor -->
+          <div class="card-body-wrapper">
+            <textarea 
+              class="card-body-textarea" 
+              id="cardBodyTextarea" 
+              placeholder="Add tasks... (type - [ ] or hit Enter for next task)"
+            ></textarea>
+          </div>
+
+          <!-- Card Footer Toolbar matching Screenshot 5 -->
+          <div class="card-footer-toolbar">
+            <!-- Formatting tools row -->
+            <div class="card-fmt-row">
+              <button class="card-fmt-btn" data-fmt="bold" title="Bold"><b>B</b></button>
+              <button class="card-fmt-btn" data-fmt="italic" title="Italic"><i>I</i></button>
+              <button class="card-fmt-btn" data-fmt="underline" title="Underline"><u>U</u></button>
+              <button class="card-fmt-btn" data-fmt="strike" title="Strikethrough"><s>S</s></button>
+              <span class="card-fmt-sep"></span>
+              <button class="card-fmt-btn" data-fmt="checklist" title="Checklist item">☑</button>
+              <button class="card-fmt-btn" data-fmt="bullets" title="Bullet list">•≡</button>
+              <button class="card-fmt-btn" data-fmt="numbers" title="Numbered list">1≡</button>
+              <span class="card-fmt-sep"></span>
+              <button class="card-fmt-btn" data-fmt="link" title="Insert link">🔗</button>
+              <button class="card-fmt-btn" data-fmt="font" title="Font style">Aa</button>
+              <button class="card-fmt-btn" data-fmt="more" title="More">···</button>
+            </div>
+
+            <!-- Bottom row: 8 color swatches + Delete, Clear done, Mark complete, Close -->
+            <div class="card-bottom-actions-row">
+              <div class="card-color-swatches" id="cardColorSwatches">
+                <span class="swatch-dot" data-color="mint" style="background:#B9E7D0" title="Mint"></span>
+                <span class="swatch-dot" data-color="sky" style="background:#BAE4E7" title="Sky"></span>
+                <span class="swatch-dot" data-color="butter" style="background:#FBE08D" title="Butter"></span>
+                <span class="swatch-dot" data-color="peach" style="background:#FBD4A8" title="Peach"></span>
+                <span class="swatch-dot" data-color="blush" style="background:#F9C9D6" title="Blush"></span>
+                <span class="swatch-dot" data-color="lilac" style="background:#DCC9F2" title="Lilac"></span>
+                <span class="swatch-dot" data-color="blue" style="background:#C2DDF6" title="Blue"></span>
+                <span class="swatch-dot" data-color="slate" style="background:#D9DFE8" title="Slate"></span>
+              </div>
+
+              <div class="card-text-actions">
+                <button class="card-action-text-btn danger" id="btnCardDelete">Delete</button>
+                <button class="card-action-text-btn" id="btnClearCompleted" title="Clear completed tasks">Clear done</button>
+                <button class="card-action-text-btn" id="btnMarkComplete">Mark all done</button>
+                <button class="card-action-text-btn" id="btnCloseCard">Close</button>
+              </div>
+            </div>
+
+            <!-- 10-Second Undo Progress Bar -->
+            <div class="undo-drawer" id="undoDrawer" style="display: none;">
+              <div class="undo-drawer-row">
+                <span class="undo-msg">Task deleted. 10s to undo.</span>
+                <button class="btn-undo-action" id="btnCardUndo">Undo</button>
+              </div>
+              <div class="undo-bar-track">
+                <div class="undo-bar-drain" id="undoBarDrain"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen-Edge Tab Rail (Vertical column flush against screen bezel) -->
+    <div class="edge-rail rested" id="edgeRail">
+      <!-- Tabs populated dynamically -->
+      <div class="rail-tabs-track" id="railTabsTrack"></div>
+
+      <!-- 3 Rail Action Buttons (Hidden when rested, visible when touched/hovered) -->
+      <div class="rail-actions-container" id="railActionsContainer">
+        <!-- Add New Task Button (white circular + button) -->
+        <button class="add-note-circle-btn" id="btnAddNote" title="New Task">+</button>
+
+        <!-- Bottom Task Manager & Edge Switcher Icons -->
+        <div class="rail-settings-group">
+          <button class="rail-icon-btn" id="btnOpenManager" title="Open Full Task Manager (Alt+Space)">⊞</button>
+          <button class="rail-icon-btn" id="btnFlipEdge" title="Flip Screen Edge (Left ◧ / Right ◨)">◨</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
