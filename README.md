@@ -21,18 +21,6 @@ Peeky Task is a minimalist, transparent daily task and to-do widget designed to 
 
 ---
 
-## App Preview
-
-<div align="center">
-
-![Peeky Task Preview](assets/preview.png)
-
-> Lives flush against the edge of your monitor without blocking active apps. Access your tasks anytime with a hover or `Alt + Space`.
-
-</div>
-
----
-
 ## Features
 
 - **Screen-Edge Rested & Hover States** — collapses into tiny 7px vertical color slivers flush against the screen bezel when idle; fans out smoothly into full tabs with action buttons when touched
