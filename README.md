@@ -23,7 +23,13 @@ Peeky Task is a minimalist, transparent daily task and to-do widget designed to 
 
 ## App Preview
 
+<div align="center">
+
+![Peeky Task Preview](assets/preview.png)
+
 > Lives flush against the edge of your monitor without blocking active apps. Access your tasks anytime with a hover or `Alt + Space`.
+
+</div>
 
 ---
 
@@ -79,39 +85,15 @@ Users need quick access to sticky notes while also wanting a searchable master a
 
 ---
 
-## Run Locally
+## Keyboard Shortcuts
 
-### Prerequisites
-- Node.js (v18 or higher)
-- npm (v9 or higher)
-
-### Installation
-```bash
-# Clone repository
-git clone https://github.com/Pro-Prince/peeky-task-app.git
-cd peeky-task-app
-
-# Install dependencies
-npm install
-
-# Start the application
-npm start
-```
-
----
-
-## Packaging for Microsoft Store (MSIX / AppX)
-
-To generate certified Windows MSIX / AppX packages for Microsoft Partner Center:
-
-```bash
-npm run build
-```
-
-The output packages will be generated inside the `release/` directory:
-- `Peeky Task 1.0.0.appx` (Certified Windows Store upload package)
-- `Peeky Task Setup 1.0.0.exe` (Standalone Windows NSIS installer)
-- `win-unpacked/` (Direct unpacked executable)
+| Shortcut | Action |
+|---|---|
+| `Alt + Space` | Toggle Full Task Manager |
+| `Ctrl + N` | New Task List |
+| `Ctrl + .` | Cycle Card Color Palette |
+| `Escape` | Tuck / Close Floating Card |
+| `Tab` / `Shift + Tab` | Indent / Outdent Checklist Item |
 
 ---
 
