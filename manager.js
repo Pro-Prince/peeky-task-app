@@ -74,7 +74,9 @@ let state = {
   sortBy: "updated", // "updated" | "title" | "color"
   edge: "right",
   theme: "dark",
+  font: "handwritten",
   hideOverFullscreen: true,
+  launchAtStartup: false,
   trial: {
     isLicensed: false,
     trialStartedAt: Date.now(),
@@ -102,6 +104,11 @@ const navArchive = document.getElementById("navArchive");
 // Sidebar Bottom Buttons
 const btnSidebarSettings = document.getElementById("btnSidebarSettings");
 const btnSidebarAbout = document.getElementById("btnSidebarAbout");
+
+// View Panes
+const tasksWorkspaceView = document.getElementById("tasksWorkspaceView");
+const settingsView = document.getElementById("settingsView");
+const aboutView = document.getElementById("aboutView");
 
 // Editor Pane
 const noteEditorPane = document.getElementById("noteEditorPane");
@@ -142,14 +149,13 @@ const inputLicenseKey = document.getElementById("inputLicenseKey");
 const btnCancelLicense = document.getElementById("btnCancelLicense");
 const btnConfirmLicense = document.getElementById("btnConfirmLicense");
 
-// Settings Modal
-const settingsModal = document.getElementById("settingsModal");
-const btnCloseSettings = document.getElementById("btnCloseSettings");
-const btnEdgeRight = document.getElementById("btnEdgeRight");
-const btnEdgeLeft = document.getElementById("btnEdgeLeft");
-const btnThemeDark = document.getElementById("btnThemeDark");
-const btnThemeLight = document.getElementById("btnThemeLight");
-const btnThemeSystem = document.getElementById("btnThemeSystem");
+// Settings View Elements (Screenshot 1)
+const cardThemeSystem = document.getElementById("cardThemeSystem");
+const cardThemeLight = document.getElementById("cardThemeLight");
+const cardThemeDark = document.getElementById("cardThemeDark");
+const cardEdgeLeft = document.getElementById("cardEdgeLeft");
+const cardEdgeRight = document.getElementById("cardEdgeRight");
+const fontPillSelector = document.getElementById("fontPillSelector");
 const chkHideFullscreen = document.getElementById("chkHideFullscreen");
 const chkStartup = document.getElementById("chkStartup");
 const dataPathInput = document.getElementById("dataPathInput");
@@ -165,15 +171,11 @@ const settingsLicenseActions = document.getElementById("settingsLicenseActions")
 const btnSettingsEnterKey = document.getElementById("btnSettingsEnterKey");
 const btnSettingsBuy = document.getElementById("btnSettingsBuy");
 
-// About Modal
-const aboutModal = document.getElementById("aboutModal");
-const btnCloseAbout = document.getElementById("btnCloseAbout");
-const btnAboutOnboarding = document.getElementById("btnAboutOnboarding");
-const btnAboutWebsite = document.getElementById("btnAboutWebsite");
+// About View Elements (Screenshot 2)
 const btnAboutPrivacy = document.getElementById("btnAboutPrivacy");
 const btnAboutSupport = document.getElementById("btnAboutSupport");
-const btnAboutCheckUpdate = document.getElementById("btnAboutCheckUpdate");
-const aboutUpdateStatus = document.getElementById("aboutUpdateStatus");
+const btnAboutFeatures = document.getElementById("btnAboutFeatures");
+const btnAboutWebsite = document.getElementById("btnAboutWebsite");
 
 // Dynamic 7-Day Trial Calculation
 function getTrialStatus() {
@@ -197,10 +199,12 @@ function getTrialStatus() {
   const daysRemaining = Math.max(0, Math.ceil(msRemaining / (24 * 60 * 60 * 1000)));
   const isExpired = daysRemaining <= 0;
 
-  // Format date like Peeky Notes: "Tuesday 28 October"
+  // Format date like screenshot: "Tuesday 27 October"
   const endDate = new Date(trialEndsAt);
-  const options = { weekday: "long", day: "numeric", month: "long" };
-  const endDateStr = endDate.toLocaleDateString("en-US", options);
+  const dayOfWeek = endDate.toLocaleDateString("en-US", { weekday: "long" });
+  const dayOfMonth = endDate.getDate();
+  const monthName = endDate.toLocaleDateString("en-US", { month: "long" });
+  const endDateStr = `${dayOfWeek} ${dayOfMonth} ${monthName}`;
 
   return {
     isLicensed: false,
@@ -276,6 +280,106 @@ function updateTrialUI() {
       if (settingsLicenseActions) settingsLicenseActions.style.display = "flex";
     }
   }
+}
+
+// Workspace View Switching (Tasks, Settings, About)
+function switchWorkspaceView(viewName) {
+  const allNavBtns = [navAllNotes, navOnDeck, navCompleted, navArchive, btnSidebarSettings, btnSidebarAbout].filter(Boolean);
+  allNavBtns.forEach((b) => b.classList.remove("active"));
+
+  if (viewName === "settings") {
+    if (tasksWorkspaceView) tasksWorkspaceView.style.display = "none";
+    if (aboutView) aboutView.style.display = "none";
+    if (settingsView) settingsView.style.display = "flex";
+    if (btnSidebarSettings) btnSidebarSettings.classList.add("active");
+    syncSettingsUI();
+  } else if (viewName === "about") {
+    if (tasksWorkspaceView) tasksWorkspaceView.style.display = "none";
+    if (settingsView) settingsView.style.display = "none";
+    if (aboutView) aboutView.style.display = "flex";
+    if (btnSidebarAbout) btnSidebarAbout.classList.add("active");
+  } else {
+    if (settingsView) settingsView.style.display = "none";
+    if (aboutView) aboutView.style.display = "none";
+    if (tasksWorkspaceView) tasksWorkspaceView.style.display = "flex";
+
+    if (state.currentFilter === "deck" && navOnDeck) navOnDeck.classList.add("active");
+    else if (state.currentFilter === "completed" && navCompleted) navCompleted.classList.add("active");
+    else if (state.currentFilter === "archive" && navArchive) navArchive.classList.add("active");
+    else if (navAllNotes) navAllNotes.classList.add("active");
+
+    renderNotesList();
+    renderEditor();
+  }
+}
+
+// Synchronize Settings View state with controls
+async function syncSettingsUI() {
+  const currentTheme = state.theme || "dark";
+  [cardThemeSystem, cardThemeLight, cardThemeDark].filter(Boolean).forEach((c) => {
+    if (c.dataset.theme === currentTheme) c.classList.add("selected");
+    else c.classList.remove("selected");
+  });
+
+  const currentEdge = state.edge || "right";
+  [cardEdgeLeft, cardEdgeRight].filter(Boolean).forEach((c) => {
+    if (c.dataset.edge === currentEdge) c.classList.add("selected");
+    else c.classList.remove("selected");
+  });
+
+  const currentFont = state.font || "handwritten";
+  applyFont(currentFont);
+  if (fontPillSelector) {
+    const fontBtns = fontPillSelector.querySelectorAll(".font-pill-btn");
+    fontBtns.forEach((btn) => {
+      if (btn.dataset.font === currentFont) btn.classList.add("active");
+      else btn.classList.remove("active");
+    });
+  }
+
+  if (chkHideFullscreen) {
+    chkHideFullscreen.checked = state.hideOverFullscreen !== false;
+  }
+
+  if (chkStartup && window.peekyApi && window.peekyApi.getLoginItemSettings) {
+    try {
+      const autoStart = await window.peekyApi.getLoginItemSettings();
+      chkStartup.checked = !!autoStart;
+    } catch (e) {}
+  }
+
+  if (dataPathInput && window.peekyApi && window.peekyApi.getDataPath) {
+    try {
+      const p = await window.peekyApi.getDataPath();
+      if (p) dataPathInput.value = p;
+    } catch (err) {}
+  }
+}
+
+function applyFont(fontKey) {
+  state.font = fontKey;
+  document.body.classList.remove("font-handwritten", "font-normal", "font-rounded", "font-typewriter");
+  document.body.classList.add(`font-${fontKey}`);
+}
+
+function applyTheme(theme) {
+  state.theme = theme;
+  if (theme === "system") {
+    const isDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.body.className = isDark ? "theme-dark" : "theme-light";
+  } else if (theme === "light") {
+    document.body.className = "theme-light";
+  } else {
+    document.body.className = "theme-dark";
+  }
+  if (state.font) {
+    document.body.classList.add(`font-${state.font}`);
+  }
+
+  [cardThemeSystem, cardThemeLight, cardThemeDark].filter(Boolean).forEach((btn) => {
+    if (btn.dataset.theme === theme) btn.classList.add("selected");
+    else btn.classList.remove("selected");
+  });
 }
 
 // Ensure note has structured items
@@ -807,6 +911,7 @@ function setupListeners() {
   const navBtns = [navAllNotes, navOnDeck, navCompleted, navArchive].filter(Boolean);
   navBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
+      switchWorkspaceView("tasks");
       navBtns.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       state.currentFilter = btn.dataset.filter;
@@ -820,6 +925,20 @@ function setupListeners() {
       renderEditor();
     });
   });
+
+  // Sidebar Settings Button
+  if (btnSidebarSettings) {
+    btnSidebarSettings.addEventListener("click", () => {
+      switchWorkspaceView("settings");
+    });
+  }
+
+  // Sidebar About Button
+  if (btnSidebarAbout) {
+    btnSidebarAbout.addEventListener("click", () => {
+      switchWorkspaceView("about");
+    });
+  }
 
   // Search input
   searchInput.addEventListener("input", (e) => {
@@ -1003,11 +1122,25 @@ function setupListeners() {
     const note = getActiveNote();
     if (!note) return;
     if (note.archived) {
-      // If archived, unarchive and pin
+      // If archived, unarchive and pin if capacity allows
+      const deckNotes = state.notes.filter((n) => n.onDeck && !n.archived);
+      if (deckNotes.length >= 7) {
+        alert("Screen edge is full. Unpin or complete a task list to pin another.");
+        return;
+      }
       note.archived = false;
       note.onDeck = true;
     } else {
-      note.onDeck = !note.onDeck;
+      if (!note.onDeck) {
+        const deckNotes = state.notes.filter((n) => n.onDeck && !n.archived);
+        if (deckNotes.length >= 7) {
+          alert("Screen edge is full. Unpin or complete a task list to pin another.");
+          return;
+        }
+        note.onDeck = true;
+      } else {
+        note.onDeck = false;
+      }
     }
     renderEditor();
     renderNotesList();
@@ -1124,230 +1257,181 @@ function setupListeners() {
     });
   });
 
-  // ================= SETTINGS MODAL =================
-  if (btnSidebarSettings && settingsModal) {
-    btnSidebarSettings.addEventListener("click", async () => {
-      settingsModal.style.display = "flex";
+  // ================= NATIVE SETTINGS & ABOUT VIEWS (Screenshots 1 & 2) =================
 
-      // Load startup state
-      if (window.peekyApi && window.peekyApi.getLoginItemSettings) {
-        try {
-          const autoStart = await window.peekyApi.getLoginItemSettings();
-          if (chkStartup) chkStartup.checked = !!autoStart;
-        } catch (e) {
-          console.warn("Could not check startup settings:", e);
-        }
-      }
-
-      // Sync active edge button
-      if (state.edge === "left") {
-        btnEdgeLeft.classList.add("active");
-        btnEdgeRight.classList.remove("active");
-      } else {
-        btnEdgeRight.classList.add("active");
-        btnEdgeLeft.classList.remove("active");
-      }
-
-      // Sync active theme button
-      applyTheme(state.theme || "dark");
+  // Theme cards in Settings
+  [cardThemeSystem, cardThemeLight, cardThemeDark].filter(Boolean).forEach((card) => {
+    card.addEventListener("click", () => {
+      const themeKey = card.dataset.theme;
+      applyTheme(themeKey);
+      persistData();
     });
+  });
 
-    if (btnCloseSettings) {
-      btnCloseSettings.addEventListener("click", () => {
-        settingsModal.style.display = "none";
+  // Screen Edge cards in Settings
+  [cardEdgeLeft, cardEdgeRight].filter(Boolean).forEach((card) => {
+    card.addEventListener("click", () => {
+      const edgeKey = card.dataset.edge;
+      state.edge = edgeKey;
+      [cardEdgeLeft, cardEdgeRight].filter(Boolean).forEach((c) => {
+        if (c.dataset.edge === edgeKey) c.classList.add("selected");
+        else c.classList.remove("selected");
       });
-    }
+      if (window.peekyApi && window.peekyApi.dockEdge) {
+        window.peekyApi.dockEdge(edgeKey);
+      }
+      persistData();
+    });
+  });
 
-    // Edge switchers in Settings
-    if (btnEdgeRight) {
-      btnEdgeRight.addEventListener("click", () => {
-        state.edge = "right";
-        btnEdgeRight.classList.add("active");
-        btnEdgeLeft.classList.remove("active");
-        if (window.peekyApi && window.peekyApi.dockEdge) {
-          window.peekyApi.dockEdge("right");
-        }
-        persistData();
-      });
-    }
-
-    if (btnEdgeLeft) {
-      btnEdgeLeft.addEventListener("click", () => {
-        state.edge = "left";
-        btnEdgeLeft.classList.add("active");
-        btnEdgeRight.classList.remove("active");
-        if (window.peekyApi && window.peekyApi.dockEdge) {
-          window.peekyApi.dockEdge("left");
-        }
-        persistData();
-      });
-    }
-
-    // Themes in Settings - active toggle
-    [btnThemeDark, btnThemeLight, btnThemeSystem].filter(Boolean).forEach((btn) => {
+  // Font Pill Selector in Settings
+  if (fontPillSelector) {
+    const fontBtns = fontPillSelector.querySelectorAll(".font-pill-btn");
+    fontBtns.forEach((btn) => {
       btn.addEventListener("click", () => {
-        applyTheme(btn.dataset.theme);
+        const fontKey = btn.dataset.font;
+        applyFont(fontKey);
+        fontBtns.forEach((b) => {
+          if (b.dataset.font === fontKey) b.classList.add("active");
+          else b.classList.remove("active");
+        });
         persistData();
       });
     });
+  }
 
-    // Startup switch
-    if (chkStartup) {
-      if (window.peekyApi && window.peekyApi.getLoginItemSettings) {
-        window.peekyApi.getLoginItemSettings().then((openAtLogin) => {
-          chkStartup.checked = !!openAtLogin;
-        });
+  // Window Startup Switch
+  if (chkStartup) {
+    if (window.peekyApi && window.peekyApi.getLoginItemSettings) {
+      window.peekyApi.getLoginItemSettings().then((openAtLogin) => {
+        chkStartup.checked = !!openAtLogin;
+      });
+    }
+    chkStartup.addEventListener("change", () => {
+      if (window.peekyApi && window.peekyApi.setLoginItemSettings) {
+        window.peekyApi.setLoginItemSettings(chkStartup.checked);
       }
-      chkStartup.addEventListener("change", () => {
-        if (window.peekyApi && window.peekyApi.setLoginItemSettings) {
-          window.peekyApi.setLoginItemSettings(chkStartup.checked);
-        }
-      });
-    }
-
-    // Hide over full-screen apps
-    if (chkHideFullscreen) {
-      chkHideFullscreen.checked = state.hideOverFullscreen !== false;
-      chkHideFullscreen.addEventListener("change", () => {
-        state.hideOverFullscreen = chkHideFullscreen.checked;
-        persistData();
-      });
-    }
-
-    // Copy Data Path
-    if (btnCopyDataPath && dataPathInput) {
-      btnCopyDataPath.addEventListener("click", () => {
-        navigator.clipboard.writeText(dataPathInput.value).then(() => {
-          btnCopyDataPath.textContent = "Copied! ✓";
-          setTimeout(() => { btnCopyDataPath.textContent = "Copy path"; }, 2000);
-        });
-      });
-    }
-
-    // Open Data Folder button
-    if (btnOpenDataFolder) {
-      btnOpenDataFolder.addEventListener("click", () => {
-        if (window.peekyApi && window.peekyApi.openDataFolder) {
-          window.peekyApi.openDataFolder();
-        }
-      });
-    }
-
-    // Export Backup button
-    if (btnExportBackup) {
-      btnExportBackup.addEventListener("click", async () => {
-        if (window.peekyApi && window.peekyApi.exportBackup) {
-          const success = await window.peekyApi.exportBackup(state);
-          if (success) {
-            alert("Backup saved successfully!");
-          }
-        }
-      });
-    }
-
-    // Import Backup button
-    if (btnImportBackup) {
-      btnImportBackup.addEventListener("click", async () => {
-        if (window.peekyApi && window.peekyApi.importBackup) {
-          const restored = await window.peekyApi.importBackup();
-          if (restored && Array.isArray(restored.notes)) {
-            state.notes = restored.notes;
-            if (restored.activeNoteId) state.activeNoteId = restored.activeNoteId;
-            renderNotesList();
-            renderEditor();
-            persistData();
-            alert("Tasks restored successfully from backup!");
-          }
-        }
-      });
-    }
-
-    // Settings License Actions
-    if (btnSettingsEnterKey) {
-      btnSettingsEnterKey.addEventListener("click", () => {
-        settingsModal.style.display = "none";
-        licenseModal.style.display = "flex";
-        inputLicenseKey.focus();
-      });
-    }
-
-    if (btnSettingsBuy) {
-      btnSettingsBuy.addEventListener("click", () => {
-        if (window.peekyApi && window.peekyApi.openExternal) {
-          window.peekyApi.openExternal("https://peekytask.in/#buy");
-        }
-      });
-    }
-  }
-
-  // ================= ABOUT MODAL =================
-  if (btnSidebarAbout && aboutModal) {
-    btnSidebarAbout.addEventListener("click", () => {
-      aboutModal.style.display = "flex";
-      if (aboutUpdateStatus) aboutUpdateStatus.textContent = "Check for latest version";
+      state.launchAtStartup = chkStartup.checked;
+      persistData();
     });
-
-    if (btnCloseAbout) {
-      btnCloseAbout.addEventListener("click", () => {
-        aboutModal.style.display = "none";
-      });
-    }
-
-    if (btnAboutOnboarding) {
-      btnAboutOnboarding.addEventListener("click", () => {
-        aboutModal.style.display = "none";
-        if (window.peekyApi && window.peekyApi.openOnboarding) {
-          window.peekyApi.openOnboarding();
-        }
-      });
-    }
-
-    if (btnAboutWebsite) {
-      btnAboutWebsite.addEventListener("click", () => {
-        if (window.peekyApi && window.peekyApi.openExternal) {
-          window.peekyApi.openExternal("https://peekytask.in");
-        }
-      });
-    }
-
-    if (btnAboutPrivacy) {
-      btnAboutPrivacy.addEventListener("click", () => {
-        if (window.peekyApi && window.peekyApi.openExternal) {
-          window.peekyApi.openExternal("https://peekytask.in/#privacy");
-        }
-      });
-    }
-
-    if (btnAboutSupport) {
-      btnAboutSupport.addEventListener("click", () => {
-        if (window.peekyApi && window.peekyApi.openExternal) {
-          window.peekyApi.openExternal("https://peekytask.in/#faq");
-        }
-      });
-    }
-
-    if (btnAboutCheckUpdate) {
-      btnAboutCheckUpdate.addEventListener("click", () => {
-        if (aboutUpdateStatus) {
-          aboutUpdateStatus.textContent = "Checking...";
-          setTimeout(() => {
-            aboutUpdateStatus.textContent = "You have the latest version (v1.0.0) ✓";
-          }, 600);
-        }
-      });
-    }
   }
 
-  // Buy Peeky Task
+  // Hide over full-screen apps
+  if (chkHideFullscreen) {
+    chkHideFullscreen.checked = state.hideOverFullscreen !== false;
+    chkHideFullscreen.addEventListener("change", () => {
+      state.hideOverFullscreen = chkHideFullscreen.checked;
+      persistData();
+    });
+  }
+
+  // Copy Data Path
+  if (btnCopyDataPath && dataPathInput) {
+    btnCopyDataPath.addEventListener("click", () => {
+      navigator.clipboard.writeText(dataPathInput.value).then(() => {
+        btnCopyDataPath.textContent = "Copied! ✓";
+        setTimeout(() => { btnCopyDataPath.textContent = "Copy path"; }, 2000);
+      });
+    });
+  }
+
+  // Open Data Folder button
+  if (btnOpenDataFolder) {
+    btnOpenDataFolder.addEventListener("click", () => {
+      if (window.peekyApi && window.peekyApi.openDataFolder) {
+        window.peekyApi.openDataFolder();
+      }
+    });
+  }
+
+  // Export Backup button
+  if (btnExportBackup) {
+    btnExportBackup.addEventListener("click", async () => {
+      if (window.peekyApi && window.peekyApi.exportBackup) {
+        const success = await window.peekyApi.exportBackup(state);
+        if (success) {
+          alert("Backup saved successfully!");
+        }
+      }
+    });
+  }
+
+  // Import Backup button
+  if (btnImportBackup) {
+    btnImportBackup.addEventListener("click", async () => {
+      if (window.peekyApi && window.peekyApi.importBackup) {
+        const restored = await window.peekyApi.importBackup();
+        if (restored && Array.isArray(restored.notes)) {
+          state.notes = restored.notes;
+          if (restored.activeNoteId) state.activeNoteId = restored.activeNoteId;
+          renderNotesList();
+          renderEditor();
+          persistData();
+          alert("Tasks restored successfully from backup!");
+        }
+      }
+    });
+  }
+
+  // Settings License Actions
+  if (btnSettingsEnterKey) {
+    btnSettingsEnterKey.addEventListener("click", () => {
+      licenseModal.style.display = "flex";
+      inputLicenseKey.focus();
+    });
+  }
+
+  if (btnSettingsBuy) {
+    btnSettingsBuy.addEventListener("click", () => {
+      if (window.peekyApi && window.peekyApi.openExternal) {
+        window.peekyApi.openExternal("https://peeky-task.vercel.app/buy");
+      }
+    });
+  }
+
+  // About View Link Buttons (Matching Screenshot 2)
+  if (btnAboutPrivacy) {
+    btnAboutPrivacy.addEventListener("click", () => {
+      if (window.peekyApi && window.peekyApi.openExternal) {
+        window.peekyApi.openExternal("https://peeky-task.vercel.app/#privacy");
+      }
+    });
+  }
+
+  if (btnAboutSupport) {
+    btnAboutSupport.addEventListener("click", () => {
+      if (window.peekyApi && window.peekyApi.openExternal) {
+        window.peekyApi.openExternal("https://peeky-task.vercel.app/#faq");
+      }
+    });
+  }
+
+  if (btnAboutFeatures) {
+    btnAboutFeatures.addEventListener("click", () => {
+      if (window.peekyApi && window.peekyApi.openExternal) {
+        window.peekyApi.openExternal("https://peeky-task.vercel.app/#features");
+      }
+    });
+  }
+
+  if (btnAboutWebsite) {
+    btnAboutWebsite.addEventListener("click", () => {
+      if (window.peekyApi && window.peekyApi.openExternal) {
+        window.peekyApi.openExternal("https://peeky-task.vercel.app/");
+      }
+    });
+  }
+
+  // Buy Peeky Task Banner Button
   if (btnBuyNotes) {
     btnBuyNotes.addEventListener("click", () => {
       if (window.peekyApi && window.peekyApi.openExternal) {
-        window.peekyApi.openExternal("https://peekytask.in/#buy");
+        window.peekyApi.openExternal("https://peeky-task.vercel.app/buy");
       }
     });
   }
 
-  // Enter License Key
+  // Enter License Key Banner Button
   if (btnEnterKey) {
     btnEnterKey.addEventListener("click", () => {
       licenseModal.style.display = "flex";
@@ -1361,6 +1445,7 @@ function setupListeners() {
     });
   }
 
+  // Confirm License Key Activation
   if (btnConfirmLicense) {
     btnConfirmLicense.addEventListener("click", () => {
       const key = inputLicenseKey.value.trim();
@@ -1455,32 +1540,6 @@ function setupListeners() {
   });
 }
 
-function applyTheme(theme) {
-  state.theme = theme || "dark";
-  let isLight = false;
-  if (state.theme === "light") {
-    isLight = true;
-  } else if (state.theme === "system") {
-    isLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
-  } else {
-    isLight = false; // dark
-  }
-
-  if (isLight) {
-    document.body.classList.add("theme-light");
-  } else {
-    document.body.classList.remove("theme-light");
-  }
-
-  [btnThemeDark, btnThemeLight, btnThemeSystem].filter(Boolean).forEach((btn) => {
-    if (btn.dataset.theme === state.theme) {
-      btn.classList.add("active");
-    } else {
-      btn.classList.remove("active");
-    }
-  });
-}
-
 if (window.matchMedia) {
   window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => {
     if (state.theme === "system") {
@@ -1530,9 +1589,25 @@ async function init() {
 
   setupListeners();
   applyTheme(state.theme || "dark");
+  applyFont(state.font || "handwritten");
   renderNotesList();
   renderEditor();
   updateTrialUI();
+
+  // Keep countdown updated every minute
+  setInterval(updateTrialUI, 60000);
+
+  // Automatically prompt user to buy if trial has expired
+  const trialStat = getTrialStatus();
+  if (trialStat.isExpired && !trialStat.isLicensed) {
+    setTimeout(() => {
+      if (confirm("Your 7-day free trial has expired! Editing is locked. Would you like to buy Peeky Task to unlock lifetime editing?")) {
+        if (window.peekyApi && window.peekyApi.openExternal) {
+          window.peekyApi.openExternal("https://peeky-task.vercel.app/buy");
+        }
+      }
+    }, 500);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", init);

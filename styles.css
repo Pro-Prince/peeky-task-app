@@ -99,21 +99,21 @@ body.edge-left .rail-tabs-track {
 
 /* --- STATE A: RESTED POSITION (Default when not touched) --- */
 .edge-rail.rested .rail-tabs-track {
-  gap: 4px;
+  gap: 8px;
 }
 
 .edge-rail.rested .rail-tab {
-  width: 8px;
-  height: 28px;
-  border-radius: 4px;
+  width: 7px;
+  height: 20px;
+  border-radius: 3.5px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
-  margin-right: 2px;
+  margin-right: 0px;
   transform: none !important;
 }
 
 body.edge-left .edge-rail.rested .rail-tab {
   margin-right: 0;
-  margin-left: 2px;
+  margin-left: 0px;
 }
 
 .edge-rail.rested .rail-tab-label {
@@ -272,7 +272,7 @@ body.edge-left .rail-icon-btn {
 /* ================= 2. ACTIVE FLOATING NOTE CARD ================= */
 .note-card-container {
   order: 1;
-  margin-right: 18px;
+  margin-right: 14px;
   pointer-events: auto; /* card is interactive */
   transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -280,7 +280,7 @@ body.edge-left .rail-icon-btn {
 body.edge-left .note-card-container {
   order: 2;
   margin-right: 0;
-  margin-left: 18px;
+  margin-left: 14px;
 }
 
 .note-card {
@@ -767,3 +767,29 @@ body.edge-left .note-card {
   transform-origin: left;
   transition: width 10s linear;
 }
+
+/* ================= 4. TASK FONTS (Handwritten, Normal, Rounded, Typewriter) ================= */
+body.font-handwritten .task-text-input,
+body.font-handwritten .card-title-input,
+body.font-handwritten .quick-add-input {
+  font-family: "Comic Sans MS", "Caveat", "Segoe Print", cursive, sans-serif !important;
+}
+
+body.font-normal .task-text-input,
+body.font-normal .card-title-input,
+body.font-normal .quick-add-input {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+body.font-rounded .task-text-input,
+body.font-rounded .card-title-input,
+body.font-rounded .quick-add-input {
+  font-family: "Comfortaa", "Quicksand", "Nunito", "Segoe UI", sans-serif !important;
+}
+
+body.font-typewriter .task-text-input,
+body.font-typewriter .card-title-input,
+body.font-typewriter .quick-add-input {
+  font-family: "Courier New", Consolas, Monaco, monospace !important;
+}
+

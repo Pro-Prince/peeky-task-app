@@ -73,167 +73,434 @@
         <div class="sidebar-spacer"></div>
 
         <div class="sidebar-bottom">
-          <button class="sidebar-link-btn" id="btnSidebarSettings">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+          <button class="nav-item" id="btnSidebarSettings">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="3"></circle>
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
             </svg>
             <span>Settings</span>
           </button>
 
-          <button class="sidebar-link-btn" id="btnSidebarAbout">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+          <button class="nav-item" id="btnSidebarAbout">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="16" x2="12" y2="12"></line>
               <line x1="12" y1="8" x2="12.01" y2="8"></line>
             </svg>
             <span>About</span>
           </button>
+
+          <div class="sidebar-user-block">
+            <div class="sidebar-user-avatar">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <div class="sidebar-user-text">
+              <span class="sidebar-user-status">Not signed in</span>
+              <span class="sidebar-user-sub">Local storage</span>
+            </div>
+          </div>
         </div>
       </aside>
 
-      <!-- Column 2: Tasks List Column -->
-      <section class="notes-column">
-        <div class="notes-search-bar">
-          <div class="search-input-wrapper">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input type="text" class="search-input" id="searchInput" placeholder="Search tasks..." />
-          </div>
-          <button class="btn-icon-action" id="btnSortNotes" title="Sort tasks">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-          </button>
-          <button class="btn-add-primary" id="btnNewNotePrimary" title="New Task">+</button>
-        </div>
-
-        <div class="notes-list-header">
-          <h2 class="notes-list-title" id="notesListTitle">All tasks</h2>
-          <span class="notes-count-badge" id="notesCountBadge">5</span>
-        </div>
-
-        <div class="notes-list-scroll" id="notesListContainer">
-          <!-- Populated dynamically -->
-        </div>
-      </section>
-
-      <!-- Column 3: Large Active Task Editor -->
-      <main class="note-editor-column" id="noteEditorPane">
-        <div class="editor-top-bar">
-          <div class="editor-status-left">
-            <div class="deck-status-badge" id="deckStatusBadge">
-              <span class="status-indicator-dot"></span>
-              <span class="status-indicator-label">Active · on the deck</span>
+      <!-- Tasks Workspace View (Columns 2 & 3) -->
+      <div class="tasks-workspace-view" id="tasksWorkspaceView">
+        <!-- Column 2: Tasks List Column -->
+        <section class="notes-column">
+          <div class="notes-search-bar">
+            <div class="search-input-wrapper">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input type="text" class="search-input" id="searchInput" placeholder="Search tasks..." />
             </div>
-            <span class="task-progress-pill" id="managerProgressPill" style="display: none;">0/0 done</span>
+            <button class="btn-icon-action" id="btnSortNotes" title="Sort tasks">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </button>
+            <button class="btn-add-primary" id="btnNewNotePrimary" title="New Task">+</button>
           </div>
 
-          <div class="editor-header-actions">
-            <button class="editor-tool-btn" id="btnExportNote" title="Export Markdown / Copy">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                <polyline points="16 6 12 2 8 6"></polyline>
-                <line x1="12" y1="2" x2="12" y2="15"></line>
-              </svg>
-            </button>
-            <button class="editor-tool-btn" id="btnToggleDeck" title="Pin / Unpin on edge Deck">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
-            </button>
-            <button class="editor-tool-btn" id="btnArchiveNote" title="Archive / Unarchive task list">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <div class="notes-list-header">
+            <h2 class="notes-list-title" id="notesListTitle">All tasks</h2>
+            <span class="notes-count-badge" id="notesCountBadge">5</span>
+          </div>
+
+          <div class="notes-list-scroll" id="notesListContainer">
+            <!-- Populated dynamically -->
+          </div>
+        </section>
+
+        <!-- Column 3: Large Active Task Editor -->
+        <main class="note-editor-column" id="noteEditorPane">
+          <div class="editor-top-bar">
+            <div class="editor-status-left">
+              <div class="deck-status-badge" id="deckStatusBadge">
+                <span class="status-indicator-dot"></span>
+                <span class="status-indicator-label">Active · on the deck</span>
+              </div>
+              <span class="task-progress-pill" id="managerProgressPill" style="display: none;">0/0 done</span>
+            </div>
+
+            <div class="editor-header-actions">
+              <button class="editor-tool-btn" id="btnExportNote" title="Export Markdown / Copy">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                  <polyline points="16 6 12 2 8 6"></polyline>
+                  <line x1="12" y1="2" x2="12" y2="15"></line>
+                </svg>
+              </button>
+              <button class="editor-tool-btn" id="btnToggleDeck" title="Pin / Unpin on edge Deck">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
+              <button class="editor-tool-btn" id="btnArchiveNote" title="Archive / Unarchive task list">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="21 8 21 21 3 21 3 8"></polyline>
+                  <rect x="1" y="3" width="22" height="5"></rect>
+                  <line x1="10" y1="12" x2="14" y2="12"></line>
+                </svg>
+              </button>
+              <button class="editor-tool-btn del" id="btnDeleteNote" title="Delete task">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Archived Notice Banner -->
+          <div class="archived-notice-banner" id="archivedNoticeBanner" style="display: none;">
+            <div class="archived-notice-left">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="21 8 21 21 3 21 3 8"></polyline>
                 <rect x="1" y="3" width="22" height="5"></rect>
                 <line x1="10" y1="12" x2="14" y2="12"></line>
               </svg>
-            </button>
-            <button class="editor-tool-btn del" id="btnDeleteNote" title="Delete task">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"></polyline>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- Archived Notice Banner -->
-        <div class="archived-notice-banner" id="archivedNoticeBanner" style="display: none;">
-          <div class="archived-notice-left">
-            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="21 8 21 21 3 21 3 8"></polyline>
-              <rect x="1" y="3" width="22" height="5"></rect>
-              <line x1="10" y1="12" x2="14" y2="12"></line>
-            </svg>
-            <span>This list is in your archive. Tasks are preserved in read-only mode.</span>
-          </div>
-          <div class="archived-notice-actions">
-            <button class="archived-action-btn restore" id="btnRestoreArchived">Restore</button>
-            <button class="archived-action-btn delete" id="btnPermanentDelete">Delete</button>
-          </div>
-        </div>
-
-        <div class="editor-title-row">
-          <input type="text" class="editor-title-input" id="editorTitleInput" placeholder="List title..." />
-          <span class="editor-meta-time" id="editorMetaTime">edited now</span>
-        </div>
-
-        <!-- Manager Quick Add Task Bar -->
-        <div class="quick-add-task-row manager-quick-add">
-          <button class="quick-add-icon-btn" id="btnManagerQuickAdd" title="Add task">+</button>
-          <input 
-            type="text" 
-            class="quick-add-input" 
-            id="managerQuickAddInput" 
-            placeholder="Add a new task to this list... (press Enter)"
-            autocomplete="off"
-          />
-        </div>
-
-        <!-- Manager Scrollable Task Items -->
-        <div class="task-items-scroll manager-tasks-scroll" id="managerTaskItemsContainer">
-          <!-- Active Tasks -->
-          <div class="tasks-group active-tasks" id="managerActiveTasksGroup"></div>
-
-          <!-- Collapsible Completed Section -->
-          <div class="completed-tasks-section" id="managerCompletedTasksSection" style="display: none;">
-            <button class="completed-toggle-btn" id="btnManagerToggleCompleted" type="button">
-              <span class="completed-chevron" id="managerCompletedChevron">▾</span>
-              <span id="managerCompletedTitle">Completed (0)</span>
-            </button>
-            <div class="tasks-group completed-tasks" id="managerCompletedTasksGroup"></div>
-          </div>
-        </div>
-
-        <!-- Bottom Task Actions & Color Swatches -->
-        <footer class="editor-bottom-bar">
-          <div class="task-actions-toolbar">
-            <button class="mgr-action-btn" id="btnManagerClearDone" title="Clear all completed tasks">Clear done</button>
-            <button class="mgr-action-btn" id="btnManagerMarkAll" title="Mark all tasks done / undone">Mark all done</button>
-          </div>
-
-          <div class="editor-date-stamp" id="editorDateStamp">Created 20 Oct 2026 · Updated now</div>
-
-          <div class="color-palette-tray">
-            <div class="palette-dots" id="paletteDots">
-              <span class="palette-dot" data-color="mint" style="background:#B9E7D0" title="Mint"></span>
-              <span class="palette-dot" data-color="sky" style="background:#BAE4E7" title="Sky"></span>
-              <span class="palette-dot" data-color="butter" style="background:#FBE08D" title="Butter"></span>
-              <span class="palette-dot" data-color="peach" style="background:#FBD4A8" title="Peach"></span>
-              <span class="palette-dot" data-color="blush" style="background:#F9C9D6" title="Blush"></span>
-              <span class="palette-dot" data-color="lilac" style="background:#DCC9F2" title="Lilac"></span>
-              <span class="palette-dot" data-color="blue" style="background:#C2DDF6" title="Blue"></span>
-              <span class="palette-dot" data-color="slate" style="background:#D9DFE8" title="Slate"></span>
+              <span>This list is in your archive. Tasks are preserved in read-only mode.</span>
             </div>
-            <button class="palette-more-btn" title="More options">···</button>
+            <div class="archived-notice-actions">
+              <button class="archived-action-btn restore" id="btnRestoreArchived">Restore</button>
+              <button class="archived-action-btn delete" id="btnPermanentDelete">Delete</button>
+            </div>
           </div>
-        </footer>
-      </main>
+
+          <div class="editor-title-row">
+            <input type="text" class="editor-title-input" id="editorTitleInput" placeholder="List title..." />
+            <span class="editor-meta-time" id="editorMetaTime">edited now</span>
+          </div>
+
+          <!-- Manager Quick Add Task Bar -->
+          <div class="quick-add-task-row manager-quick-add">
+            <button class="quick-add-icon-btn" id="btnManagerQuickAdd" title="Add task">+</button>
+            <input 
+              type="text" 
+              class="quick-add-input" 
+              id="managerQuickAddInput" 
+              placeholder="Add a new task to this list... (press Enter)"
+              autocomplete="off"
+            />
+          </div>
+
+          <!-- Manager Scrollable Task Items -->
+          <div class="task-items-scroll manager-tasks-scroll" id="managerTaskItemsContainer">
+            <!-- Active Tasks -->
+            <div class="tasks-group active-tasks" id="managerActiveTasksGroup"></div>
+
+            <!-- Collapsible Completed Section -->
+            <div class="completed-tasks-section" id="managerCompletedTasksSection" style="display: none;">
+              <button class="completed-toggle-btn" id="btnManagerToggleCompleted" type="button">
+                <span class="completed-chevron" id="managerCompletedChevron">▾</span>
+                <span id="managerCompletedTitle">Completed (0)</span>
+              </button>
+              <div class="tasks-group completed-tasks" id="managerCompletedTasksGroup"></div>
+            </div>
+          </div>
+
+          <!-- Bottom Task Actions & Color Swatches -->
+          <footer class="editor-bottom-bar">
+            <div class="task-actions-toolbar">
+              <button class="mgr-action-btn" id="btnManagerClearDone" title="Clear all completed tasks">Clear done</button>
+              <button class="mgr-action-btn" id="btnManagerMarkAll" title="Mark all tasks done / undone">Mark all done</button>
+            </div>
+
+            <div class="editor-date-stamp" id="editorDateStamp">Created 20 Oct 2026 · Updated now</div>
+
+            <div class="color-palette-tray">
+              <div class="palette-dots" id="paletteDots">
+                <span class="palette-dot" data-color="mint" style="background:#B9E7D0" title="Mint"></span>
+                <span class="palette-dot" data-color="sky" style="background:#BAE4E7" title="Sky"></span>
+                <span class="palette-dot" data-color="butter" style="background:#FBE08D" title="Butter"></span>
+                <span class="palette-dot" data-color="peach" style="background:#FBD4A8" title="Peach"></span>
+                <span class="palette-dot" data-color="blush" style="background:#F9C9D6" title="Blush"></span>
+                <span class="palette-dot" data-color="lilac" style="background:#DCC9F2" title="Lilac"></span>
+                <span class="palette-dot" data-color="blue" style="background:#C2DDF6" title="Blue"></span>
+                <span class="palette-dot" data-color="slate" style="background:#D9DFE8" title="Slate"></span>
+              </div>
+              <button class="palette-more-btn" title="More options">···</button>
+            </div>
+          </footer>
+        </main>
+      </div>
+
+      <!-- Settings Full Page View (Matching User Screenshot 1) -->
+      <div class="workspace-view-pane" id="settingsView" style="display: none;">
+        <div class="view-header">
+          <h1 class="view-title">Settings</h1>
+          <p class="view-subtitle">How Peeky Task behaves on this PC.</p>
+        </div>
+
+        <div class="view-content-scroll">
+          <!-- Section 1: Appearance -->
+          <div class="view-section">
+            <h2 class="section-heading">Appearance</h2>
+            <div class="settings-card-group">
+              <!-- Subgroup: Theme -->
+              <div class="subgroup-header">
+                <div class="subgroup-title">Theme</div>
+                <div class="subgroup-desc">Follows Windows unless you choose otherwise.</div>
+              </div>
+              <div class="theme-cards-grid">
+                <!-- Theme Card 1: Match Windows -->
+                <div class="theme-option-card" id="cardThemeSystem" data-theme="system">
+                  <div class="theme-preview-box match-windows-preview">
+                    <div class="preview-split-left">
+                      <div class="preview-line-white line-short"></div>
+                      <div class="preview-line-white"></div>
+                      <div class="preview-line-white"></div>
+                    </div>
+                    <div class="preview-split-right">
+                      <div class="preview-line-dark line-short"></div>
+                      <div class="preview-line-dark"></div>
+                      <div class="preview-mini-sticky"></div>
+                    </div>
+                  </div>
+                  <span class="theme-card-label">Match Windows</span>
+                </div>
+
+                <!-- Theme Card 2: Light -->
+                <div class="theme-option-card" id="cardThemeLight" data-theme="light">
+                  <div class="theme-preview-box light-theme-preview">
+                    <div class="preview-light-window">
+                      <div class="preview-dots-row">
+                        <span class="preview-dot dot-red"></span>
+                        <span class="preview-dot dot-yellow"></span>
+                        <span class="preview-dot dot-green"></span>
+                      </div>
+                      <div class="preview-line-dark line-short"></div>
+                      <div class="preview-line-dark"></div>
+                      <div class="preview-mini-sticky"></div>
+                    </div>
+                  </div>
+                  <span class="theme-card-label">Light</span>
+                </div>
+
+                <!-- Theme Card 3: Dark -->
+                <div class="theme-option-card selected" id="cardThemeDark" data-theme="dark">
+                  <div class="theme-preview-box dark-theme-preview">
+                    <div class="preview-dark-window">
+                      <div class="preview-dots-row">
+                        <span class="preview-dot dot-dim"></span>
+                        <span class="preview-dot dot-dim"></span>
+                        <span class="preview-dot dot-dim"></span>
+                      </div>
+                      <div class="preview-line-muted line-short"></div>
+                      <div class="preview-line-muted"></div>
+                      <div class="preview-mini-sticky dark-sticky"></div>
+                    </div>
+                  </div>
+                  <span class="theme-card-label">Dark</span>
+                </div>
+              </div>
+
+              <div class="settings-card-divider"></div>
+
+              <!-- Subgroup: Screen edge -->
+              <div class="subgroup-header">
+                <div class="subgroup-title">Screen edge</div>
+                <div class="subgroup-desc">Which side of the display your tasks live on.</div>
+              </div>
+              <div class="edge-cards-grid">
+                <!-- Edge Card 1: Left -->
+                <div class="edge-option-card" id="cardEdgeLeft" data-edge="left">
+                  <div class="monitor-preview-box">
+                    <div class="monitor-screen left-docked">
+                      <div class="monitor-tabs-column left">
+                        <span class="m-tab mint"></span>
+                        <span class="m-tab blush"></span>
+                        <span class="m-tab sky"></span>
+                        <span class="m-tab butter"></span>
+                        <span class="m-tab lilac"></span>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="edge-card-label">Left</span>
+                </div>
+
+                <!-- Edge Card 2: Right -->
+                <div class="edge-option-card selected" id="cardEdgeRight" data-edge="right">
+                  <div class="monitor-preview-box">
+                    <div class="monitor-screen right-docked">
+                      <div class="monitor-tabs-column right">
+                        <span class="m-tab mint"></span>
+                        <span class="m-tab blush"></span>
+                        <span class="m-tab sky"></span>
+                        <span class="m-tab butter"></span>
+                        <span class="m-tab lilac"></span>
+                      </div>
+                    </div>
+                  </div>
+                  <span class="edge-card-label">Right</span>
+                </div>
+              </div>
+
+              <div class="settings-card-divider"></div>
+
+              <!-- Subgroup: Font for new tasks -->
+              <div class="settings-row-between">
+                <div>
+                  <div class="subgroup-title">Font for new tasks</div>
+                  <div class="subgroup-desc">Tasks you have already created keep the font they are in.</div>
+                </div>
+                <div class="font-pill-selector" id="fontPillSelector">
+                  <button class="font-pill-btn active" data-font="handwritten">Handwritten</button>
+                  <button class="font-pill-btn" data-font="normal">Normal</button>
+                  <button class="font-pill-btn" data-font="rounded">Rounded</button>
+                  <button class="font-pill-btn" data-font="typewriter">Typewriter</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Behaviour -->
+          <div class="view-section">
+            <h2 class="section-heading">Behaviour</h2>
+            <div class="settings-card-group">
+              <div class="settings-row-between">
+                <div>
+                  <div class="subgroup-title">Hide over fullscreen apps</div>
+                  <div class="subgroup-desc">Keeps the deck out of games and presentations.</div>
+                </div>
+                <label class="switch-control">
+                  <input type="checkbox" id="chkHideFullscreen" checked />
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+
+              <div class="settings-card-divider"></div>
+
+              <div class="settings-row-between">
+                <div>
+                  <div class="subgroup-title">Launch on Windows Startup</div>
+                  <div class="subgroup-desc">Start Peeky Task docked to your screen edge on Windows boot.</div>
+                </div>
+                <label class="switch-control">
+                  <input type="checkbox" id="chkStartup" />
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Data Storage & Backups -->
+          <div class="view-section">
+            <h2 class="section-heading">Data Storage & Backups</h2>
+            <div class="settings-card-group">
+              <div class="subgroup-desc" style="margin-bottom: 12px;">Tasks are stored locally on your PC. Nothing is ever sent to any remote servers.</div>
+              <div class="settings-path-row">
+                <input type="text" class="settings-path-input" id="dataPathInput" readonly value="%APPDATA%\peeky-task\peeky-task-data.json" />
+                <button class="settings-btn-inline" id="btnCopyDataPath">Copy path</button>
+              </div>
+              <div class="settings-actions-row">
+                <button class="settings-btn-action" id="btnOpenDataFolder">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                  <span>Open Data Folder</span>
+                </button>
+                <button class="settings-btn-action" id="btnExportBackup">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="15"></line></svg>
+                  <span>Export Backup</span>
+                </button>
+                <button class="settings-btn-action" id="btnImportBackup">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  <span>Restore Backup</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: License Status -->
+          <div class="view-section">
+            <h2 class="section-heading">License Status</h2>
+            <div class="settings-card-group">
+              <div class="license-status-card" id="settingsLicenseCard">
+                <div class="license-status-icon" id="settingsLicenseIcon">✓</div>
+                <div class="license-status-info">
+                  <div class="license-status-title" id="settingsLicenseTitle">Pro License Active</div>
+                  <div class="license-status-sub" id="settingsLicenseSub">Lifetime unlock · All features enabled</div>
+                </div>
+                <div class="license-status-actions" id="settingsLicenseActions">
+                  <button class="settings-btn-inline" id="btnSettingsEnterKey">Enter key</button>
+                  <button class="settings-btn-inline primary" id="btnSettingsBuy">Buy Peeky Task</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Full Page View (Matching User Screenshot 2) -->
+      <div class="workspace-view-pane" id="aboutView" style="display: none;">
+        <div class="view-header">
+          <h1 class="view-title">About</h1>
+          <p class="view-subtitle">What this is, and what it is built on.</p>
+        </div>
+
+        <div class="view-content-scroll">
+          <!-- Main App Hero Card -->
+          <div class="about-hero-card">
+            <div class="about-hero-header">
+              <img src="assets/app-icon.png" class="about-hero-icon" alt="Peeky Task" />
+              <div class="about-hero-meta">
+                <div class="about-app-name">Peeky Task</div>
+                <div class="about-app-version">Version 1.0.0 · Peeky Task</div>
+              </div>
+            </div>
+            <p class="about-hero-desc">
+              Floating daily tasks that live on the edge of your screen. Reach the edge and they peel out; move away and they tuck back.
+            </p>
+          </div>
+
+          <!-- Section: Help and privacy -->
+          <div class="view-section">
+            <h2 class="section-heading">Help and privacy</h2>
+            <div class="about-pills-row">
+              <button class="about-pill-button" id="btnAboutPrivacy">Privacy policy</button>
+              <button class="about-pill-button" id="btnAboutSupport">Contact support</button>
+              <button class="about-pill-button" id="btnAboutFeatures">Features & Guide</button>
+            </div>
+          </div>
+
+          <!-- Section: Credits -->
+          <div class="view-section">
+            <h2 class="section-heading">Credits</h2>
+            <div class="about-credits-card">
+              <div class="credits-intro">Inspired by the minimalist desktop widget concept</div>
+              <button class="credits-website-pill" id="btnAboutWebsite">peeky-task.vercel.app</button>
+              <div class="credits-footnote">
+                Task text font is customizable in handwritten, normal, rounded, and typewriter. Icons are Segoe Fluent Icons, part of Windows.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
     </div>
   </div>
@@ -247,214 +514,6 @@
       <div class="modal-actions">
         <button class="modal-btn-cancel" id="btnCancelLicense">Cancel</button>
         <button class="modal-btn-confirm" id="btnConfirmLicense">Activate Key</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Settings Modal -->
-  <div class="modal-overlay" id="settingsModal" style="display: none;">
-    <div class="modal-box modal-large">
-      <div class="modal-header">
-        <div class="modal-header-title">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-          <h3>Settings</h3>
-        </div>
-        <button class="modal-close-btn" id="btnCloseSettings">✕</button>
-      </div>
-
-      <div class="settings-sections-scroll">
-        <!-- Section: Dock Position -->
-        <div class="settings-group">
-          <label class="settings-label">Screen Dock Edge</label>
-          <div class="settings-subtext">Choose which edge of your screen Peeky Task docks against.</div>
-          <div class="settings-pill-selector">
-            <button class="settings-pill-btn active" id="btnEdgeRight" data-edge="right">Right Edge ◨</button>
-            <button class="settings-pill-btn" id="btnEdgeLeft" data-edge="left">Left Edge ◧</button>
-          </div>
-        </div>
-
-        <!-- Section: Theme -->
-        <div class="settings-group">
-          <label class="settings-label">Appearance & Theme</label>
-          <div class="settings-subtext">Choose your preferred manager color theme.</div>
-          <div class="settings-pill-selector">
-            <button class="settings-pill-btn active" id="btnThemeDark" data-theme="dark">Dark</button>
-            <button class="settings-pill-btn" id="btnThemeLight" data-theme="light">Light</button>
-            <button class="settings-pill-btn" id="btnThemeSystem" data-theme="system">System</button>
-          </div>
-        </div>
-
-        <!-- Section: Global Shortcut -->
-        <div class="settings-group">
-          <label class="settings-label">Global Summon Shortcut</label>
-          <div class="settings-subtext">Toggle this Task Manager from anywhere in Windows.</div>
-          <div class="settings-shortcut-display">
-            <kbd class="shortcut-kbd">Alt</kbd> + <kbd class="shortcut-kbd">Space</kbd>
-            <span class="shortcut-badge">Global Active</span>
-          </div>
-        </div>
-
-        <!-- Section: Window Behavior -->
-        <div class="settings-group">
-          <label class="settings-label">Window Behavior</label>
-          <div class="settings-toggle-row">
-            <div>
-              <div class="toggle-title">Hide over full-screen apps</div>
-              <div class="settings-subtext">Tuck the deck away whenever a full-screen application or game is active.</div>
-            </div>
-            <label class="switch-control">
-              <input type="checkbox" id="chkHideFullscreen" checked />
-              <span class="switch-slider"></span>
-            </label>
-          </div>
-          <div class="settings-toggle-row" style="margin-top: 10px;">
-            <div>
-              <div class="toggle-title">Launch on Windows Startup</div>
-              <div class="settings-subtext">Start Peeky Task docked to your screen edge when you log in.</div>
-            </div>
-            <label class="switch-control">
-              <input type="checkbox" id="chkStartup" />
-              <span class="switch-slider"></span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Section: Keyboard Shortcuts Reference -->
-        <div class="settings-group">
-          <label class="settings-label">Keyboard Shortcuts</label>
-          <div class="settings-subtext">Work faster with native Windows shortcuts.</div>
-          <div class="shortcuts-table">
-            <div class="shortcut-row"><span class="shortcut-desc">Toggle Task Manager</span><span class="shortcut-keys"><kbd>Alt</kbd> + <kbd>Space</kbd></span></div>
-            <div class="shortcut-row"><span class="shortcut-desc">Quick task window</span><span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>T</kbd></span></div>
-            <div class="shortcut-row"><span class="shortcut-desc">New task list</span><span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>N</kbd></span></div>
-            <div class="shortcut-row"><span class="shortcut-desc">Cycle pastel color</span><span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>.</kbd></span></div>
-            <div class="shortcut-row"><span class="shortcut-desc">Pin / unpin from deck</span><span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>D</kbd></span></div>
-            <div class="shortcut-row"><span class="shortcut-desc">Toggle task checkbox</span><span class="shortcut-keys"><kbd>Space</kbd></span></div>
-            <div class="shortcut-row"><span class="shortcut-desc">Delete task (10s undo)</span><span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Backspace</kbd></span></div>
-            <div class="shortcut-row"><span class="shortcut-desc">Undo deletion</span><span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Z</kbd></span></div>
-            <div class="shortcut-row"><span class="shortcut-desc">Dismiss deck / close note</span><span class="shortcut-keys"><kbd>Esc</kbd></span></div>
-          </div>
-        </div>
-
-        <!-- Section: Data Storage & Backup -->
-        <div class="settings-group">
-          <label class="settings-label">Data Storage & Backups</label>
-          <div class="settings-subtext">Tasks are stored locally on your PC. Nothing is ever sent to any remote servers.</div>
-          <div class="settings-path-row">
-            <input type="text" class="settings-path-input" id="dataPathInput" readonly value="%APPDATA%\peeky-task\peeky-task-data.json" />
-            <button class="settings-btn-inline" id="btnCopyDataPath">Copy path</button>
-          </div>
-          <div class="settings-actions-row">
-            <button class="settings-btn-action" id="btnOpenDataFolder">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-              <span>Open Data Folder</span>
-            </button>
-            <button class="settings-btn-action" id="btnExportBackup">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="15"></line></svg>
-              <span>Export Backup</span>
-            </button>
-            <button class="settings-btn-action" id="btnImportBackup">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-              <span>Restore Backup</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Section: License Status -->
-        <div class="settings-group">
-          <label class="settings-label">License Status</label>
-          <div class="license-status-card" id="settingsLicenseCard">
-            <div class="license-status-icon" id="settingsLicenseIcon">✓</div>
-            <div class="license-status-info">
-              <div class="license-status-title" id="settingsLicenseTitle">Pro License Active</div>
-              <div class="license-status-sub" id="settingsLicenseSub">Lifetime unlock · All features enabled</div>
-            </div>
-            <div class="license-status-actions" id="settingsLicenseActions">
-              <button class="settings-btn-inline" id="btnSettingsEnterKey">Enter key</button>
-              <button class="settings-btn-inline primary" id="btnSettingsBuy">Buy Peeky Task</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- About Modal -->
-  <div class="modal-overlay" id="aboutModal" style="display: none;">
-    <div class="modal-box modal-medium">
-      <div class="modal-header">
-        <div class="modal-header-title">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="16" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-          </svg>
-          <h3>About Peeky Task</h3>
-        </div>
-        <button class="modal-close-btn" id="btnCloseAbout">✕</button>
-      </div>
-
-      <div class="about-modal-content">
-        <div class="about-app-header">
-          <img src="assets/app-icon.png" class="about-app-icon" alt="Peeky Task" />
-          <div class="about-app-titles">
-            <div class="about-app-name">Peeky Task</div>
-            <div class="about-app-version">Version 1.0.0 (Windows x64)</div>
-          </div>
-        </div>
-
-        <p class="about-description">
-          A minimalist floating daily task and to-do deck for Windows. Stays docked out of your way flush against your screen bezel until you need it.
-        </p>
-
-        <div class="about-links-grid">
-          <button class="about-link-tile" id="btnAboutOnboarding">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-            <div>
-              <div class="tile-title">Replay Guide</div>
-              <div class="tile-sub">Onboarding walkthrough</div>
-            </div>
-          </button>
-
-          <button class="about-link-tile" id="btnAboutWebsite">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-            <div>
-              <div class="tile-title">Website</div>
-              <div class="tile-sub">peekytask.in</div>
-            </div>
-          </button>
-
-          <button class="about-link-tile" id="btnAboutPrivacy">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            <div>
-              <div class="tile-title">Privacy Policy</div>
-              <div class="tile-sub">peekytask.in/#privacy</div>
-            </div>
-          </button>
-
-          <button class="about-link-tile" id="btnAboutSupport">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-            <div>
-              <div class="tile-title">Support & FAQ</div>
-              <div class="tile-sub">Help & documentation</div>
-            </div>
-          </button>
-
-          <button class="about-link-tile" id="btnAboutCheckUpdate">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-            <div>
-              <div class="tile-title">Updates</div>
-              <div class="tile-sub" id="aboutUpdateStatus">Check for latest version</div>
-            </div>
-          </button>
-        </div>
-
-        <div class="about-footer-meta">
-          <span>Crafted with precision for Windows · Microsoft Store Edition</span>
-        </div>
       </div>
     </div>
   </div>

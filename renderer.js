@@ -188,7 +188,25 @@ function renderRailTabs() {
   railTabsTrack.innerHTML = "";
 
   const deckNotes = getDeckNotes();
-  deckNotes.forEach((note) => {
+
+  // Dynamic vertical capacity calculation:
+  // Calculate maximum tabs that fit before pushing action buttons off-screen
+  const availHeight = window.innerHeight - 40;
+  const actionsHeight = 92; // 26px add button + margins + 48px settings group
+  const tabSlotHeight = 80; // 74px tab + 6px gap
+  const maxTabs = Math.max(2, Math.floor((availHeight - actionsHeight) / tabSlotHeight));
+
+  if (btnAddNote) {
+    if (deckNotes.length >= maxTabs) {
+      btnAddNote.style.display = "none";
+    } else {
+      btnAddNote.style.display = "flex";
+    }
+  }
+
+  const visibleDeckNotes = deckNotes.slice(0, maxTabs);
+
+  visibleDeckNotes.forEach((note) => {
     const items = ensureNoteItems(note);
     const total = items.length;
     const done = items.filter((it) => it.done).length;
@@ -501,7 +519,8 @@ function setCardOpenState(open) {
 // Switch Edge (Left vs Right)
 function applyEdge(edge) {
   state.edge = edge;
-  document.body.className = `edge-${edge}`;
+  const fontClass = state.font ? `font-${state.font}` : "font-handwritten";
+  document.body.className = `edge-${edge} ${fontClass}`;
   btnFlipEdge.textContent = edge === "right" ? "◨" : "◧";
   btnFlipEdge.title = `Flip Screen Edge (Currently ${edge.toUpperCase()} - click to switch)`;
 }
@@ -548,8 +567,13 @@ function setupListeners() {
   function handleQuickAdd() {
     if (!quickAddInput) return;
     if (isEditingLocked()) {
-      alert("Your 7-day free trial has ended. Editing is locked. Buy a license or enter your key in Manager to unlock.");
-      if (window.peekyApi && window.peekyApi.openManager) window.peekyApi.openManager();
+      if (confirm("Your 7-day free trial has ended. Editing is locked. Would you like to buy Peeky Task to unlock lifetime editing?")) {
+        if (window.peekyApi && window.peekyApi.openExternal) {
+          window.peekyApi.openExternal("https://peeky-task.vercel.app/buy");
+        }
+      } else if (window.peekyApi && window.peekyApi.openManager) {
+        window.peekyApi.openManager();
+      }
       return;
     }
     const text = quickAddInput.value.trim();
@@ -679,8 +703,22 @@ function setupListeners() {
   // Add Task List Button (+) matching Screenshot 5
   btnAddNote.addEventListener("click", () => {
     if (isEditingLocked()) {
-      alert("Your 7-day free trial has ended. Editing is locked. Buy a license or enter your key in Manager to unlock.");
-      if (window.peekyApi && window.peekyApi.openManager) window.peekyApi.openManager();
+      if (confirm("Your 7-day free trial has ended. Editing is locked. Would you like to buy Peeky Task to unlock lifetime editing?")) {
+        if (window.peekyApi && window.peekyApi.openExternal) {
+          window.peekyApi.openExternal("https://peeky-task.vercel.app/buy");
+        }
+      } else if (window.peekyApi && window.peekyApi.openManager) {
+        window.peekyApi.openManager();
+      }
+      return;
+    }
+    const deckNotes = getDeckNotes();
+    const availHeight = window.innerHeight - 40;
+    const actionsHeight = 92;
+    const tabSlotHeight = 80;
+    const maxTabs = Math.max(2, Math.floor((availHeight - actionsHeight) / tabSlotHeight));
+    if (deckNotes.length >= maxTabs) {
+      alert("Screen edge is full. Unpin or complete a task list to pin another.");
       return;
     }
     const newNote = {
@@ -829,8 +867,12 @@ function setupListeners() {
 
   if (window.peekyApi && window.peekyApi.onDataUpdated) {
     window.peekyApi.onDataUpdated((data) => {
-      if (data && data.notes) {
-        state.notes = data.notes;
+      if (data) {
+        if (data.notes) state.notes = data.notes;
+        if (data.trial) state.trial = data.trial;
+        if (data.font) state.font = data.font;
+        if (data.edge) applyEdge(data.edge);
+        else applyEdge(state.edge || "right");
         renderRailTabs();
         renderCard();
       }
@@ -895,8 +937,11 @@ async function init() {
   if (window.peekyApi && window.peekyApi.loadData) {
     try {
       const saved = await window.peekyApi.loadData();
-      if (saved && saved.notes && saved.notes.length > 0) {
-        state = { ...state, ...saved };
+      if (saved) {
+        if (saved.notes && saved.notes.length > 0) state.notes = saved.notes;
+        if (saved.trial) state.trial = saved.trial;
+        if (saved.font) state.font = saved.font;
+        if (saved.edge) state.edge = saved.edge;
       }
     } catch (e) {
       console.warn("Could not load saved data:", e);
