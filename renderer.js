@@ -687,7 +687,7 @@ async function init() {
   }
 
   applyEdge(state.edge || "right");
-  setCardOpenState(false); // start in rested position!
+  setCardOpenState(true); // start with active task card open!
   renderRailTabs();
   renderCard();
   setupListeners();

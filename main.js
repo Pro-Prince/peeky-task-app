@@ -8,7 +8,7 @@ let onboardingWindow = null;
 let tray = null;
 let isAlwaysOnTop = true;
 let currentEdge = "right"; // "left" | "right"
-let isCardOpen = false; // Start in rested position until hovered/clicked
+let isCardOpen = true; // Start with active task card open so user sees it right away!
 let isDeckHovered = false;
 
 const dataFilePath = path.join(app.getPath("userData"), "peeky-task-data.json");
@@ -44,8 +44,8 @@ function getDisplayBounds() {
 
 function getTargetDeckWidth() {
   if (isCardOpen) return 530; // 480px card + 32px tabs + margins
-  if (isDeckHovered) return 44;
-  return 16; // Rested pill sliver width flush against edge
+  if (isDeckHovered) return 52;
+  return 24; // Rested pill sliver width flush against edge
 }
 
 function repositionDeckWindow() {
@@ -97,6 +97,9 @@ function createDeckWindow() {
 
   deckWindow.once("ready-to-show", () => {
     deckWindow.show();
+    if (isCardOpen) {
+      deckWindow.webContents.send("open-card");
+    }
   });
 
   deckWindow.on("closed", () => {
@@ -268,43 +271,66 @@ function createTray() {
   }
 }
 
-app.whenReady().then(() => {
-  const userData = loadUserData();
-  if (userData && (userData.edge === "left" || userData.edge === "right")) {
-    currentEdge = userData.edge;
-  } else {
-    currentEdge = "right"; // default on right
-  }
+const gotTheLock = app.requestSingleInstanceLock();
 
-  createDeckWindow();
-
-  if (!userData || !userData.hasSeenOnboarding) {
-    createOnboardingWindow();
-  }
-
-  createTray();
-
-  try {
-    globalShortcut.register("Alt+Space", () => {
-      if (!managerWindow || !managerWindow.isVisible()) {
-        createManagerWindow(true);
-      } else {
-        managerWindow.hide();
-      }
-    });
-  } catch (e) {
-    console.log("Could not register Alt+Space global shortcut:", e);
-  }
-
-  app.on("activate", () => {
-    if (!managerWindow) {
-      createManagerWindow(true);
-    } else {
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on("second-instance", () => {
+    if (managerWindow) {
+      if (managerWindow.isMinimized()) managerWindow.restore();
       managerWindow.show();
       managerWindow.focus();
+    } else {
+      createManagerWindow(true);
+    }
+    isCardOpen = true;
+    repositionDeckWindow();
+    if (deckWindow) {
+      deckWindow.show();
+      deckWindow.webContents.send("open-card");
     }
   });
-});
+
+  app.whenReady().then(() => {
+    const userData = loadUserData();
+    if (userData && (userData.edge === "left" || userData.edge === "right")) {
+      currentEdge = userData.edge;
+    } else {
+      currentEdge = "right"; // default on right
+    }
+
+    isCardOpen = true;
+    createDeckWindow();
+
+    if (!userData || !userData.hasSeenOnboarding) {
+      createOnboardingWindow();
+    }
+
+    createTray();
+
+    try {
+      globalShortcut.register("Alt+Space", () => {
+        if (!managerWindow || !managerWindow.isVisible()) {
+          createManagerWindow(true);
+        } else {
+          managerWindow.hide();
+        }
+      });
+    } catch (e) {
+      console.log("Could not register Alt+Space global shortcut:", e);
+    }
+
+    app.on("activate", () => {
+      if (!managerWindow) {
+        createManagerWindow(true);
+      } else {
+        managerWindow.show();
+        managerWindow.focus();
+      }
+    });
+  });
+}
 
 app.on("will-quit", () => {
   globalShortcut.unregisterAll();

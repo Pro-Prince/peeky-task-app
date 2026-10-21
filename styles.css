@@ -44,11 +44,12 @@ html, body {
 
 body.edge-left .overlay-stage {
   justify-content: flex-start;
-  flex-direction: row-reverse;
+  flex-direction: row;
 }
 
 /* ================= 1. SCREEN-EDGE TAB RAIL ================= */
 .edge-rail {
+  order: 2;
   width: auto;
   height: auto;
   max-height: 90vh;
@@ -58,9 +59,11 @@ body.edge-left .overlay-stage {
   pointer-events: auto; /* rail is interactive */
   z-index: 50;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 10px 0;
 }
 
 body.edge-left .edge-rail {
+  order: 1;
   align-items: flex-start;
 }
 
@@ -96,10 +99,10 @@ body.edge-left .rail-tabs-track {
 }
 
 .edge-rail.rested .rail-tab {
-  width: 7px;
-  height: 24px;
+  width: 8px;
+  height: 28px;
   border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   margin-right: 2px;
   transform: none !important;
 }
@@ -264,12 +267,14 @@ body.edge-left .rail-icon-btn {
 
 /* ================= 2. ACTIVE FLOATING NOTE CARD ================= */
 .note-card-container {
+  order: 1;
   margin-right: 10px;
   pointer-events: auto; /* card is interactive */
   transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body.edge-left .note-card-container {
+  order: 2;
   margin-right: 0;
   margin-left: 10px;
 }

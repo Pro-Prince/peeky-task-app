@@ -519,7 +519,7 @@ function setupListeners() {
   // Buy Peeky Task
   btnBuyNotes.addEventListener("click", () => {
     if (window.peekyApi && window.peekyApi.openExternal) {
-      window.peekyApi.openExternal("https://peekytask.in/#pricing");
+      window.peekyApi.openExternal("https://peekytask.in/buy");
     }
   });
 
