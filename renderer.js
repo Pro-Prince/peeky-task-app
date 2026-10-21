@@ -161,13 +161,15 @@ function persistData() {
 
 // Get active note
 function getActiveNote() {
-  return state.notes.find((n) => n.id === state.activeNoteId) || state.notes[0];
+  const deckNotes = getDeckNotes();
+  const found = deckNotes.find((n) => n.id === state.activeNoteId);
+  if (found) return found;
+  return deckNotes[0] || null;
 }
 
 // Get notes visible on deck
 function getDeckNotes() {
-  const visible = state.notes.filter((n) => n.onDeck !== false && !n.archived);
-  return visible.length > 0 ? visible : state.notes;
+  return state.notes.filter((n) => n.onDeck !== false && !n.archived);
 }
 
 // Render Rail Tabs

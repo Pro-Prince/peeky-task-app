@@ -12,7 +12,7 @@ const COLOR_MAP = {
 
 const COLOR_KEYS = Object.keys(COLOR_MAP);
 
-// Initial default tasks matching screenshot
+// Initial default tasks
 const DEFAULT_NOTES = [
   {
     id: "n1",
@@ -69,15 +69,25 @@ const DEFAULT_NOTES = [
 let state = {
   notes: [...DEFAULT_NOTES],
   activeNoteId: "n1",
-  currentFilter: "all", // "all" | "deck" | "archive"
+  currentFilter: "all", // "all" | "deck" | "completed" | "archive"
   searchQuery: "",
+  sortBy: "updated", // "updated" | "title" | "color"
+  edge: "right",
+  theme: "dark",
+  user: {
+    signedIn: false,
+    name: "Not signed in",
+    email: "",
+    avatarInitials: "U",
+    syncedAt: null,
+  },
   trial: {
-    isLicensed: false,
-    licenseKey: "",
+    isLicensed: true,
+    licenseKey: "PRO-LIFETIME-ACCESS",
   },
 };
 
-// DOM Elements
+// DOM Elements - Left Column & Search
 const notesListContainer = document.getElementById("notesListContainer");
 const notesCountBadge = document.getElementById("notesCountBadge");
 const notesListTitle = document.getElementById("notesListTitle");
@@ -85,10 +95,18 @@ const searchInput = document.getElementById("searchInput");
 const btnNewNotePrimary = document.getElementById("btnNewNotePrimary");
 const btnSortNotes = document.getElementById("btnSortNotes");
 
+// Nav Buttons
 const navAllNotes = document.getElementById("navAllNotes");
 const navOnDeck = document.getElementById("navOnDeck");
+const navCompleted = document.getElementById("navCompleted");
 const navArchive = document.getElementById("navArchive");
 
+// Sidebar Bottom Buttons
+const btnSidebarSettings = document.getElementById("btnSidebarSettings");
+const btnSidebarAbout = document.getElementById("btnSidebarAbout");
+const sidebarAccount = document.querySelector(".sidebar-account");
+
+// Editor Pane
 const noteEditorPane = document.getElementById("noteEditorPane");
 const editorTitleInput = document.getElementById("editorTitleInput");
 const managerQuickAddInput = document.getElementById("managerQuickAddInput");
@@ -106,16 +124,61 @@ const editorMetaTime = document.getElementById("editorMetaTime");
 const editorDateStamp = document.getElementById("editorDateStamp");
 const deckStatusBadge = document.getElementById("deckStatusBadge");
 const btnToggleDeck = document.getElementById("btnToggleDeck");
+const btnArchiveNote = document.getElementById("btnArchiveNote");
 const btnExportNote = document.getElementById("btnExportNote");
 const btnDeleteNote = document.getElementById("btnDeleteNote");
 const paletteDots = document.getElementById("paletteDots");
 
+// Archived Notice Banner
+const archivedNoticeBanner = document.getElementById("archivedNoticeBanner");
+const btnRestoreArchived = document.getElementById("btnRestoreArchived");
+const btnPermanentDelete = document.getElementById("btnPermanentDelete");
+
+// Trial / License Modal
 const btnEnterKey = document.getElementById("btnEnterKey");
 const btnBuyNotes = document.getElementById("btnBuyNotes");
 const licenseModal = document.getElementById("licenseModal");
 const inputLicenseKey = document.getElementById("inputLicenseKey");
 const btnCancelLicense = document.getElementById("btnCancelLicense");
 const btnConfirmLicense = document.getElementById("btnConfirmLicense");
+
+// Settings Modal
+const settingsModal = document.getElementById("settingsModal");
+const btnCloseSettings = document.getElementById("btnCloseSettings");
+const btnEdgeRight = document.getElementById("btnEdgeRight");
+const btnEdgeLeft = document.getElementById("btnEdgeLeft");
+const btnThemeDark = document.getElementById("btnThemeDark");
+const btnThemeLight = document.getElementById("btnThemeLight");
+const btnThemeSystem = document.getElementById("btnThemeSystem");
+const chkStartup = document.getElementById("chkStartup");
+const btnOpenDataFolder = document.getElementById("btnOpenDataFolder");
+const btnExportBackup = document.getElementById("btnExportBackup");
+const btnImportBackup = document.getElementById("btnImportBackup");
+
+// About Modal
+const aboutModal = document.getElementById("aboutModal");
+const btnCloseAbout = document.getElementById("btnCloseAbout");
+const btnAboutOnboarding = document.getElementById("btnAboutOnboarding");
+const btnAboutWebsite = document.getElementById("btnAboutWebsite");
+const btnAboutSupport = document.getElementById("btnAboutSupport");
+const btnAboutCheckUpdate = document.getElementById("btnAboutCheckUpdate");
+const aboutUpdateStatus = document.getElementById("aboutUpdateStatus");
+
+// Account Modal
+const accountModal = document.getElementById("accountModal");
+const btnCloseAccount = document.getElementById("btnCloseAccount");
+const viewNotSignedIn = document.getElementById("viewNotSignedIn");
+const viewSignedIn = document.getElementById("viewSignedIn");
+const inputAccountEmail = document.getElementById("inputAccountEmail");
+const btnContinueEmail = document.getElementById("btnContinueEmail");
+const btnSocialGoogle = document.getElementById("btnSocialGoogle");
+const btnSocialMicrosoft = document.getElementById("btnSocialMicrosoft");
+const profileAvatarLarge = document.getElementById("profileAvatarLarge");
+const profileName = document.getElementById("profileName");
+const profileEmail = document.getElementById("profileEmail");
+const syncStatusValue = document.getElementById("syncStatusValue");
+const btnSyncNow = document.getElementById("btnSyncNow");
+const btnSignOut = document.getElementById("btnSignOut");
 
 // Ensure note has structured items
 function ensureNoteItems(note) {
@@ -181,32 +244,62 @@ function persistData() {
 }
 
 function getActiveNote() {
+  const filtered = getFilteredNotes();
+  const found = filtered.find((n) => n.id === state.activeNoteId);
+  if (found) return found;
+  if (filtered.length > 0) {
+    state.activeNoteId = filtered[0].id;
+    return filtered[0];
+  }
   return state.notes.find((n) => n.id === state.activeNoteId) || state.notes[0];
 }
 
 function getFilteredNotes() {
-  return state.notes.filter((note) => {
+  let list = state.notes.filter((note) => {
     const items = ensureNoteItems(note);
     const total = items.length;
     const done = items.filter((it) => it.done).length;
+    const isCompleted = total > 0 && done === total;
 
-    // Filter tab
+    // Archive view
+    if (state.currentFilter === "archive") {
+      return note.archived === true;
+    }
+
+    // All active tabs exclude archived tasks
+    if (note.archived) return false;
+
+    if (state.currentFilter === "deck") {
+      return note.onDeck !== false;
+    }
     if (state.currentFilter === "completed") {
-      return total > 0 && done === total;
+      return isCompleted;
     }
-    if (state.currentFilter === "deck" && !note.onDeck) return false;
-    if (state.currentFilter === "archive" && !note.archived) return false;
-    if (state.currentFilter === "all" && note.archived) return false;
-
-    // Search query
-    if (state.searchQuery) {
-      const q = state.searchQuery.toLowerCase();
-      const matchTitle = (note.title || "").toLowerCase().includes(q);
-      const matchBody = items.some((it) => (it.text || "").toLowerCase().includes(q));
-      return matchTitle || matchBody;
-    }
+    // "all"
     return true;
   });
+
+  // Search query filter
+  if (state.searchQuery) {
+    const q = state.searchQuery.toLowerCase();
+    list = list.filter((note) => {
+      const matchTitle = (note.title || "").toLowerCase().includes(q);
+      const matchBody = (note.items || []).some((it) => (it.text || "").toLowerCase().includes(q));
+      return matchTitle || matchBody;
+    });
+  }
+
+  // Sort lists
+  if (state.sortBy === "title") {
+    list.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+  } else if (state.sortBy === "color") {
+    list.sort((a, b) => (a.color || "").localeCompare(b.color || ""));
+  } else {
+    // Default: updated (newest first)
+    list.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  }
+
+  return list;
 }
 
 function getTaskProgress(note) {
@@ -224,6 +317,30 @@ function renderNotesList() {
   notesCountBadge.textContent = list.length;
   notesListContainer.innerHTML = "";
 
+  if (list.length === 0) {
+    let emptyMsg = "No task lists found. Click + above to create your first list!";
+    if (state.currentFilter === "deck") {
+      emptyMsg = "No task lists on the deck. Pin a list to view it on your screen edge rail.";
+    } else if (state.currentFilter === "completed") {
+      emptyMsg = "No completed task lists yet. Finish all items in a list to see it here.";
+    } else if (state.currentFilter === "archive") {
+      emptyMsg = "Your archive is empty. Archive finished projects to keep your active deck clean.";
+    } else if (state.searchQuery) {
+      emptyMsg = `No task lists matching "${state.searchQuery}".`;
+    }
+
+    notesListContainer.innerHTML = `
+      <div class="notes-column-empty">
+        <svg class="notes-column-empty-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+        </svg>
+        <div class="notes-column-empty-text">${emptyMsg}</div>
+      </div>
+    `;
+    return;
+  }
+
   list.forEach((note) => {
     const item = document.createElement("div");
     item.className = `note-list-item ${note.id === state.activeNoteId ? "active" : ""}`;
@@ -235,18 +352,59 @@ function renderNotesList() {
     const info = document.createElement("div");
     info.className = "item-info";
 
+    const titleRow = document.createElement("div");
+    titleRow.className = "item-title-row";
+    titleRow.style.display = "flex";
+    titleRow.style.alignItems = "center";
+    titleRow.style.justifyContent = "space-between";
+    titleRow.style.gap = "6px";
+
     const title = document.createElement("div");
     title.className = "item-title";
     title.textContent = note.title || "Untitled task";
 
+    titleRow.appendChild(title);
+
+    // Indicator badge (Deck / Archived / Done)
+    const items = ensureNoteItems(note);
+    const total = items.length;
+    const done = items.filter((it) => it.done).length;
+    const isCompleted = total > 0 && done === total;
+
+    if (note.archived) {
+      const badge = document.createElement("span");
+      badge.style.fontSize = "10px";
+      badge.style.padding = "1px 5px";
+      badge.style.borderRadius = "4px";
+      badge.style.background = "rgba(245, 158, 11, 0.2)";
+      badge.style.color = "#F59E0B";
+      badge.textContent = "Archived";
+      titleRow.appendChild(badge);
+    } else if (isCompleted) {
+      const badge = document.createElement("span");
+      badge.style.fontSize = "10px";
+      badge.style.padding = "1px 5px";
+      badge.style.borderRadius = "4px";
+      badge.style.background = "rgba(46, 125, 50, 0.2)";
+      badge.style.color = "#4CAF50";
+      badge.textContent = "✓ Done";
+      titleRow.appendChild(badge);
+    } else if (note.onDeck) {
+      const pin = document.createElement("span");
+      pin.title = "Pinned on deck";
+      pin.style.fontSize = "11px";
+      pin.style.opacity = "0.7";
+      pin.textContent = "◨";
+      titleRow.appendChild(pin);
+    }
+
     const snippet = document.createElement("div");
     snippet.className = "item-snippet";
-    const items = ensureNoteItems(note);
     const firstTaskText = items[0]?.text || "No tasks";
     const progress = getTaskProgress(note);
     snippet.textContent = `${progress}${firstTaskText}`;
 
-    info.appendChild(title);
+    info.appendChild(titleRow);
     info.appendChild(snippet);
 
     item.appendChild(colorDot);
@@ -268,6 +426,7 @@ function renderEditor() {
   if (!activeNote) {
     editorTitleInput.value = "";
     if (managerActiveTasksGroup) managerActiveTasksGroup.innerHTML = "";
+    if (archivedNoticeBanner) archivedNoticeBanner.style.display = "none";
     return;
   }
 
@@ -278,10 +437,32 @@ function renderEditor() {
   editorMetaTime.textContent = formatRelativeTime(activeNote.updatedAt);
   editorDateStamp.textContent = `Created ${formatDate(activeNote.createdAt)} · Updated ${formatRelativeTime(activeNote.updatedAt)}`;
 
+  // Archived Notice Banner
+  if (archivedNoticeBanner) {
+    if (activeNote.archived) {
+      archivedNoticeBanner.style.display = "flex";
+      editorTitleInput.readOnly = true;
+      if (btnArchiveNote) {
+        btnArchiveNote.title = "Restore from archive";
+        btnArchiveNote.classList.add("active");
+      }
+    } else {
+      archivedNoticeBanner.style.display = "none";
+      editorTitleInput.readOnly = false;
+      if (btnArchiveNote) {
+        btnArchiveNote.title = "Archive task list";
+        btnArchiveNote.classList.remove("active");
+      }
+    }
+  }
+
   // Update deck badge
   const dot = deckStatusBadge.querySelector(".status-indicator-dot");
   const label = deckStatusBadge.querySelector(".status-indicator-label");
-  if (activeNote.onDeck !== false) {
+  if (activeNote.archived) {
+    dot.style.background = "#F59E0B";
+    label.textContent = "Archived · click to restore";
+  } else if (activeNote.onDeck !== false) {
     dot.style.background = "#2E7D32";
     label.textContent = "Active · on the deck";
   } else {
@@ -374,6 +555,10 @@ function createManagerTaskRow(item, note) {
 
   checkbox.addEventListener("click", (e) => {
     e.stopPropagation();
+    if (note.archived) {
+      alert("Please restore this list from the archive to edit or check off tasks.");
+      return;
+    }
     item.done = !item.done;
     note.updatedAt = Date.now();
     syncNoteBody(note);
@@ -387,8 +572,10 @@ function createManagerTaskRow(item, note) {
   input.className = "task-text-input";
   input.value = item.text || "";
   input.placeholder = "Task description...";
+  if (note.archived) input.readOnly = true;
 
   input.addEventListener("input", (e) => {
+    if (note.archived) return;
     item.text = e.target.value;
     note.updatedAt = Date.now();
     syncNoteBody(note);
@@ -396,6 +583,7 @@ function createManagerTaskRow(item, note) {
   });
 
   input.addEventListener("keydown", (e) => {
+    if (note.archived) return;
     if (e.key === "Enter") {
       e.preventDefault();
       const items = ensureNoteItems(note);
@@ -474,6 +662,10 @@ function createManagerTaskRow(item, note) {
 
   delBtn.addEventListener("click", (e) => {
     e.stopPropagation();
+    if (note.archived) {
+      alert("Please restore this list from the archive to delete tasks.");
+      return;
+    }
     const items = ensureNoteItems(note);
     note.items = items.filter((it) => it.id !== item.id);
     note.updatedAt = Date.now();
@@ -490,9 +682,40 @@ function createManagerTaskRow(item, note) {
   return row;
 }
 
+// Update the bottom sidebar account display
+function updateSidebarAccountUI() {
+  if (!sidebarAccount) return;
+  const nameEl = sidebarAccount.querySelector(".account-name");
+  const subEl = sidebarAccount.querySelector(".account-sub");
+  const avatarEl = sidebarAccount.querySelector(".account-avatar");
+
+  if (state.user && state.user.signedIn) {
+    if (nameEl) nameEl.textContent = state.user.name || state.user.email || "Account";
+    if (subEl) subEl.textContent = "Pro · Synced";
+    if (avatarEl) {
+      avatarEl.textContent = state.user.avatarInitials || (state.user.email ? state.user.email[0].toUpperCase() : "✓");
+      avatarEl.style.background = "var(--accent-purple)";
+      avatarEl.style.color = "#FFFFFF";
+      avatarEl.style.fontWeight = "700";
+    }
+  } else {
+    if (nameEl) nameEl.textContent = "Not signed in";
+    if (subEl) subEl.textContent = "Sign in";
+    if (avatarEl) {
+      avatarEl.innerHTML = `
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      `;
+      avatarEl.style.background = "";
+      avatarEl.style.color = "";
+    }
+  }
+}
+
 function setupListeners() {
-  // Navigation filters
-  const navCompleted = document.getElementById("navCompleted");
+  // Navigation filters (All tasks, On the deck, Completed, Archive)
   const navBtns = [navAllNotes, navOnDeck, navCompleted, navArchive].filter(Boolean);
   navBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -506,6 +729,7 @@ function setupListeners() {
       else if (state.currentFilter === "archive") notesListTitle.textContent = "Archive";
 
       renderNotesList();
+      renderEditor();
     });
   });
 
@@ -515,15 +739,33 @@ function setupListeners() {
     renderNotesList();
   });
 
-  // Add new task
+  // Sort button: cycles sort order
+  btnSortNotes.addEventListener("click", () => {
+    if (state.sortBy === "updated") {
+      state.sortBy = "title";
+      btnSortNotes.title = "Sorted: A-Z";
+    } else if (state.sortBy === "title") {
+      state.sortBy = "color";
+      btnSortNotes.title = "Sorted: By Color";
+    } else {
+      state.sortBy = "updated";
+      btnSortNotes.title = "Sorted: Recently Updated";
+    }
+    renderNotesList();
+  });
+
+  // Add new task list
   btnNewNotePrimary.addEventListener("click", () => {
     const usedColors = state.notes.map((n) => n.color);
     const unused = COLOR_KEYS.find((c) => !usedColors.includes(c)) || COLOR_KEYS[state.notes.length % COLOR_KEYS.length];
 
     const newNote = {
       id: "task_" + Date.now(),
-      title: "New task",
+      title: "New task list",
       color: unused,
+      items: [
+        { id: "item_" + Date.now() + "_1", text: "", done: false }
+      ],
       body: "- [ ] ",
       onDeck: true,
       archived: false,
@@ -533,6 +775,15 @@ function setupListeners() {
 
     state.notes.unshift(newNote);
     state.activeNoteId = newNote.id;
+
+    // Switch to All tasks tab if currently in archive or completed
+    if (state.currentFilter === "archive" || state.currentFilter === "completed") {
+      state.currentFilter = "all";
+      navBtns.forEach((b) => b.classList.remove("active"));
+      if (navAllNotes) navAllNotes.classList.add("active");
+      if (notesListTitle) notesListTitle.textContent = "All tasks";
+    }
+
     renderNotesList();
     renderEditor();
     persistData();
@@ -544,7 +795,7 @@ function setupListeners() {
   // Title editor
   editorTitleInput.addEventListener("input", (e) => {
     const note = getActiveNote();
-    if (!note) return;
+    if (!note || note.archived) return;
     note.title = e.target.value;
     note.updatedAt = Date.now();
     editorMetaTime.textContent = "edited just now";
@@ -560,6 +811,10 @@ function setupListeners() {
 
     const note = getActiveNote();
     if (!note) return;
+    if (note.archived) {
+      alert("Please restore this list from the archive to add tasks.");
+      return;
+    }
 
     const items = ensureNoteItems(note);
     const newItem = {
@@ -614,7 +869,7 @@ function setupListeners() {
   if (btnManagerClearDone) {
     btnManagerClearDone.addEventListener("click", () => {
       const note = getActiveNote();
-      if (!note) return;
+      if (!note || note.archived) return;
       const items = ensureNoteItems(note);
       note.items = items.filter((it) => !it.done);
       note.updatedAt = Date.now();
@@ -629,7 +884,7 @@ function setupListeners() {
   if (btnManagerMarkAll) {
     btnManagerMarkAll.addEventListener("click", () => {
       const note = getActiveNote();
-      if (!note) return;
+      if (!note || note.archived) return;
       const items = ensureNoteItems(note);
       const hasUncompleted = items.some((it) => !it.done);
       items.forEach((it) => {
@@ -647,7 +902,13 @@ function setupListeners() {
   btnToggleDeck.addEventListener("click", () => {
     const note = getActiveNote();
     if (!note) return;
-    note.onDeck = !note.onDeck;
+    if (note.archived) {
+      // If archived, unarchive and pin
+      note.archived = false;
+      note.onDeck = true;
+    } else {
+      note.onDeck = !note.onDeck;
+    }
     renderEditor();
     renderNotesList();
     persistData();
@@ -657,7 +918,54 @@ function setupListeners() {
     btnToggleDeck.click();
   });
 
-  // Delete task list
+  // Archive / Unarchive Button in editor top bar
+  if (btnArchiveNote) {
+    btnArchiveNote.addEventListener("click", () => {
+      const note = getActiveNote();
+      if (!note) return;
+      note.archived = !note.archived;
+      if (note.archived) {
+        note.onDeck = false; // remove from floating edge deck when archived
+      } else {
+        note.onDeck = true; // restore to deck
+      }
+      note.updatedAt = Date.now();
+      renderNotesList();
+      renderEditor();
+      persistData();
+    });
+  }
+
+  // Restore button in Archived Notice Banner
+  if (btnRestoreArchived) {
+    btnRestoreArchived.addEventListener("click", () => {
+      const note = getActiveNote();
+      if (!note) return;
+      note.archived = false;
+      note.onDeck = true;
+      note.updatedAt = Date.now();
+      renderNotesList();
+      renderEditor();
+      persistData();
+    });
+  }
+
+  // Permanent Delete button in Archived Notice Banner
+  if (btnPermanentDelete) {
+    btnPermanentDelete.addEventListener("click", () => {
+      const note = getActiveNote();
+      if (!note) return;
+      if (confirm(`Permanently delete "${note.title || 'Untitled'}"? This cannot be undone.`)) {
+        state.notes = state.notes.filter((n) => n.id !== note.id);
+        state.activeNoteId = state.notes[0]?.id || null;
+        renderNotesList();
+        renderEditor();
+        persistData();
+      }
+    });
+  }
+
+  // Delete task list button in editor top bar
   btnDeleteNote.addEventListener("click", () => {
     const note = getActiveNote();
     if (!note) return;
@@ -695,7 +1003,7 @@ function setupListeners() {
     if (!COLOR_MAP[colorKey]) return;
 
     const note = getActiveNote();
-    if (!note) return;
+    if (!note || note.archived) return;
     note.color = colorKey;
     note.updatedAt = Date.now();
 
@@ -716,14 +1024,307 @@ function setupListeners() {
     });
   });
 
-  // About Button opens Onboarding Walkthrough
-  const btnSidebarAbout = document.getElementById("btnSidebarAbout");
-  if (btnSidebarAbout) {
+  // ================= SETTINGS MODAL =================
+  if (btnSidebarSettings && settingsModal) {
+    btnSidebarSettings.addEventListener("click", async () => {
+      settingsModal.style.display = "flex";
+
+      // Load startup state
+      if (window.peekyApi && window.peekyApi.getLoginItemSettings) {
+        try {
+          const autoStart = await window.peekyApi.getLoginItemSettings();
+          if (chkStartup) chkStartup.checked = !!autoStart;
+        } catch (e) {
+          console.warn("Could not check startup settings:", e);
+        }
+      }
+
+      // Sync active edge button
+      if (state.edge === "left") {
+        btnEdgeLeft.classList.add("active");
+        btnEdgeRight.classList.remove("active");
+      } else {
+        btnEdgeRight.classList.add("active");
+        btnEdgeLeft.classList.remove("active");
+      }
+
+      // Sync active theme button
+      [btnThemeDark, btnThemeLight, btnThemeSystem].filter(Boolean).forEach((btn) => {
+        if (btn.dataset.theme === (state.theme || "dark")) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+    });
+
+    if (btnCloseSettings) {
+      btnCloseSettings.addEventListener("click", () => {
+        settingsModal.style.display = "none";
+      });
+    }
+
+    // Edge switchers in Settings
+    if (btnEdgeRight) {
+      btnEdgeRight.addEventListener("click", () => {
+        state.edge = "right";
+        btnEdgeRight.classList.add("active");
+        btnEdgeLeft.classList.remove("active");
+        if (window.peekyApi && window.peekyApi.dockEdge) {
+          window.peekyApi.dockEdge("right");
+        }
+        persistData();
+      });
+    }
+
+    if (btnEdgeLeft) {
+      btnEdgeLeft.addEventListener("click", () => {
+        state.edge = "left";
+        btnEdgeLeft.classList.add("active");
+        btnEdgeRight.classList.remove("active");
+        if (window.peekyApi && window.peekyApi.dockEdge) {
+          window.peekyApi.dockEdge("left");
+        }
+        persistData();
+      });
+    }
+
+    // Themes in Settings
+    [btnThemeDark, btnThemeLight, btnThemeSystem].filter(Boolean).forEach((btn) => {
+      btn.addEventListener("click", () => {
+        [btnThemeDark, btnThemeLight, btnThemeSystem].forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        state.theme = btn.dataset.theme;
+        persistData();
+      });
+    });
+
+    // Startup switch
+    if (chkStartup) {
+      chkStartup.addEventListener("change", () => {
+        if (window.peekyApi && window.peekyApi.setLoginItemSettings) {
+          window.peekyApi.setLoginItemSettings(chkStartup.checked);
+        }
+      });
+    }
+
+    // Open Data Folder button
+    if (btnOpenDataFolder) {
+      btnOpenDataFolder.addEventListener("click", () => {
+        if (window.peekyApi && window.peekyApi.openDataFolder) {
+          window.peekyApi.openDataFolder();
+        }
+      });
+    }
+
+    // Export Backup button
+    if (btnExportBackup) {
+      btnExportBackup.addEventListener("click", async () => {
+        if (window.peekyApi && window.peekyApi.exportBackup) {
+          const success = await window.peekyApi.exportBackup(state);
+          if (success) {
+            alert("Backup saved successfully!");
+          }
+        }
+      });
+    }
+
+    // Import Backup button
+    if (btnImportBackup) {
+      btnImportBackup.addEventListener("click", async () => {
+        if (window.peekyApi && window.peekyApi.importBackup) {
+          const restored = await window.peekyApi.importBackup();
+          if (restored && Array.isArray(restored.notes)) {
+            state.notes = restored.notes;
+            if (restored.activeNoteId) state.activeNoteId = restored.activeNoteId;
+            renderNotesList();
+            renderEditor();
+            persistData();
+            alert("Tasks restored successfully from backup!");
+          }
+        }
+      });
+    }
+  }
+
+  // ================= ABOUT MODAL =================
+  if (btnSidebarAbout && aboutModal) {
     btnSidebarAbout.addEventListener("click", () => {
-      if (window.peekyApi && window.peekyApi.openOnboarding) {
-        window.peekyApi.openOnboarding();
+      aboutModal.style.display = "flex";
+      if (aboutUpdateStatus) aboutUpdateStatus.textContent = "Check for latest version";
+    });
+
+    if (btnCloseAbout) {
+      btnCloseAbout.addEventListener("click", () => {
+        aboutModal.style.display = "none";
+      });
+    }
+
+    if (btnAboutOnboarding) {
+      btnAboutOnboarding.addEventListener("click", () => {
+        aboutModal.style.display = "none";
+        if (window.peekyApi && window.peekyApi.openOnboarding) {
+          window.peekyApi.openOnboarding();
+        }
+      });
+    }
+
+    if (btnAboutWebsite) {
+      btnAboutWebsite.addEventListener("click", () => {
+        if (window.peekyApi && window.peekyApi.openExternal) {
+          window.peekyApi.openExternal("https://peekytask.in");
+        }
+      });
+    }
+
+    if (btnAboutSupport) {
+      btnAboutSupport.addEventListener("click", () => {
+        if (window.peekyApi && window.peekyApi.openExternal) {
+          window.peekyApi.openExternal("https://peekytask.in/#faq");
+        }
+      });
+    }
+
+    if (btnAboutCheckUpdate) {
+      btnAboutCheckUpdate.addEventListener("click", () => {
+        if (aboutUpdateStatus) {
+          aboutUpdateStatus.textContent = "Checking...";
+          setTimeout(() => {
+            aboutUpdateStatus.textContent = "You have the latest version (v1.0.0) ✓";
+          }, 600);
+        }
+      });
+    }
+  }
+
+  // ================= ACCOUNT & SIGN IN MODAL =================
+  if (sidebarAccount && accountModal) {
+    sidebarAccount.addEventListener("click", () => {
+      accountModal.style.display = "flex";
+      const isUserSignedIn = state.user && state.user.signedIn;
+
+      if (isUserSignedIn) {
+        viewNotSignedIn.style.display = "none";
+        viewSignedIn.style.display = "flex";
+        profileName.textContent = state.user.name || "User";
+        profileEmail.textContent = state.user.email || "user@example.com";
+        profileAvatarLarge.textContent = state.user.avatarInitials || "U";
+        syncStatusValue.textContent = state.user.syncedAt ? `Up to date · ${formatRelativeTime(state.user.syncedAt)}` : "Up to date · just now";
+      } else {
+        viewNotSignedIn.style.display = "flex";
+        viewSignedIn.style.display = "none";
       }
     });
+
+    if (btnCloseAccount) {
+      btnCloseAccount.addEventListener("click", () => {
+        accountModal.style.display = "none";
+      });
+    }
+
+    // Email Sign in
+    if (btnContinueEmail) {
+      btnContinueEmail.addEventListener("click", () => {
+        const email = (inputAccountEmail.value || "").trim();
+        if (!email || !email.includes("@")) {
+          alert("Please enter a valid email address.");
+          return;
+        }
+
+        const username = email.split("@")[0];
+        const initials = username.substring(0, 2).toUpperCase();
+
+        state.user = {
+          signedIn: true,
+          email: email,
+          name: username,
+          avatarInitials: initials,
+          syncedAt: Date.now(),
+        };
+
+        updateSidebarAccountUI();
+        viewNotSignedIn.style.display = "none";
+        viewSignedIn.style.display = "flex";
+        profileName.textContent = state.user.name;
+        profileEmail.textContent = state.user.email;
+        profileAvatarLarge.textContent = state.user.avatarInitials;
+        syncStatusValue.textContent = "Up to date · just now";
+        persistData();
+      });
+    }
+
+    // Quick Google sign in
+    if (btnSocialGoogle) {
+      btnSocialGoogle.addEventListener("click", () => {
+        state.user = {
+          signedIn: true,
+          email: "alex@gmail.com",
+          name: "Alex",
+          avatarInitials: "A",
+          syncedAt: Date.now(),
+        };
+        updateSidebarAccountUI();
+        viewNotSignedIn.style.display = "none";
+        viewSignedIn.style.display = "flex";
+        profileName.textContent = state.user.name;
+        profileEmail.textContent = state.user.email;
+        profileAvatarLarge.textContent = state.user.avatarInitials;
+        syncStatusValue.textContent = "Up to date · just now";
+        persistData();
+      });
+    }
+
+    // Quick Microsoft sign in
+    if (btnSocialMicrosoft) {
+      btnSocialMicrosoft.addEventListener("click", () => {
+        state.user = {
+          signedIn: true,
+          email: "prince@outlook.com",
+          name: "Prince",
+          avatarInitials: "P",
+          syncedAt: Date.now(),
+        };
+        updateSidebarAccountUI();
+        viewNotSignedIn.style.display = "none";
+        viewSignedIn.style.display = "flex";
+        profileName.textContent = state.user.name;
+        profileEmail.textContent = state.user.email;
+        profileAvatarLarge.textContent = state.user.avatarInitials;
+        syncStatusValue.textContent = "Up to date · just now";
+        persistData();
+      });
+    }
+
+    // Sync Now button
+    if (btnSyncNow) {
+      btnSyncNow.addEventListener("click", () => {
+        syncStatusValue.textContent = "Syncing tasks...";
+        btnSyncNow.disabled = true;
+        setTimeout(() => {
+          state.user.syncedAt = Date.now();
+          syncStatusValue.textContent = "Up to date · just now";
+          btnSyncNow.disabled = false;
+          persistData();
+        }, 500);
+      });
+    }
+
+    // Sign Out button
+    if (btnSignOut) {
+      btnSignOut.addEventListener("click", () => {
+        state.user = {
+          signedIn: false,
+          name: "Not signed in",
+          email: "",
+          avatarInitials: "U",
+          syncedAt: null,
+        };
+        updateSidebarAccountUI();
+        viewSignedIn.style.display = "none";
+        viewNotSignedIn.style.display = "flex";
+        persistData();
+      });
+    }
   }
 
   // Buy Peeky Task
@@ -733,7 +1334,7 @@ function setupListeners() {
     }
   });
 
-  // Enter Key
+  // Enter License Key
   btnEnterKey.addEventListener("click", () => {
     licenseModal.style.display = "flex";
     inputLicenseKey.focus();
@@ -768,6 +1369,16 @@ function setupListeners() {
       }
     });
   }
+
+  // Close modals on Esc key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if (settingsModal && settingsModal.style.display === "flex") settingsModal.style.display = "none";
+      if (aboutModal && aboutModal.style.display === "flex") aboutModal.style.display = "none";
+      if (accountModal && accountModal.style.display === "flex") accountModal.style.display = "none";
+      if (licenseModal && licenseModal.style.display === "flex") licenseModal.style.display = "none";
+    }
+  });
 }
 
 async function init() {
@@ -783,6 +1394,7 @@ async function init() {
   }
 
   setupListeners();
+  updateSidebarAccountUI();
   renderNotesList();
   renderEditor();
 

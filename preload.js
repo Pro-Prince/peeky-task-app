@@ -14,9 +14,14 @@ contextBridge.exposeInMainWorld("peekyApi", {
   openOnboarding: () => ipcRenderer.send("open-onboarding"),
   launchStickyTasks: (edge) => ipcRenderer.send("launch-sticky-tasks", edge),
 
-  // File persistence & Sync
+  // File persistence, Backup & Sync
   loadData: () => ipcRenderer.invoke("data-load"),
   saveData: (data) => ipcRenderer.invoke("data-save", data),
+  openDataFolder: () => ipcRenderer.send("open-data-folder"),
+  exportBackup: (data) => ipcRenderer.invoke("export-tasks-file", data),
+  importBackup: () => ipcRenderer.invoke("import-tasks-file"),
+  getLoginItemSettings: () => ipcRenderer.invoke("get-login-item-settings"),
+  setLoginItemSettings: (val) => ipcRenderer.invoke("set-login-item-settings", val),
 
   // External URLs
   openExternal: (url) => ipcRenderer.send("open-external", url),

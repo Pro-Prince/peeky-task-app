@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, screen, Tray, Menu, globalShortcut, shell } = require("electron");
+const { app, BrowserWindow, ipcMain, screen, Tray, Menu, globalShortcut, shell, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
@@ -434,3 +434,62 @@ ipcMain.on("open-external", (event, url) => {
     shell.openExternal(url);
   }
 });
+
+ipcMain.on("open-data-folder", () => {
+  shell.openPath(app.getPath("userData"));
+});
+
+ipcMain.handle("get-login-item-settings", () => {
+  try {
+    return app.getLoginItemSettings().openAtLogin;
+  } catch (e) {
+    return false;
+  }
+});
+
+ipcMain.handle("set-login-item-settings", (event, openAtLogin) => {
+  try {
+    app.setLoginItemSettings({ openAtLogin: !!openAtLogin });
+    return app.getLoginItemSettings().openAtLogin;
+  } catch (e) {
+    return false;
+  }
+});
+
+ipcMain.handle("export-tasks-file", async (event, data) => {
+  try {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    const res = await dialog.showSaveDialog(win, {
+      title: "Export Peeky Task Backup",
+      defaultPath: "peeky-task-backup.json",
+      filters: [{ name: "JSON Backup", extensions: ["json"] }],
+    });
+    if (!res.canceled && res.filePath) {
+      fs.writeFileSync(res.filePath, JSON.stringify(data, null, 2), "utf-8");
+      return true;
+    }
+  } catch (err) {
+    console.error("Error exporting backup:", err);
+  }
+  return false;
+});
+
+ipcMain.handle("import-tasks-file", async (event) => {
+  try {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    const res = await dialog.showOpenDialog(win, {
+      title: "Import Peeky Task Backup",
+      filters: [{ name: "JSON Backup", extensions: ["json"] }],
+      properties: ["openFile"],
+    });
+    if (!res.canceled && res.filePaths.length > 0) {
+      const raw = fs.readFileSync(res.filePaths[0], "utf-8");
+      const parsed = JSON.parse(raw);
+      return parsed;
+    }
+  } catch (err) {
+    console.error("Error importing backup:", err);
+  }
+  return null;
+});
+

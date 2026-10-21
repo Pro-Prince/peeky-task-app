@@ -159,12 +159,35 @@
                 <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
             </button>
+            <button class="editor-tool-btn" id="btnArchiveNote" title="Archive / Unarchive task list">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="21 8 21 21 3 21 3 8"></polyline>
+                <rect x="1" y="3" width="22" height="5"></rect>
+                <line x1="10" y1="12" x2="14" y2="12"></line>
+              </svg>
+            </button>
             <button class="editor-tool-btn del" id="btnDeleteNote" title="Delete task">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
               </svg>
             </button>
+          </div>
+        </div>
+
+        <!-- Archived Notice Banner -->
+        <div class="archived-notice-banner" id="archivedNoticeBanner" style="display: none;">
+          <div class="archived-notice-left">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="21 8 21 21 3 21 3 8"></polyline>
+              <rect x="1" y="3" width="22" height="5"></rect>
+              <line x1="10" y1="12" x2="14" y2="12"></line>
+            </svg>
+            <span>This list is in your archive. Tasks are preserved in read-only mode.</span>
+          </div>
+          <div class="archived-notice-actions">
+            <button class="archived-action-btn restore" id="btnRestoreArchived">Restore</button>
+            <button class="archived-action-btn delete" id="btnPermanentDelete">Delete</button>
           </div>
         </div>
 
@@ -240,6 +263,248 @@
       </div>
     </div>
   </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal" style="display: none;">
+    <div class="modal-box modal-large">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <h3>Settings</h3>
+        </div>
+        <button class="modal-close-btn" id="btnCloseSettings">✕</button>
+      </div>
+
+      <div class="settings-sections-scroll">
+        <!-- Section: Dock Position -->
+        <div class="settings-group">
+          <label class="settings-label">Screen Dock Edge</label>
+          <div class="settings-subtext">Choose which edge of your screen Peeky Task docks against.</div>
+          <div class="settings-pill-selector">
+            <button class="settings-pill-btn active" id="btnEdgeRight" data-edge="right">Right Edge ◨</button>
+            <button class="settings-pill-btn" id="btnEdgeLeft" data-edge="left">Left Edge ◧</button>
+          </div>
+        </div>
+
+        <!-- Section: Theme -->
+        <div class="settings-group">
+          <label class="settings-label">Appearance & Theme</label>
+          <div class="settings-subtext">Choose your preferred manager color theme.</div>
+          <div class="settings-pill-selector">
+            <button class="settings-pill-btn active" id="btnThemeDark" data-theme="dark">Dark</button>
+            <button class="settings-pill-btn" id="btnThemeLight" data-theme="light">Light</button>
+            <button class="settings-pill-btn" id="btnThemeSystem" data-theme="system">System</button>
+          </div>
+        </div>
+
+        <!-- Section: Global Shortcut -->
+        <div class="settings-group">
+          <label class="settings-label">Global Summon Shortcut</label>
+          <div class="settings-subtext">Toggle this Task Manager from anywhere in Windows.</div>
+          <div class="settings-shortcut-display">
+            <kbd class="shortcut-kbd">Alt</kbd> + <kbd class="shortcut-kbd">Space</kbd>
+            <span class="shortcut-badge">Global Active</span>
+          </div>
+        </div>
+
+        <!-- Section: Startup -->
+        <div class="settings-group">
+          <label class="settings-label">Startup Behavior</label>
+          <div class="settings-toggle-row">
+            <div>
+              <div class="toggle-title">Launch on Windows Startup</div>
+              <div class="settings-subtext">Start Peeky Task docked to your screen edge when you log in.</div>
+            </div>
+            <label class="switch-control">
+              <input type="checkbox" id="chkStartup" />
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Section: Data Storage & Backup -->
+        <div class="settings-group">
+          <label class="settings-label">Data Storage & Backups</label>
+          <div class="settings-subtext">Tasks are stored locally on your PC. Export JSON anytime to create safe offline backups.</div>
+          <div class="settings-actions-row">
+            <button class="settings-btn-action" id="btnOpenDataFolder">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+              <span>Open Data Folder</span>
+            </button>
+            <button class="settings-btn-action" id="btnExportBackup">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="15"></line></svg>
+              <span>Export Backup</span>
+            </button>
+            <button class="settings-btn-action" id="btnImportBackup">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              <span>Restore Backup</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section: License Status -->
+        <div class="settings-group">
+          <label class="settings-label">License Status</label>
+          <div class="license-status-card" id="settingsLicenseCard">
+            <div class="license-status-icon">✓</div>
+            <div class="license-status-info">
+              <div class="license-status-title" id="settingsLicenseTitle">Pro License Active</div>
+              <div class="license-status-sub" id="settingsLicenseSub">Lifetime unlock · All features enabled</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Modal -->
+  <div class="modal-overlay" id="aboutModal" style="display: none;">
+    <div class="modal-box modal-medium">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <h3>About Peeky Task</h3>
+        </div>
+        <button class="modal-close-btn" id="btnCloseAbout">✕</button>
+      </div>
+
+      <div class="about-modal-content">
+        <div class="about-app-header">
+          <img src="assets/app-icon.png" class="about-app-icon" alt="Peeky Task" />
+          <div class="about-app-titles">
+            <div class="about-app-name">Peeky Task</div>
+            <div class="about-app-version">Version 1.0.0 (Windows x64)</div>
+          </div>
+        </div>
+
+        <p class="about-description">
+          A minimalist floating daily task and to-do deck for Windows. Stays docked out of your way flush against your screen bezel until you need it.
+        </p>
+
+        <div class="about-links-grid">
+          <button class="about-link-tile" id="btnAboutOnboarding">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            <div>
+              <div class="tile-title">Replay Guide</div>
+              <div class="tile-sub">Onboarding walkthrough</div>
+            </div>
+          </button>
+
+          <button class="about-link-tile" id="btnAboutWebsite">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            <div>
+              <div class="tile-title">Website</div>
+              <div class="tile-sub">peekytask.in</div>
+            </div>
+          </button>
+
+          <button class="about-link-tile" id="btnAboutSupport">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            <div>
+              <div class="tile-title">Support</div>
+              <div class="tile-sub">Help & FAQ</div>
+            </div>
+          </button>
+
+          <button class="about-link-tile" id="btnAboutCheckUpdate">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            <div>
+              <div class="tile-title">Updates</div>
+              <div class="tile-sub" id="aboutUpdateStatus">Check for latest version</div>
+            </div>
+          </button>
+        </div>
+
+        <div class="about-footer-meta">
+          <span>Crafted with precision for Windows · © 2026 Peeky Task</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account & Sign In Modal -->
+  <div class="modal-overlay" id="accountModal" style="display: none;">
+    <div class="modal-box modal-medium">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <h3 id="accountModalTitle">Sign in to Peeky Task</h3>
+        </div>
+        <button class="modal-close-btn" id="btnCloseAccount">✕</button>
+      </div>
+
+      <!-- State 1: Not Signed In -->
+      <div class="account-view" id="viewNotSignedIn">
+        <div class="account-promo-hero">
+          <div class="sync-icon-circle">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          </div>
+          <h4>Sync tasks everywhere</h4>
+          <p>Access your tasks across all your Windows devices with real-time automatic backup.</p>
+        </div>
+
+        <div class="account-form">
+          <input type="email" class="modal-input" id="inputAccountEmail" placeholder="Enter your email address..." />
+          <button class="btn-account-primary" id="btnContinueEmail">Continue with Email</button>
+
+          <div class="account-divider"><span>or continue with</span></div>
+
+          <div class="social-login-row">
+            <button class="btn-social" id="btnSocialGoogle" type="button">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12.3 0 15.1s.7 5.4 1.9 7.8l3.7-2.9z"/><path fill="#34A853" d="M12 23.5c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16.5C3.7 20.2 7.5 23.5 12 23.5z"/></svg>
+              <span>Google</span>
+            </button>
+            <button class="btn-social" id="btnSocialMicrosoft" type="button">
+              <svg viewBox="0 0 24 24" width="16" height="16"><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="13" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="13" width="10" height="10" fill="#00A4EF"/><rect x="13" y="13" width="10" height="10" fill="#FFB900"/></svg>
+              <span>Microsoft</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- State 2: Signed In Profile -->
+      <div class="account-view" id="viewSignedIn" style="display: none;">
+        <div class="account-profile-header">
+          <div class="profile-avatar-large" id="profileAvatarLarge">U</div>
+          <div class="profile-meta">
+            <div class="profile-name" id="profileName">User</div>
+            <div class="profile-email" id="profileEmail">user@example.com</div>
+            <span class="profile-badge-pro">✓ Pro · Cloud Sync Active</span>
+          </div>
+        </div>
+
+        <div class="sync-status-box">
+          <div class="sync-status-row">
+            <span class="sync-label">Sync status</span>
+            <span class="sync-value" id="syncStatusValue">Up to date · just now</span>
+          </div>
+          <div class="sync-status-row">
+            <span class="sync-label">Cloud storage</span>
+            <span class="sync-value">Encrypted & backed up</span>
+          </div>
+        </div>
+
+        <div class="account-profile-actions">
+          <button class="btn-account-sync" id="btnSyncNow">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            <span>Sync Now</span>
+          </button>
+          <button class="btn-account-signout" id="btnSignOut">Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <script src="manager.js"></script>
 </body>
