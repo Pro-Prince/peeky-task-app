@@ -519,7 +519,7 @@ function setupListeners() {
   // Buy Peeky Task
   btnBuyNotes.addEventListener("click", () => {
     if (window.peekyApi && window.peekyApi.openExternal) {
-      window.peekyApi.openExternal("https://peekytask.com/buy");
+      window.peekyApi.openExternal("https://peekytask.in/#pricing");
     }
   });
 
@@ -541,7 +541,8 @@ function setupListeners() {
       persistData();
       alert("License activated successfully! Thank you for purchasing Peeky Task.");
       licenseModal.style.display = "none";
-      document.getElementById("trialBanner").style.display = "none";
+      const banner = document.getElementById("trialBanner");
+      if (banner) banner.style.display = "none";
     } else {
       alert("Please enter a valid license key.");
     }
@@ -574,6 +575,11 @@ async function init() {
   setupListeners();
   renderNotesList();
   renderEditor();
+
+  if (state.trial && state.trial.isLicensed) {
+    const banner = document.getElementById("trialBanner");
+    if (banner) banner.style.display = "none";
+  }
 }
 
 document.addEventListener("DOMContentLoaded", init);
