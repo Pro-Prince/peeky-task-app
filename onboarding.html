@@ -3,99 +3,125 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Peeky Task</title>
+  <title>Peeky Task - Start Guide</title>
   <link rel="stylesheet" href="onboarding.css">
 </head>
 <body>
   <div class="onboarding-window">
     <!-- Window Header -->
     <header class="window-header">
-      <span class="window-title">Peeky Task</span>
-      <button class="window-close-btn" id="btnCloseOnboarding">✕</button>
+      <span class="window-title">Peeky Task · Getting Started</span>
+      <button class="window-close-btn" id="btnCloseOnboarding" title="Close">✕</button>
     </header>
 
-    <!-- Slide 1: Your tasks, in your order -->
+    <!-- Slide 1: Daily tasks at your screen edge -->
     <div class="slide active" id="slide1">
       <div class="slide-content">
         <div class="app-icon-badge">
           <img src="assets/app-icon.png" alt="Peeky Task Icon" class="badge-img" />
         </div>
 
-        <h1 class="slide-title">Your tasks, in your order</h1>
+        <h1 class="slide-title">Daily tasks at your screen edge</h1>
         <p class="slide-description">
-          Two things to make the deck yours: arrange your tasks by dragging them, and start a list just by typing one. Everything else works exactly as it did.
+          Peeky Task lives flush against your screen bezel as a subtle colored tab. Hover to peek at your to-dos, or summon your deck from anywhere with a single global shortcut.
         </p>
 
         <div class="feature-pills-row">
           <div class="feature-pill">
-            <span class="pill-icon">⇅</span>
-            <span>Drag to reorder</span>
+            <span class="pill-icon">⚡</span>
+            <span>Alt+Space summon</span>
           </div>
           <div class="feature-pill">
-            <span class="pill-icon">≡</span>
-            <span>Lists as you type</span>
+            <span class="pill-icon">📌</span>
+            <span>Edge dock pill</span>
+          </div>
+          <div class="feature-pill">
+            <span class="pill-icon">🔒</span>
+            <span>100% Offline & Private</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Slide 2: Drag tasks into the order you want -->
+    <!-- Slide 2: Rapid checklist workflow & shortcuts -->
     <div class="slide" id="slide2">
       <div class="slide-content">
         <div class="preview-card-frame">
           <div class="mockup-sidebar">
-            <div class="mockup-pill active">All tasks</div>
-            <div class="mockup-pill">On the deck</div>
+            <div class="mockup-pill active">Today</div>
+            <div class="mockup-pill">Groceries</div>
+            <div class="mockup-pill">Projects</div>
           </div>
           <div class="mockup-editor" style="background:#FBE08D">
-            <div class="mockup-title">Groceries</div>
-            <div class="mockup-lines">
-              <span>- oat milk</span>
-              <span>- rye bread</span>
-              <span>- coffee, the good one</span>
+            <div class="mockup-header-row">
+              <span class="mockup-title">Today's Focus</span>
+              <span class="mockup-progress">2/3 done</span>
+            </div>
+            <div class="mockup-checklist">
+              <div class="mockup-item done">
+                <span class="mockup-chk">✓</span>
+                <span class="mockup-text">Review pull request</span>
+              </div>
+              <div class="mockup-item done">
+                <span class="mockup-chk">✓</span>
+                <span class="mockup-text">Finish project proposal</span>
+              </div>
+              <div class="mockup-item">
+                <span class="mockup-chk"></span>
+                <span class="mockup-text">Send update to team</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <h1 class="slide-title">Drag tasks into the order you want</h1>
+        <h1 class="slide-title">Lightning keyboard speed</h1>
         <p class="slide-description">
-          On the deck, hold a tab by its title and drop it higher or lower. In All Tasks, use the handle on the right of a task. Either way, the other follows.
-        </p>
-      </div>
-    </div>
-
-    <!-- Slide 3: Lists start themselves -->
-    <div class="slide" id="slide3">
-      <div class="slide-content">
-        <div class="mockup-sticky" style="background:#F9C9D6">
-          <div class="sticky-head">
-            <span class="sticky-title">Grocery shopping</span>
-            <span class="sticky-status">Saved · now</span>
-          </div>
-          <div class="sticky-body">
-            <div>1. egg</div>
-            <div>2. milk</div>
-            <div>3. bread</div>
-            <div>4. lettuce</div>
-          </div>
-        </div>
-
-        <h1 class="slide-title">Lists start themselves</h1>
-        <p class="slide-description">
-          Begin a line with a dash, 1. or [ ] and a space, and it becomes a bullet, a numbered list or a checklist. Backspace straight after gives you back what you typed.
+          Add tasks instantly without touching the mouse. Press Enter for the next to-do, Space to check off, or Backspace to delete with a 10-second safety undo.
         </p>
 
         <div class="helper-syntax-row">
-          <span class="syntax-badge"><code>-</code> then Space bullets</span>
-          <span class="syntax-badge"><code>1.</code> then Space numbers</span>
-          <span class="syntax-badge"><code>[ ]</code> then Space checklist</span>
+          <span class="syntax-badge"><code>Ctrl + .</code> Cycle 8 pastel colors</span>
+          <span class="syntax-badge"><code>Space</code> Check off task</span>
+          <span class="syntax-badge"><code>Ctrl + Backspace</code> Delete (10s undo)</span>
+          <span class="syntax-badge"><code>Ctrl + Z</code> Restore deleted task</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 3: Screen Edge Choice & Launch -->
+    <div class="slide" id="slide3">
+      <div class="slide-content">
+        <div class="mockup-sticky" style="background:#C2DDF6">
+          <div class="sticky-head">
+            <span class="sticky-title">Keyboard Shortcuts</span>
+            <span class="sticky-status">Registered system-wide</span>
+          </div>
+          <div class="sticky-body-tasks">
+            <div class="shortcut-item-row">
+              <span class="shortcut-desc">Toggle deck / summon</span>
+              <span class="shortcut-keys"><kbd>Alt</kbd> + <kbd>Space</kbd></span>
+            </div>
+            <div class="shortcut-item-row">
+              <span class="shortcut-desc">Quick add task</span>
+              <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>T</kbd></span>
+            </div>
+            <div class="shortcut-item-row">
+              <span class="shortcut-desc">All Tasks Manager</span>
+              <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>A</kbd></span>
+            </div>
+          </div>
         </div>
 
+        <h1 class="slide-title">Choose your screen edge</h1>
+        <p class="slide-description">
+          Your tasks are stored locally in plain JSON. No email or cloud account needed. You're ready to organize your day.
+        </p>
+
         <div class="edge-choice-row">
-          <span class="edge-choice-label">Dock sticky tasks on:</span>
+          <span class="edge-choice-label">Dock deck on:</span>
           <div class="edge-toggle-group">
-            <button type="button" class="edge-toggle-btn active" data-edge="right" id="btnChooseRight">Right (Default) ◨</button>
-            <button type="button" class="edge-toggle-btn" data-edge="left" id="btnChooseLeft">Left ◧</button>
+            <button type="button" class="edge-toggle-btn active" data-edge="right" id="btnChooseRight">Right edge (Default)</button>
+            <button type="button" class="edge-toggle-btn" data-edge="left" id="btnChooseLeft">Left edge</button>
           </div>
         </div>
       </div>

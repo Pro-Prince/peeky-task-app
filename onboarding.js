@@ -42,7 +42,7 @@ function updateStep(step) {
 
   // Update Next button
   if (currentStep === totalSteps) {
-    btnNext.textContent = "Back to my tasks";
+    btnNext.textContent = "Start Using Peeky Task";
   } else {
     btnNext.textContent = "Next";
   }

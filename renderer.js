@@ -319,12 +319,20 @@ function createTaskRowElement(item, note) {
   const checkbox = document.createElement("button");
   checkbox.type = "button";
   checkbox.className = "task-checkbox";
-  checkbox.title = item.done ? "Mark as to-do" : "Mark as completed";
+  checkbox.tabIndex = 0;
+  checkbox.title = item.done ? "Mark as to-do (Space to toggle)" : "Mark as completed (Space to toggle)";
   checkbox.innerHTML = `
     <svg class="check-icon" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="20 6 9 17 4 12"></polyline>
     </svg>
   `;
+
+  checkbox.addEventListener("keydown", (e) => {
+    if (e.key === " " || e.key === "Spacebar" || e.key === "Enter") {
+      e.preventDefault();
+      checkbox.click();
+    }
+  });
 
   checkbox.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -352,6 +360,11 @@ function createTaskRowElement(item, note) {
   });
 
   input.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && (e.key === " " || e.key === "Spacebar" || e.key === "Enter")) {
+      e.preventDefault();
+      checkbox.click();
+      return;
+    }
     if (e.key === "Enter") {
       e.preventDefault();
       const items = ensureNoteItems(note);
@@ -731,15 +744,18 @@ function setupListeners() {
     persistData();
   });
 
-  // Keyboard Shortcuts
+  // Keyboard Shortcuts matching website documentation
   window.addEventListener("keydown", (e) => {
+    // 1. Esc: Close / hide widget
     if (e.key === "Escape" && state.isCardOpen) {
       setCardOpenState(false);
     }
+    // 2. Ctrl+N: New task list
     if (e.ctrlKey && e.key.toLowerCase() === "n") {
       e.preventDefault();
       btnAddNote.click();
     }
+    // 3. Ctrl+.: Cycle task color
     if (e.ctrlKey && e.key === ".") {
       e.preventDefault();
       const activeNote = getActiveNote();
@@ -750,6 +766,36 @@ function setupListeners() {
       renderCard();
       renderRailTabs();
       persistData();
+    }
+    // 4. Ctrl+Backspace: Delete active task with 10s undo
+    if (e.ctrlKey && e.key === "Backspace") {
+      e.preventDefault();
+      if (btnCardDelete) btnCardDelete.click();
+    }
+    // 5. Ctrl+Z: Undo task deletion during 10s countdown
+    if (e.ctrlKey && e.key.toLowerCase() === "z") {
+      if (undoDrawer && undoDrawer.style.display !== "none") {
+        e.preventDefault();
+        if (btnCardUndo) btnCardUndo.click();
+      }
+    }
+    // 6. Ctrl+P: Toggle Always-on-Top
+    if (e.ctrlKey && e.key.toLowerCase() === "p") {
+      e.preventDefault();
+      state.isAlwaysOnTop = !state.isAlwaysOnTop;
+      if (window.peekyApi && window.peekyApi.setAlwaysOnTop) {
+        window.peekyApi.setAlwaysOnTop(state.isAlwaysOnTop);
+      }
+    }
+    // 7. Ctrl+D: Pin / unpin from deck
+    if (e.ctrlKey && e.key.toLowerCase() === "d") {
+      e.preventDefault();
+      const activeNote = getActiveNote();
+      if (activeNote) {
+        activeNote.onDeck = !activeNote.onDeck;
+        renderRailTabs();
+        persistData();
+      }
     }
   });
 
@@ -775,6 +821,20 @@ function setupListeners() {
       setCardOpenState(true);
       renderCard();
       renderRailTabs();
+    });
+  }
+
+  if (window.peekyApi && window.peekyApi.onFocusQuickAdd) {
+    window.peekyApi.onFocusQuickAdd(() => {
+      setCardOpenState(true);
+      renderCard();
+      renderRailTabs();
+      setTimeout(() => {
+        if (quickAddInput) {
+          quickAddInput.focus();
+          quickAddInput.select();
+        }
+      }, 40);
     });
   }
 }

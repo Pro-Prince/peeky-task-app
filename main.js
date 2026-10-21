@@ -2,6 +2,8 @@ const { app, BrowserWindow, ipcMain, screen, Tray, Menu, globalShortcut, shell, 
 const path = require("path");
 const fs = require("fs");
 
+app.commandLine.appendSwitch("disable-features", "CalculateNativeWinOcclusion");
+
 let deckWindow = null;
 let managerWindow = null;
 let onboardingWindow = null;
@@ -43,8 +45,8 @@ function getDisplayBounds() {
 }
 
 function getTargetDeckWidth() {
-  if (isCardOpen) return 530; // 480px card + 32px tabs + margins
-  if (isDeckHovered) return 52;
+  if (isCardOpen) return 600; // 480px card + 32px tabs + 88px transparent padding so shadow never clips on either edge
+  if (isDeckHovered) return 56;
   return 24; // Rested pill sliver width flush against edge
 }
 
@@ -81,6 +83,8 @@ function createDeckWindow() {
     frame: false,
     transparent: true,
     hasShadow: false,
+    roundedCorners: false,
+    thickFrame: false,
     backgroundColor: "#00000000",
     alwaysOnTop: isAlwaysOnTop,
     skipTaskbar: true,
@@ -310,6 +314,7 @@ if (!gotTheLock) {
     createTray();
 
     try {
+      // 1. Alt+Space: Toggle task pill / summon manager
       globalShortcut.register("Alt+Space", () => {
         if (!managerWindow || !managerWindow.isVisible()) {
           createManagerWindow(true);
@@ -317,8 +322,25 @@ if (!gotTheLock) {
           managerWindow.hide();
         }
       });
+
+      // 2. Ctrl+Alt+T: Quick add task (opens floating deck and focuses quick add)
+      globalShortcut.register("CommandOrControl+Alt+T", () => {
+        isCardOpen = true;
+        repositionDeckWindow();
+        if (deckWindow) {
+          deckWindow.show();
+          deckWindow.focus();
+          deckWindow.webContents.send("open-card");
+          deckWindow.webContents.send("focus-quick-add");
+        }
+      });
+
+      // 3. Ctrl+Alt+A: All tasks manager
+      globalShortcut.register("CommandOrControl+Alt+A", () => {
+        createManagerWindow(true);
+      });
     } catch (e) {
-      console.log("Could not register Alt+Space global shortcut:", e);
+      console.log("Could not register global shortcuts:", e);
     }
 
     app.on("activate", () => {

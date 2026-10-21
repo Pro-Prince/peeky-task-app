@@ -60,11 +60,13 @@ body.edge-left .overlay-stage {
   z-index: 50;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   padding: 10px 0;
+  box-shadow: none !important;
 }
 
 body.edge-left .edge-rail {
   order: 1;
   align-items: flex-start;
+  box-shadow: none !important;
 }
 
 .rail-tabs-track {
@@ -73,10 +75,12 @@ body.edge-left .edge-rail {
   gap: 4px;
   align-items: flex-end;
   transition: gap 0.2s ease;
+  box-shadow: none !important;
 }
 
 body.edge-left .rail-tabs-track {
   align-items: flex-start;
+  box-shadow: none !important;
 }
 
 /* Individual Vertical Sticky Tab */
@@ -102,7 +106,7 @@ body.edge-left .rail-tabs-track {
   width: 8px;
   height: 28px;
   border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
   margin-right: 2px;
   transform: none !important;
 }
@@ -268,7 +272,7 @@ body.edge-left .rail-icon-btn {
 /* ================= 2. ACTIVE FLOATING NOTE CARD ================= */
 .note-card-container {
   order: 1;
-  margin-right: 10px;
+  margin-right: 18px;
   pointer-events: auto; /* card is interactive */
   transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -276,7 +280,7 @@ body.edge-left .rail-icon-btn {
 body.edge-left .note-card-container {
   order: 2;
   margin-right: 0;
-  margin-left: 10px;
+  margin-left: 18px;
 }
 
 .note-card {
@@ -284,7 +288,7 @@ body.edge-left .note-card-container {
   min-height: 400px;
   max-height: 520px;
   border-radius: 18px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 32px -4px rgba(0, 0, 0, 0.28), 0 4px 12px -2px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
   overflow: hidden;

@@ -74,18 +74,14 @@ let state = {
   sortBy: "updated", // "updated" | "title" | "color"
   edge: "right",
   theme: "dark",
-  user: {
-    signedIn: false,
-    name: "Not signed in",
-    email: "",
-    avatarInitials: "U",
-    syncedAt: null,
-  },
   trial: {
     isLicensed: true,
     licenseKey: "PRO-LIFETIME-ACCESS",
   },
 };
+
+// Undo stack for 10s task deletion
+let lastDeletedTask = null;
 
 // DOM Elements - Left Column & Search
 const notesListContainer = document.getElementById("notesListContainer");
@@ -104,7 +100,6 @@ const navArchive = document.getElementById("navArchive");
 // Sidebar Bottom Buttons
 const btnSidebarSettings = document.getElementById("btnSidebarSettings");
 const btnSidebarAbout = document.getElementById("btnSidebarAbout");
-const sidebarAccount = document.querySelector(".sidebar-account");
 
 // Editor Pane
 const noteEditorPane = document.getElementById("noteEditorPane");
@@ -163,22 +158,6 @@ const btnAboutWebsite = document.getElementById("btnAboutWebsite");
 const btnAboutSupport = document.getElementById("btnAboutSupport");
 const btnAboutCheckUpdate = document.getElementById("btnAboutCheckUpdate");
 const aboutUpdateStatus = document.getElementById("aboutUpdateStatus");
-
-// Account Modal
-const accountModal = document.getElementById("accountModal");
-const btnCloseAccount = document.getElementById("btnCloseAccount");
-const viewNotSignedIn = document.getElementById("viewNotSignedIn");
-const viewSignedIn = document.getElementById("viewSignedIn");
-const inputAccountEmail = document.getElementById("inputAccountEmail");
-const btnContinueEmail = document.getElementById("btnContinueEmail");
-const btnSocialGoogle = document.getElementById("btnSocialGoogle");
-const btnSocialMicrosoft = document.getElementById("btnSocialMicrosoft");
-const profileAvatarLarge = document.getElementById("profileAvatarLarge");
-const profileName = document.getElementById("profileName");
-const profileEmail = document.getElementById("profileEmail");
-const syncStatusValue = document.getElementById("syncStatusValue");
-const btnSyncNow = document.getElementById("btnSyncNow");
-const btnSignOut = document.getElementById("btnSignOut");
 
 // Ensure note has structured items
 function ensureNoteItems(note) {
@@ -391,10 +370,9 @@ function renderNotesList() {
       titleRow.appendChild(badge);
     } else if (note.onDeck) {
       const pin = document.createElement("span");
+      pin.className = "deck-chip";
       pin.title = "Pinned on deck";
-      pin.style.fontSize = "11px";
-      pin.style.opacity = "0.7";
-      pin.textContent = "◨";
+      pin.textContent = "On deck";
       titleRow.appendChild(pin);
     }
 
@@ -553,6 +531,15 @@ function createManagerTaskRow(item, note) {
     </svg>
   `;
 
+  checkbox.tabIndex = 0;
+  checkbox.title = item.done ? "Mark as to-do (Space to toggle)" : "Mark as completed (Space to toggle)";
+  checkbox.addEventListener("keydown", (e) => {
+    if (e.key === " " || e.key === "Spacebar" || e.key === "Enter") {
+      e.preventDefault();
+      checkbox.click();
+    }
+  });
+
   checkbox.addEventListener("click", (e) => {
     e.stopPropagation();
     if (note.archived) {
@@ -584,6 +571,11 @@ function createManagerTaskRow(item, note) {
 
   input.addEventListener("keydown", (e) => {
     if (note.archived) return;
+    if ((e.ctrlKey || e.metaKey) && (e.key === " " || e.key === "Spacebar" || e.key === "Enter")) {
+      e.preventDefault();
+      checkbox.click();
+      return;
+    }
     if (e.key === "Enter") {
       e.preventDefault();
       const items = ensureNoteItems(note);
@@ -667,7 +659,16 @@ function createManagerTaskRow(item, note) {
       return;
     }
     const items = ensureNoteItems(note);
-    note.items = items.filter((it) => it.id !== item.id);
+    const idx = items.findIndex((it) => it.id === item.id);
+    if (idx !== -1) {
+      lastDeletedTask = {
+        noteId: note.id,
+        item: { ...items[idx] },
+        index: idx,
+        timestamp: Date.now(),
+      };
+      items.splice(idx, 1);
+    }
     note.updatedAt = Date.now();
     syncNoteBody(note);
     renderEditor();
@@ -680,38 +681,6 @@ function createManagerTaskRow(item, note) {
   row.appendChild(delBtn);
 
   return row;
-}
-
-// Update the bottom sidebar account display
-function updateSidebarAccountUI() {
-  if (!sidebarAccount) return;
-  const nameEl = sidebarAccount.querySelector(".account-name");
-  const subEl = sidebarAccount.querySelector(".account-sub");
-  const avatarEl = sidebarAccount.querySelector(".account-avatar");
-
-  if (state.user && state.user.signedIn) {
-    if (nameEl) nameEl.textContent = state.user.name || state.user.email || "Account";
-    if (subEl) subEl.textContent = "Pro · Synced";
-    if (avatarEl) {
-      avatarEl.textContent = state.user.avatarInitials || (state.user.email ? state.user.email[0].toUpperCase() : "✓");
-      avatarEl.style.background = "var(--accent-purple)";
-      avatarEl.style.color = "#FFFFFF";
-      avatarEl.style.fontWeight = "700";
-    }
-  } else {
-    if (nameEl) nameEl.textContent = "Not signed in";
-    if (subEl) subEl.textContent = "Sign in";
-    if (avatarEl) {
-      avatarEl.innerHTML = `
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-      `;
-      avatarEl.style.background = "";
-      avatarEl.style.color = "";
-    }
-  }
 }
 
 function setupListeners() {
@@ -1049,13 +1018,7 @@ function setupListeners() {
       }
 
       // Sync active theme button
-      [btnThemeDark, btnThemeLight, btnThemeSystem].filter(Boolean).forEach((btn) => {
-        if (btn.dataset.theme === (state.theme || "dark")) {
-          btn.classList.add("active");
-        } else {
-          btn.classList.remove("active");
-        }
-      });
+      applyTheme(state.theme || "dark");
     });
 
     if (btnCloseSettings) {
@@ -1089,12 +1052,10 @@ function setupListeners() {
       });
     }
 
-    // Themes in Settings
+    // Themes in Settings - active toggle
     [btnThemeDark, btnThemeLight, btnThemeSystem].filter(Boolean).forEach((btn) => {
       btn.addEventListener("click", () => {
-        [btnThemeDark, btnThemeLight, btnThemeSystem].forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        state.theme = btn.dataset.theme;
+        applyTheme(btn.dataset.theme);
         persistData();
       });
     });
@@ -1197,167 +1158,45 @@ function setupListeners() {
     }
   }
 
-  // ================= ACCOUNT & SIGN IN MODAL =================
-  if (sidebarAccount && accountModal) {
-    sidebarAccount.addEventListener("click", () => {
-      accountModal.style.display = "flex";
-      const isUserSignedIn = state.user && state.user.signedIn;
-
-      if (isUserSignedIn) {
-        viewNotSignedIn.style.display = "none";
-        viewSignedIn.style.display = "flex";
-        profileName.textContent = state.user.name || "User";
-        profileEmail.textContent = state.user.email || "user@example.com";
-        profileAvatarLarge.textContent = state.user.avatarInitials || "U";
-        syncStatusValue.textContent = state.user.syncedAt ? `Up to date · ${formatRelativeTime(state.user.syncedAt)}` : "Up to date · just now";
-      } else {
-        viewNotSignedIn.style.display = "flex";
-        viewSignedIn.style.display = "none";
+  // Buy Peeky Task
+  if (btnBuyNotes) {
+    btnBuyNotes.addEventListener("click", () => {
+      if (window.peekyApi && window.peekyApi.openExternal) {
+        window.peekyApi.openExternal("https://peekytask.in/buy");
       }
     });
-
-    if (btnCloseAccount) {
-      btnCloseAccount.addEventListener("click", () => {
-        accountModal.style.display = "none";
-      });
-    }
-
-    // Email Sign in
-    if (btnContinueEmail) {
-      btnContinueEmail.addEventListener("click", () => {
-        const email = (inputAccountEmail.value || "").trim();
-        if (!email || !email.includes("@")) {
-          alert("Please enter a valid email address.");
-          return;
-        }
-
-        const username = email.split("@")[0];
-        const initials = username.substring(0, 2).toUpperCase();
-
-        state.user = {
-          signedIn: true,
-          email: email,
-          name: username,
-          avatarInitials: initials,
-          syncedAt: Date.now(),
-        };
-
-        updateSidebarAccountUI();
-        viewNotSignedIn.style.display = "none";
-        viewSignedIn.style.display = "flex";
-        profileName.textContent = state.user.name;
-        profileEmail.textContent = state.user.email;
-        profileAvatarLarge.textContent = state.user.avatarInitials;
-        syncStatusValue.textContent = "Up to date · just now";
-        persistData();
-      });
-    }
-
-    // Quick Google sign in
-    if (btnSocialGoogle) {
-      btnSocialGoogle.addEventListener("click", () => {
-        state.user = {
-          signedIn: true,
-          email: "alex@gmail.com",
-          name: "Alex",
-          avatarInitials: "A",
-          syncedAt: Date.now(),
-        };
-        updateSidebarAccountUI();
-        viewNotSignedIn.style.display = "none";
-        viewSignedIn.style.display = "flex";
-        profileName.textContent = state.user.name;
-        profileEmail.textContent = state.user.email;
-        profileAvatarLarge.textContent = state.user.avatarInitials;
-        syncStatusValue.textContent = "Up to date · just now";
-        persistData();
-      });
-    }
-
-    // Quick Microsoft sign in
-    if (btnSocialMicrosoft) {
-      btnSocialMicrosoft.addEventListener("click", () => {
-        state.user = {
-          signedIn: true,
-          email: "prince@outlook.com",
-          name: "Prince",
-          avatarInitials: "P",
-          syncedAt: Date.now(),
-        };
-        updateSidebarAccountUI();
-        viewNotSignedIn.style.display = "none";
-        viewSignedIn.style.display = "flex";
-        profileName.textContent = state.user.name;
-        profileEmail.textContent = state.user.email;
-        profileAvatarLarge.textContent = state.user.avatarInitials;
-        syncStatusValue.textContent = "Up to date · just now";
-        persistData();
-      });
-    }
-
-    // Sync Now button
-    if (btnSyncNow) {
-      btnSyncNow.addEventListener("click", () => {
-        syncStatusValue.textContent = "Syncing tasks...";
-        btnSyncNow.disabled = true;
-        setTimeout(() => {
-          state.user.syncedAt = Date.now();
-          syncStatusValue.textContent = "Up to date · just now";
-          btnSyncNow.disabled = false;
-          persistData();
-        }, 500);
-      });
-    }
-
-    // Sign Out button
-    if (btnSignOut) {
-      btnSignOut.addEventListener("click", () => {
-        state.user = {
-          signedIn: false,
-          name: "Not signed in",
-          email: "",
-          avatarInitials: "U",
-          syncedAt: null,
-        };
-        updateSidebarAccountUI();
-        viewSignedIn.style.display = "none";
-        viewNotSignedIn.style.display = "flex";
-        persistData();
-      });
-    }
   }
 
-  // Buy Peeky Task
-  btnBuyNotes.addEventListener("click", () => {
-    if (window.peekyApi && window.peekyApi.openExternal) {
-      window.peekyApi.openExternal("https://peekytask.in/buy");
-    }
-  });
-
   // Enter License Key
-  btnEnterKey.addEventListener("click", () => {
-    licenseModal.style.display = "flex";
-    inputLicenseKey.focus();
-  });
+  if (btnEnterKey) {
+    btnEnterKey.addEventListener("click", () => {
+      licenseModal.style.display = "flex";
+      inputLicenseKey.focus();
+    });
+  }
 
-  btnCancelLicense.addEventListener("click", () => {
-    licenseModal.style.display = "none";
-  });
-
-  btnConfirmLicense.addEventListener("click", () => {
-    const key = inputLicenseKey.value.trim();
-    if (key.length >= 8) {
-      state.trial.isLicensed = true;
-      state.trial.licenseKey = key;
-      persistData();
-      alert("License activated successfully! Thank you for purchasing Peeky Task.");
+  if (btnCancelLicense) {
+    btnCancelLicense.addEventListener("click", () => {
       licenseModal.style.display = "none";
-      const banner = document.getElementById("trialBanner");
-      if (banner) banner.style.display = "none";
-    } else {
-      alert("Please enter a valid license key.");
-    }
-  });
+    });
+  }
+
+  if (btnConfirmLicense) {
+    btnConfirmLicense.addEventListener("click", () => {
+      const key = inputLicenseKey.value.trim();
+      if (key.length >= 8) {
+        state.trial.isLicensed = true;
+        state.trial.licenseKey = key;
+        persistData();
+        alert("License activated successfully! Thank you for purchasing Peeky Task.");
+        licenseModal.style.display = "none";
+        const banner = document.getElementById("trialBanner");
+        if (banner) banner.style.display = "none";
+      } else {
+        alert("Please enter a valid license key.");
+      }
+    });
+  }
 
   // Real-time synchronization with Deck Window
   if (window.peekyApi && window.peekyApi.onDataUpdated) {
@@ -1370,13 +1209,103 @@ function setupListeners() {
     });
   }
 
-  // Close modals on Esc key
+  // Keyboard Shortcuts inside Manager matching website
   document.addEventListener("keydown", (e) => {
+    // 1. Esc: close any open modal
     if (e.key === "Escape") {
-      if (settingsModal && settingsModal.style.display === "flex") settingsModal.style.display = "none";
-      if (aboutModal && aboutModal.style.display === "flex") aboutModal.style.display = "none";
-      if (accountModal && accountModal.style.display === "flex") accountModal.style.display = "none";
-      if (licenseModal && licenseModal.style.display === "flex") licenseModal.style.display = "none";
+      if (settingsModal && settingsModal.style.display === "flex") {
+        settingsModal.style.display = "none";
+        return;
+      }
+      if (aboutModal && aboutModal.style.display === "flex") {
+        aboutModal.style.display = "none";
+        return;
+      }
+      if (licenseModal && licenseModal.style.display === "flex") {
+        licenseModal.style.display = "none";
+        return;
+      }
+    }
+
+    const isTyping = e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA");
+
+    // 2. Ctrl+. : Cycle task list pastel color
+    if ((e.ctrlKey || e.metaKey) && e.key === ".") {
+      e.preventDefault();
+      const active = getActiveNote();
+      if (!active || active.archived) return;
+      const currentIdx = COLOR_KEYS.indexOf(active.color);
+      const nextIdx = (currentIdx + 1) % COLOR_KEYS.length;
+      active.color = COLOR_KEYS[nextIdx];
+      active.updatedAt = Date.now();
+      renderEditor();
+      renderNotesList();
+      persistData();
+      return;
+    }
+
+    // 3. Ctrl+D : Toggle On the Deck pin
+    if ((e.ctrlKey || e.metaKey) && (e.key === "d" || e.key === "D")) {
+      e.preventDefault();
+      const active = getActiveNote();
+      if (!active || active.archived) return;
+      active.onDeck = !active.onDeck;
+      renderEditor();
+      renderNotesList();
+      persistData();
+      return;
+    }
+
+    // 4. Ctrl+Z : Undo last deleted task within 10 seconds
+    if ((e.ctrlKey || e.metaKey) && (e.key === "z" || e.key === "Z")) {
+      if (lastDeletedTask && (Date.now() - lastDeletedTask.timestamp < 10000)) {
+        e.preventDefault();
+        const active = getActiveNote();
+        if (active && active.id === lastDeletedTask.noteId) {
+          const items = ensureNoteItems(active);
+          items.splice(Math.min(lastDeletedTask.index, items.length), 0, lastDeletedTask.item);
+          lastDeletedTask = null;
+          active.updatedAt = Date.now();
+          syncNoteBody(active);
+          renderEditor();
+          renderNotesList();
+          persistData();
+        }
+      }
+    }
+  });
+}
+
+function applyTheme(theme) {
+  state.theme = theme || "dark";
+  let isLight = false;
+  if (state.theme === "light") {
+    isLight = true;
+  } else if (state.theme === "system") {
+    isLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+  } else {
+    isLight = false; // dark
+  }
+
+  if (isLight) {
+    document.body.classList.add("theme-light");
+  } else {
+    document.body.classList.remove("theme-light");
+  }
+
+  [btnThemeDark, btnThemeLight, btnThemeSystem].filter(Boolean).forEach((btn) => {
+    if (btn.dataset.theme === state.theme) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
+}
+
+if (window.matchMedia) {
+  window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => {
+    if (state.theme === "system") {
+      applyTheme("system");
     }
   });
 }
@@ -1394,7 +1323,7 @@ async function init() {
   }
 
   setupListeners();
-  updateSidebarAccountUI();
+  applyTheme(state.theme || "dark");
   renderNotesList();
   renderEditor();
 

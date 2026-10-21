@@ -31,4 +31,5 @@ contextBridge.exposeInMainWorld("peekyApi", {
   onAlwaysOnTopChanged: (callback) => ipcRenderer.on("always-on-top-changed", (event, val) => callback(val)),
   onDataUpdated: (callback) => ipcRenderer.on("data-updated", (event, data) => callback(data)),
   onOpenCard: (callback) => ipcRenderer.on("open-card", () => callback()),
+  onFocusQuickAdd: (callback) => ipcRenderer.on("focus-quick-add", () => callback()),
 });
