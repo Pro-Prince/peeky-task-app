@@ -74,9 +74,11 @@ let state = {
   sortBy: "updated", // "updated" | "title" | "color"
   edge: "right",
   theme: "dark",
+  hideOverFullscreen: true,
   trial: {
-    isLicensed: true,
-    licenseKey: "PRO-LIFETIME-ACCESS",
+    isLicensed: false,
+    trialStartedAt: Date.now(),
+    licenseKey: "",
   },
 };
 
@@ -129,7 +131,10 @@ const archivedNoticeBanner = document.getElementById("archivedNoticeBanner");
 const btnRestoreArchived = document.getElementById("btnRestoreArchived");
 const btnPermanentDelete = document.getElementById("btnPermanentDelete");
 
-// Trial / License Modal
+// Trial Banner & License Modal
+const trialBanner = document.getElementById("trialBanner");
+const trialBannerHeadline = document.getElementById("trialBannerHeadline");
+const trialBannerSubtext = document.getElementById("trialBannerSubtext");
 const btnEnterKey = document.getElementById("btnEnterKey");
 const btnBuyNotes = document.getElementById("btnBuyNotes");
 const licenseModal = document.getElementById("licenseModal");
@@ -145,19 +150,133 @@ const btnEdgeLeft = document.getElementById("btnEdgeLeft");
 const btnThemeDark = document.getElementById("btnThemeDark");
 const btnThemeLight = document.getElementById("btnThemeLight");
 const btnThemeSystem = document.getElementById("btnThemeSystem");
+const chkHideFullscreen = document.getElementById("chkHideFullscreen");
 const chkStartup = document.getElementById("chkStartup");
+const dataPathInput = document.getElementById("dataPathInput");
+const btnCopyDataPath = document.getElementById("btnCopyDataPath");
 const btnOpenDataFolder = document.getElementById("btnOpenDataFolder");
 const btnExportBackup = document.getElementById("btnExportBackup");
 const btnImportBackup = document.getElementById("btnImportBackup");
+const settingsLicenseCard = document.getElementById("settingsLicenseCard");
+const settingsLicenseIcon = document.getElementById("settingsLicenseIcon");
+const settingsLicenseTitle = document.getElementById("settingsLicenseTitle");
+const settingsLicenseSub = document.getElementById("settingsLicenseSub");
+const settingsLicenseActions = document.getElementById("settingsLicenseActions");
+const btnSettingsEnterKey = document.getElementById("btnSettingsEnterKey");
+const btnSettingsBuy = document.getElementById("btnSettingsBuy");
 
 // About Modal
 const aboutModal = document.getElementById("aboutModal");
 const btnCloseAbout = document.getElementById("btnCloseAbout");
 const btnAboutOnboarding = document.getElementById("btnAboutOnboarding");
 const btnAboutWebsite = document.getElementById("btnAboutWebsite");
+const btnAboutPrivacy = document.getElementById("btnAboutPrivacy");
 const btnAboutSupport = document.getElementById("btnAboutSupport");
 const btnAboutCheckUpdate = document.getElementById("btnAboutCheckUpdate");
 const aboutUpdateStatus = document.getElementById("aboutUpdateStatus");
+
+// Dynamic 7-Day Trial Calculation
+function getTrialStatus() {
+  const trial = state.trial || {};
+  const isLicensed = !!trial.isLicensed;
+  if (isLicensed) {
+    return {
+      isLicensed: true,
+      daysRemaining: 7,
+      isExpired: false,
+      endDateStr: "",
+      licenseKey: trial.licenseKey || "Active",
+    };
+  }
+
+  const now = Date.now();
+  const trialStartedAt = Number(trial.trialStartedAt) || now;
+  const trialDurationMs = 7 * 24 * 60 * 60 * 1000;
+  const trialEndsAt = trialStartedAt + trialDurationMs;
+  const msRemaining = trialEndsAt - now;
+  const daysRemaining = Math.max(0, Math.ceil(msRemaining / (24 * 60 * 60 * 1000)));
+  const isExpired = daysRemaining <= 0;
+
+  // Format date like Peeky Notes: "Tuesday 28 October"
+  const endDate = new Date(trialEndsAt);
+  const options = { weekday: "long", day: "numeric", month: "long" };
+  const endDateStr = endDate.toLocaleDateString("en-US", options);
+
+  return {
+    isLicensed: false,
+    daysRemaining,
+    isExpired,
+    endDateStr,
+    trialEndsAt,
+    licenseKey: trial.licenseKey || "",
+  };
+}
+
+function isEditingLocked() {
+  const s = getTrialStatus();
+  return s.isExpired && !s.isLicensed;
+}
+
+function updateTrialUI() {
+  const status = getTrialStatus();
+
+  if (status.isLicensed) {
+    if (trialBanner) trialBanner.style.display = "none";
+    if (settingsLicenseCard) {
+      settingsLicenseCard.className = "license-status-card";
+      if (settingsLicenseIcon) settingsLicenseIcon.textContent = "✓";
+      if (settingsLicenseTitle) settingsLicenseTitle.textContent = "Pro License Active";
+      if (settingsLicenseSub) {
+        const masked = status.licenseKey && status.licenseKey.length >= 8
+          ? status.licenseKey.slice(0, 4) + "-••••-••••"
+          : "Active";
+        settingsLicenseSub.textContent = `Lifetime unlock · Key: ${masked} · All features enabled`;
+      }
+      if (settingsLicenseActions) settingsLicenseActions.style.display = "none";
+    }
+  } else if (!status.isExpired) {
+    if (trialBanner) {
+      trialBanner.style.display = "flex";
+      trialBanner.classList.remove("expired");
+    }
+    if (trialBannerHeadline) {
+      trialBannerHeadline.textContent = status.daysRemaining === 1
+        ? "1 day left in your free trial"
+        : `${status.daysRemaining} days left in your free trial`;
+    }
+    if (trialBannerSubtext) {
+      trialBannerSubtext.textContent = `Everything is unlocked until ${status.endDateStr}. After that your tasks stay readable and exportable, but editing is locked.`;
+    }
+
+    if (settingsLicenseCard) {
+      settingsLicenseCard.className = "license-status-card trial";
+      if (settingsLicenseIcon) settingsLicenseIcon.textContent = "⏱";
+      if (settingsLicenseTitle) settingsLicenseTitle.textContent = `Free Trial Active (${status.daysRemaining} days remaining)`;
+      if (settingsLicenseSub) settingsLicenseSub.textContent = `Full access until ${status.endDateStr}`;
+      if (settingsLicenseActions) settingsLicenseActions.style.display = "flex";
+    }
+  } else {
+    // Expired
+    if (trialBanner) {
+      trialBanner.style.display = "flex";
+      trialBanner.classList.add("expired");
+    }
+    if (trialBannerHeadline) {
+      trialBannerHeadline.textContent = "Your trial has ended";
+    }
+    if (trialBannerSubtext) {
+      trialBannerSubtext.textContent = "Your tasks are safe and you can still read, search and export them. Buy a licence to start writing again.";
+    }
+
+    if (settingsLicenseCard) {
+      settingsLicenseCard.className = "license-status-card expired";
+      if (settingsLicenseIcon) settingsLicenseIcon.textContent = "!";
+      if (settingsLicenseTitle) settingsLicenseTitle.textContent = "Trial Expired";
+      if (settingsLicenseSub) settingsLicenseSub.textContent = "Editing is locked. Read and export are unlocked.";
+      if (settingsLicenseActions) settingsLicenseActions.style.display = "flex";
+    }
+  }
+}
 
 // Ensure note has structured items
 function ensureNoteItems(note) {
@@ -725,6 +844,12 @@ function setupListeners() {
 
   // Add new task list
   btnNewNotePrimary.addEventListener("click", () => {
+    if (isEditingLocked()) {
+      alert("Your 7-day free trial has ended. Editing is locked. Buy a license or enter your key to create and edit tasks.");
+      licenseModal.style.display = "flex";
+      inputLicenseKey.focus();
+      return;
+    }
     const usedColors = state.notes.map((n) => n.color);
     const unused = COLOR_KEYS.find((c) => !usedColors.includes(c)) || COLOR_KEYS[state.notes.length % COLOR_KEYS.length];
 
@@ -775,6 +900,12 @@ function setupListeners() {
   // Manager Quick Add Task
   function handleManagerQuickAdd() {
     if (!managerQuickAddInput) return;
+    if (isEditingLocked()) {
+      alert("Your 7-day free trial has ended. Editing is locked. Buy a license or enter your key to create and edit tasks.");
+      licenseModal.style.display = "flex";
+      inputLicenseKey.focus();
+      return;
+    }
     const text = managerQuickAddInput.value.trim();
     if (!text) return;
 
@@ -1062,10 +1193,34 @@ function setupListeners() {
 
     // Startup switch
     if (chkStartup) {
+      if (window.peekyApi && window.peekyApi.getLoginItemSettings) {
+        window.peekyApi.getLoginItemSettings().then((openAtLogin) => {
+          chkStartup.checked = !!openAtLogin;
+        });
+      }
       chkStartup.addEventListener("change", () => {
         if (window.peekyApi && window.peekyApi.setLoginItemSettings) {
           window.peekyApi.setLoginItemSettings(chkStartup.checked);
         }
+      });
+    }
+
+    // Hide over full-screen apps
+    if (chkHideFullscreen) {
+      chkHideFullscreen.checked = state.hideOverFullscreen !== false;
+      chkHideFullscreen.addEventListener("change", () => {
+        state.hideOverFullscreen = chkHideFullscreen.checked;
+        persistData();
+      });
+    }
+
+    // Copy Data Path
+    if (btnCopyDataPath && dataPathInput) {
+      btnCopyDataPath.addEventListener("click", () => {
+        navigator.clipboard.writeText(dataPathInput.value).then(() => {
+          btnCopyDataPath.textContent = "Copied! ✓";
+          setTimeout(() => { btnCopyDataPath.textContent = "Copy path"; }, 2000);
+        });
       });
     }
 
@@ -1106,6 +1261,23 @@ function setupListeners() {
         }
       });
     }
+
+    // Settings License Actions
+    if (btnSettingsEnterKey) {
+      btnSettingsEnterKey.addEventListener("click", () => {
+        settingsModal.style.display = "none";
+        licenseModal.style.display = "flex";
+        inputLicenseKey.focus();
+      });
+    }
+
+    if (btnSettingsBuy) {
+      btnSettingsBuy.addEventListener("click", () => {
+        if (window.peekyApi && window.peekyApi.openExternal) {
+          window.peekyApi.openExternal("https://peekytask.in/#buy");
+        }
+      });
+    }
   }
 
   // ================= ABOUT MODAL =================
@@ -1138,6 +1310,14 @@ function setupListeners() {
       });
     }
 
+    if (btnAboutPrivacy) {
+      btnAboutPrivacy.addEventListener("click", () => {
+        if (window.peekyApi && window.peekyApi.openExternal) {
+          window.peekyApi.openExternal("https://peekytask.in/#privacy");
+        }
+      });
+    }
+
     if (btnAboutSupport) {
       btnAboutSupport.addEventListener("click", () => {
         if (window.peekyApi && window.peekyApi.openExternal) {
@@ -1162,7 +1342,7 @@ function setupListeners() {
   if (btnBuyNotes) {
     btnBuyNotes.addEventListener("click", () => {
       if (window.peekyApi && window.peekyApi.openExternal) {
-        window.peekyApi.openExternal("https://peekytask.in/buy");
+        window.peekyApi.openExternal("https://peekytask.in/#buy");
       }
     });
   }
@@ -1184,14 +1364,13 @@ function setupListeners() {
   if (btnConfirmLicense) {
     btnConfirmLicense.addEventListener("click", () => {
       const key = inputLicenseKey.value.trim();
-      if (key.length >= 8) {
+      if (key.length >= 6) {
         state.trial.isLicensed = true;
         state.trial.licenseKey = key;
         persistData();
-        alert("License activated successfully! Thank you for purchasing Peeky Task.");
+        updateTrialUI();
+        alert("License activated successfully! Full lifetime access unlocked.");
         licenseModal.style.display = "none";
-        const banner = document.getElementById("trialBanner");
-        if (banner) banner.style.display = "none";
       } else {
         alert("Please enter a valid license key.");
       }
@@ -1322,15 +1501,38 @@ async function init() {
     }
   }
 
+  // Ensure valid trial state
+  if (!state.trial || typeof state.trial !== "object") {
+    state.trial = {
+      isLicensed: false,
+      trialStartedAt: Date.now(),
+      licenseKey: "",
+    };
+  } else if (!state.trial.trialStartedAt && !state.trial.isLicensed) {
+    state.trial.trialStartedAt = Date.now();
+  }
+
+  // If previous trial had dummy test string 'nsnnswmsnwmnsmwns', reset to active trial
+  if (state.trial.licenseKey === "nsnnswmsnwmnsmwns") {
+    state.trial.isLicensed = false;
+    state.trial.trialStartedAt = Date.now();
+    state.trial.licenseKey = "";
+    persistData();
+  }
+
+  // Fetch actual data file path from main process if available
+  if (window.peekyApi && window.peekyApi.getDataPath && dataPathInput) {
+    try {
+      const p = await window.peekyApi.getDataPath();
+      if (p) dataPathInput.value = p;
+    } catch (err) {}
+  }
+
   setupListeners();
   applyTheme(state.theme || "dark");
   renderNotesList();
   renderEditor();
-
-  if (state.trial && state.trial.isLicensed) {
-    const banner = document.getElementById("trialBanner");
-    if (banner) banner.style.display = "none";
-  }
+  updateTrialUI();
 }
 
 document.addEventListener("DOMContentLoaded", init);

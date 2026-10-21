@@ -45,7 +45,7 @@ function getDisplayBounds() {
 }
 
 function getTargetDeckWidth() {
-  if (isCardOpen) return 600; // 480px card + 32px tabs + 88px transparent padding so shadow never clips on either edge
+  if (isCardOpen) return 390; // 300px compact card + 28px rail + 18px gap + 44px soft shadow padding
   if (isDeckHovered) return 56;
   return 24; // Rested pill sliver width flush against edge
 }
@@ -476,6 +476,10 @@ ipcMain.handle("set-login-item-settings", (event, openAtLogin) => {
   } catch (e) {
     return false;
   }
+});
+
+ipcMain.handle("get-data-path", () => {
+  return dataFilePath;
 });
 
 ipcMain.handle("export-tasks-file", async (event, data) => {

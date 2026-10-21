@@ -1281,6 +1281,32 @@ html, body {
   margin-top: 4px;
 }
 
+.license-status-card.trial {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.license-status-card.trial .license-status-icon {
+  background: #D97706;
+}
+
+.license-status-card.trial .license-status-title {
+  color: #F59E0B;
+}
+
+.license-status-card.expired {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.license-status-card.expired .license-status-icon {
+  background: #DC2626;
+}
+
+.license-status-card.expired .license-status-title {
+  color: #EF4444;
+}
+
 .license-status-icon {
   width: 24px;
   height: 24px;
@@ -1295,6 +1321,16 @@ html, body {
   flex-shrink: 0;
 }
 
+.license-status-info {
+  flex: 1;
+}
+
+.license-status-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .license-status-title {
   font-size: 13px;
   font-weight: 600;
@@ -1304,6 +1340,112 @@ html, body {
 .license-status-sub {
   font-size: 11px;
   color: var(--text-muted);
+}
+
+/* Settings Path Row */
+.settings-path-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.settings-path-input {
+  flex: 1;
+  background: var(--input-bg);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-dim);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 11px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  outline: none;
+  user-select: all;
+}
+
+.settings-btn-inline {
+  background: var(--input-bg);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.settings-btn-inline:hover {
+  background: var(--item-hover);
+  border-color: var(--border-strong);
+}
+
+.settings-btn-inline.primary {
+  background: var(--accent-purple);
+  border-color: var(--accent-purple);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.settings-btn-inline.primary:hover {
+  background: var(--accent-purple-hover);
+}
+
+/* Shortcuts Reference Table */
+.shortcuts-table {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-top: 6px;
+}
+
+.shortcut-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.shortcut-row:last-child {
+  border-bottom: none;
+}
+
+.shortcut-desc {
+  color: var(--text-muted);
+}
+
+.shortcut-keys {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.shortcut-keys kbd {
+  background: var(--bg-app);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-main);
+  font-family: inherit;
+}
+
+/* Expired Trial Banner */
+.trial-banner.expired {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.trial-banner.expired .clock-icon-wrapper {
+  color: #EF4444;
 }
 
 /* About Modal Elements */

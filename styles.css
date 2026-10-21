@@ -284,10 +284,10 @@ body.edge-left .note-card-container {
 }
 
 .note-card {
-  width: 480px;
-  min-height: 400px;
-  max-height: 520px;
-  border-radius: 18px;
+  width: 300px;
+  min-height: 200px;
+  max-height: 380px;
+  border-radius: 14px;
   box-shadow: 0 10px 32px -4px rgba(0, 0, 0, 0.28), 0 4px 12px -2px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
@@ -334,7 +334,7 @@ body.edge-left .note-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px 8px 18px;
+  padding: 10px 14px 6px 14px;
 }
 
 .card-title-input {
@@ -342,7 +342,7 @@ body.edge-left .note-card {
   background: transparent;
   border: none;
   outline: none;
-  font-size: 17px;
+  font-size: 14.5px;
   font-weight: 700;
   color: var(--note-ink);
   letter-spacing: -0.01em;
@@ -356,23 +356,23 @@ body.edge-left .note-card {
 .card-header-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .card-save-status {
-  font-size: 11.5px;
+  font-size: 10.5px;
   color: rgba(42, 52, 66, 0.6);
-  margin-right: 8px;
+  margin-right: 6px;
 }
 
 .task-progress-pill {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 10px;
+  padding: 1.5px 6px;
+  border-radius: 8px;
   background: rgba(42, 52, 66, 0.12);
   color: var(--note-ink);
-  margin-right: 6px;
+  margin-right: 4px;
   transition: all 0.2s ease;
 }
 
@@ -380,10 +380,10 @@ body.edge-left .note-card {
   background: transparent;
   border: none;
   color: rgba(42, 52, 66, 0.5);
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -399,13 +399,13 @@ body.edge-left .note-card {
 .card-header-divider {
   height: 1px;
   background: rgba(42, 52, 66, 0.12);
-  margin: 0 18px;
+  margin: 0 14px;
 }
 
 /* Subtle 2.5px To-Do Progress Bar */
 .card-progress-bar-track {
   height: 2.5px;
-  margin: 0 18px;
+  margin: 0 14px;
   background: rgba(42, 52, 66, 0.08);
   border-radius: 2px;
   overflow: hidden;
@@ -423,20 +423,20 @@ body.edge-left .note-card {
 .quick-add-task-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 18px 8px 18px;
+  gap: 8px;
+  padding: 6px 14px 6px 14px;
   border-bottom: 1px solid rgba(42, 52, 66, 0.08);
   background: rgba(0, 0, 0, 0.02);
 }
 
 .quick-add-icon-btn {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   border: 1.5px dashed rgba(42, 52, 66, 0.35);
   background: transparent;
   color: var(--note-ink);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -458,7 +458,7 @@ body.edge-left .note-card {
   border: none;
   background: transparent;
   outline: none;
-  font-size: 14.5px;
+  font-size: 12.5px;
   font-family: inherit;
   font-weight: 500;
   color: var(--note-ink);
@@ -471,11 +471,11 @@ body.edge-left .note-card {
 /* Scrollable Task Items Container */
 .task-items-scroll {
   flex: 1;
-  min-height: 220px;
-  max-height: 360px;
+  min-height: 110px;
+  max-height: 250px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 8px 14px 12px 14px;
+  padding: 6px 10px 10px 10px;
   display: flex;
   flex-direction: column;
 }
@@ -500,16 +500,16 @@ body.edge-left .note-card {
 .tasks-group {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 /* Individual Task Item Row */
 .task-item-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 8px;
-  border-radius: 8px;
+  gap: 8px;
+  padding: 3px 6px;
+  border-radius: 6px;
   transition: background-color 0.15s ease;
   position: relative;
 }
@@ -520,10 +520,10 @@ body.edge-left .note-card {
 
 /* Task Checkbox */
 .task-checkbox {
-  width: 19px;
-  height: 19px;
-  border-radius: 6px;
-  border: 1.8px solid rgba(42, 52, 66, 0.45);
+  width: 15px;
+  height: 15px;
+  border-radius: 4.5px;
+  border: 1.5px solid rgba(42, 52, 66, 0.45);
   background: rgba(255, 255, 255, 0.4);
   cursor: pointer;
   display: flex;
@@ -561,12 +561,12 @@ body.edge-left .note-card {
   border: none;
   background: transparent;
   outline: none;
-  font-size: 14.5px;
+  font-size: 12.5px;
   font-family: inherit;
   font-weight: 500;
   color: var(--note-ink);
-  line-height: 1.4;
-  padding: 2px 0;
+  line-height: 1.35;
+  padding: 1px 0;
   transition: color 0.15s ease, opacity 0.15s ease;
 }
 
@@ -578,14 +578,14 @@ body.edge-left .note-card {
 
 /* Task Row Delete Button (shown on hover) */
 .task-row-del-btn {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 4px;
   border: none;
   background: transparent;
   color: rgba(42, 52, 66, 0.4);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -649,16 +649,16 @@ body.edge-left .note-card {
 
 /* Empty Tasks Placeholder */
 .empty-tasks-placeholder {
-  padding: 30px 16px;
+  padding: 20px 12px;
   text-align: center;
-  font-size: 13.5px;
+  font-size: 12px;
   color: rgba(42, 52, 66, 0.5);
   font-style: italic;
 }
 
 /* Card Footer Toolbar */
 .card-footer-toolbar {
-  padding: 10px 18px 14px 18px;
+  padding: 6px 14px 10px 14px;
   border-top: 1px solid rgba(42, 52, 66, 0.1);
   display: flex;
   flex-direction: column;
@@ -673,12 +673,12 @@ body.edge-left .note-card {
 .card-color-swatches {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .swatch-dot {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   cursor: pointer;
   border: 1px solid rgba(0, 0, 0, 0.15);
@@ -697,13 +697,13 @@ body.edge-left .note-card {
 .card-text-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 
 .card-action-text-btn {
   background: transparent;
   border: none;
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 500;
   cursor: pointer;
   color: #2A3442;

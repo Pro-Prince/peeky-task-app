@@ -22,6 +22,7 @@ contextBridge.exposeInMainWorld("peekyApi", {
   importBackup: () => ipcRenderer.invoke("import-tasks-file"),
   getLoginItemSettings: () => ipcRenderer.invoke("get-login-item-settings"),
   setLoginItemSettings: (val) => ipcRenderer.invoke("set-login-item-settings", val),
+  getDataPath: () => ipcRenderer.invoke("get-data-path"),
 
   // External URLs
   openExternal: (url) => ipcRenderer.send("open-external", url),

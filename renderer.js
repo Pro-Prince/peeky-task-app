@@ -113,6 +113,17 @@ const btnAddNote = document.getElementById("btnAddNote");
 const btnOpenManager = document.getElementById("btnOpenManager");
 const btnFlipEdge = document.getElementById("btnFlipEdge");
 
+// Dynamic Trial Verification
+function isEditingLocked() {
+  const trial = state.trial || {};
+  if (trial.isLicensed) return false;
+  const now = Date.now();
+  const trialStartedAt = Number(trial.trialStartedAt) || now;
+  const trialDurationMs = 7 * 24 * 60 * 60 * 1000;
+  const daysRemaining = Math.max(0, Math.ceil((trialStartedAt + trialDurationMs - now) / (24 * 60 * 60 * 1000)));
+  return daysRemaining <= 0;
+}
+
 // Ensure note has structured items array
 function ensureNoteItems(note) {
   if (!note) return [];
@@ -536,6 +547,11 @@ function setupListeners() {
   // Quick Add Task Input
   function handleQuickAdd() {
     if (!quickAddInput) return;
+    if (isEditingLocked()) {
+      alert("Your 7-day free trial has ended. Editing is locked. Buy a license or enter your key in Manager to unlock.");
+      if (window.peekyApi && window.peekyApi.openManager) window.peekyApi.openManager();
+      return;
+    }
     const text = quickAddInput.value.trim();
     if (!text) return;
 
@@ -662,6 +678,11 @@ function setupListeners() {
 
   // Add Task List Button (+) matching Screenshot 5
   btnAddNote.addEventListener("click", () => {
+    if (isEditingLocked()) {
+      alert("Your 7-day free trial has ended. Editing is locked. Buy a license or enter your key in Manager to unlock.");
+      if (window.peekyApi && window.peekyApi.openManager) window.peekyApi.openManager();
+      return;
+    }
     const newNote = {
       id: "task_" + Date.now(),
       title: "New List",
