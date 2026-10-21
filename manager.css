@@ -537,24 +537,233 @@ html, body {
   color: var(--note-ink-muted);
 }
 
-.editor-body-wrapper {
-  flex: 1;
-  min-height: 0;
-  margin-bottom: 12px;
+/* Manager To-Do Quick Add Bar */
+.quick-add-task-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  margin-bottom: 10px;
+  flex-shrink: 0;
 }
 
-.editor-body-textarea {
-  width: 100%;
-  height: 100%;
+.quick-add-icon-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(42, 52, 66, 0.4);
+  background: transparent;
+  color: var(--note-ink);
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.quick-add-icon-btn:hover {
+  border-style: solid;
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
+}
+
+.quick-add-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--note-ink);
+}
+
+.quick-add-input::placeholder {
+  color: rgba(42, 52, 66, 0.45);
+}
+
+/* Manager Scrollable Task Items */
+.manager-tasks-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.manager-tasks-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.manager-tasks-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.manager-tasks-scroll::-webkit-scrollbar-thumb {
+  background: rgba(42, 52, 66, 0.15);
+  border-radius: 4px;
+}
+
+.tasks-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Individual Task Item Row */
+.task-item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+  position: relative;
+}
+
+.task-item-row:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.task-checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.8px solid rgba(42, 52, 66, 0.45);
+  background: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.task-checkbox:hover {
+  border-color: var(--note-ink);
+  background: #ffffff;
+  transform: scale(1.08);
+}
+
+.task-checkbox .check-icon {
+  display: none;
+  stroke: #ffffff;
+  stroke-width: 3.5;
+}
+
+.task-item-row.completed .task-checkbox {
+  background: #2E7D32;
+  border-color: #2E7D32;
+}
+
+.task-item-row.completed .task-checkbox .check-icon {
+  display: block;
+}
+
+.task-text-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14.5px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--note-ink);
+  line-height: 1.4;
+  padding: 2px 0;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.task-item-row.completed .task-text-input {
+  text-decoration: line-through;
+  color: rgba(42, 52, 66, 0.5);
+  font-weight: 400;
+}
+
+.task-row-del-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: rgba(42, 52, 66, 0.4);
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.task-item-row:hover .task-row-del-btn {
+  opacity: 1;
+}
+
+.task-row-del-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+/* Collapsible Completed Section */
+.completed-tasks-section {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(42, 52, 66, 0.15);
+}
+
+.completed-toggle-btn {
   background: transparent;
   border: none;
-  outline: none;
-  resize: none;
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: rgba(42, 52, 66, 0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.completed-toggle-btn:hover {
   color: var(--note-ink);
-  font-family: "Segoe Print", "Ink Free", -apple-system, sans-serif;
-  user-select: text;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.completed-chevron {
+  font-size: 11px;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-block;
+}
+
+.completed-tasks-section.collapsed .completed-chevron {
+  transform: rotate(-90deg);
+}
+
+.completed-tasks-section.collapsed .completed-tasks {
+  display: none;
+}
+
+.empty-tasks-placeholder {
+  padding: 30px 16px;
+  text-align: center;
+  font-size: 13.5px;
+  color: rgba(42, 52, 66, 0.5);
+  font-style: italic;
 }
 
 /* Bottom Formatting & Color Bar */
@@ -568,37 +777,27 @@ html, body {
   gap: 12px;
 }
 
-.format-toolbar {
+.task-actions-toolbar {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 8px;
 }
 
-.fmt-btn {
-  background: transparent;
-  border: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
-  color: rgba(42, 52, 66, 0.65);
-  font-size: 13px;
+.mgr-action-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(42, 52, 66, 0.12);
+  color: var(--note-ink);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 5px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   transition: all 0.15s ease;
 }
 
-.fmt-btn:hover {
-  background: rgba(0, 0, 0, 0.08);
-  color: var(--note-ink);
-}
-
-.fmt-divider {
-  width: 1px;
-  height: 14px;
-  background: rgba(42, 52, 66, 0.15);
-  margin: 0 4px;
+.mgr-action-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(42, 52, 66, 0.25);
 }
 
 .editor-date-stamp {

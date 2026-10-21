@@ -91,7 +91,17 @@ const navArchive = document.getElementById("navArchive");
 
 const noteEditorPane = document.getElementById("noteEditorPane");
 const editorTitleInput = document.getElementById("editorTitleInput");
-const editorBodyTextarea = document.getElementById("editorBodyTextarea");
+const managerQuickAddInput = document.getElementById("managerQuickAddInput");
+const btnManagerQuickAdd = document.getElementById("btnManagerQuickAdd");
+const managerTaskItemsContainer = document.getElementById("managerTaskItemsContainer");
+const managerActiveTasksGroup = document.getElementById("managerActiveTasksGroup");
+const managerCompletedTasksSection = document.getElementById("managerCompletedTasksSection");
+const managerCompletedTasksGroup = document.getElementById("managerCompletedTasksGroup");
+const btnManagerToggleCompleted = document.getElementById("btnManagerToggleCompleted");
+const managerCompletedTitle = document.getElementById("managerCompletedTitle");
+const btnManagerClearDone = document.getElementById("btnManagerClearDone");
+const btnManagerMarkAll = document.getElementById("btnManagerMarkAll");
+
 const editorMetaTime = document.getElementById("editorMetaTime");
 const editorDateStamp = document.getElementById("editorDateStamp");
 const deckStatusBadge = document.getElementById("deckStatusBadge");
@@ -106,6 +116,45 @@ const licenseModal = document.getElementById("licenseModal");
 const inputLicenseKey = document.getElementById("inputLicenseKey");
 const btnCancelLicense = document.getElementById("btnCancelLicense");
 const btnConfirmLicense = document.getElementById("btnConfirmLicense");
+
+// Ensure note has structured items
+function ensureNoteItems(note) {
+  if (!note) return [];
+  if (Array.isArray(note.items)) {
+    return note.items;
+  }
+  const items = [];
+  const lines = (note.body || "").split("\n");
+  lines.forEach((line, idx) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    const isChecked = trimmed.startsWith("- [x]") || trimmed.startsWith("[x]") || trimmed.startsWith("✓");
+    const isUnchecked = trimmed.startsWith("- [ ]") || trimmed.startsWith("[ ]") || trimmed.startsWith("[]");
+    let text = trimmed;
+    if (isChecked) {
+      text = trimmed.replace(/^(-\s*\[x\]|\[x\]|✓)\s*/i, "");
+    } else if (isUnchecked) {
+      text = trimmed.replace(/^(-\s*\[\s*\]|\[\s*\]|\[\])\s*/i, "");
+    } else if (trimmed.startsWith("- ") || trimmed.startsWith("• ")) {
+      text = trimmed.substring(2);
+    } else if (/^\d+\.\s/.test(trimmed)) {
+      text = trimmed.replace(/^\d+\.\s/, "");
+    }
+    items.push({
+      id: "item_" + (note.id || "n") + "_" + idx + "_" + Math.random().toString(36).substr(2, 4),
+      text: text,
+      done: isChecked,
+    });
+  });
+  note.items = items;
+  syncNoteBody(note);
+  return items;
+}
+
+function syncNoteBody(note) {
+  if (!note || !Array.isArray(note.items)) return;
+  note.body = note.items.map((it) => (it.done ? "- [x] " : "- [ ] ") + (it.text || "")).join("\n");
+}
 
 function formatRelativeTime(ts) {
   if (!ts) return "edited just now";
@@ -137,11 +186,12 @@ function getActiveNote() {
 
 function getFilteredNotes() {
   return state.notes.filter((note) => {
+    const items = ensureNoteItems(note);
+    const total = items.length;
+    const done = items.filter((it) => it.done).length;
+
     // Filter tab
     if (state.currentFilter === "completed") {
-      const lines = (note.body || "").split("\n");
-      const total = lines.filter((l) => l.trim().startsWith("- [ ]") || l.trim().startsWith("- [x]")).length;
-      const done = lines.filter((l) => l.trim().startsWith("- [x]")).length;
       return total > 0 && done === total;
     }
     if (state.currentFilter === "deck" && !note.onDeck) return false;
@@ -152,18 +202,17 @@ function getFilteredNotes() {
     if (state.searchQuery) {
       const q = state.searchQuery.toLowerCase();
       const matchTitle = (note.title || "").toLowerCase().includes(q);
-      const matchBody = (note.body || "").toLowerCase().includes(q);
+      const matchBody = items.some((it) => (it.text || "").toLowerCase().includes(q));
       return matchTitle || matchBody;
     }
     return true;
   });
 }
 
-function getTaskProgress(body) {
-  if (!body) return "";
-  const lines = body.split("\n");
-  const total = lines.filter((l) => l.trim().startsWith("- [ ]") || l.trim().startsWith("- [x]")).length;
-  const done = lines.filter((l) => l.trim().startsWith("- [x]")).length;
+function getTaskProgress(note) {
+  const items = ensureNoteItems(note);
+  const total = items.length;
+  const done = items.filter((it) => it.done).length;
   if (total > 0) {
     return `${done}/${total} done · `;
   }
@@ -192,9 +241,10 @@ function renderNotesList() {
 
     const snippet = document.createElement("div");
     snippet.className = "item-snippet";
-    const firstLine = (note.body || "").replace(/- \[[ x]\] /g, "").replace(/\n/g, " ").trim();
-    const progress = getTaskProgress(note.body);
-    snippet.textContent = `3h  ${progress}${firstLine || "No content"}`;
+    const items = ensureNoteItems(note);
+    const firstTaskText = items[0]?.text || "No tasks";
+    const progress = getTaskProgress(note);
+    snippet.textContent = `${progress}${firstTaskText}`;
 
     info.appendChild(title);
     info.appendChild(snippet);
@@ -217,7 +267,7 @@ function renderEditor() {
   const activeNote = getActiveNote();
   if (!activeNote) {
     editorTitleInput.value = "";
-    editorBodyTextarea.value = "";
+    if (managerActiveTasksGroup) managerActiveTasksGroup.innerHTML = "";
     return;
   }
 
@@ -225,7 +275,6 @@ function renderEditor() {
   noteEditorPane.style.backgroundColor = colorInfo.bg;
 
   editorTitleInput.value = activeNote.title || "";
-  editorBodyTextarea.value = activeNote.body || "";
   editorMetaTime.textContent = formatRelativeTime(activeNote.updatedAt);
   editorDateStamp.textContent = `Created ${formatDate(activeNote.createdAt)} · Updated ${formatRelativeTime(activeNote.updatedAt)}`;
 
@@ -252,25 +301,193 @@ function renderEditor() {
 
   // Update progress badge
   const managerProgressPill = document.getElementById("managerProgressPill");
+  const items = ensureNoteItems(activeNote);
+  const total = items.length;
+  const done = items.filter((it) => it.done).length;
+
   if (managerProgressPill) {
-    const lines = (activeNote.body || "").split("\n");
-    const total = lines.filter((l) => l.trim().startsWith("- [ ]") || l.trim().startsWith("- [x]")).length;
-    const done = lines.filter((l) => l.trim().startsWith("- [x]")).length;
     if (total > 0) {
       managerProgressPill.style.display = "inline-block";
       if (done === total) {
         managerProgressPill.style.background = "#2E7D32";
         managerProgressPill.style.color = "#FFFFFF";
         managerProgressPill.textContent = "All done! ✓";
+        if (btnManagerMarkAll) btnManagerMarkAll.textContent = "Uncheck all";
       } else {
         managerProgressPill.style.background = "rgba(42, 52, 66, 0.12)";
         managerProgressPill.style.color = "var(--note-ink)";
         managerProgressPill.textContent = `${done}/${total} done`;
+        if (btnManagerMarkAll) btnManagerMarkAll.textContent = "Mark all done";
       }
     } else {
       managerProgressPill.style.display = "none";
+      if (btnManagerMarkAll) btnManagerMarkAll.textContent = "Mark all done";
     }
   }
+
+  renderManagerTaskItems(activeNote);
+}
+
+function renderManagerTaskItems(activeNote) {
+  if (!managerActiveTasksGroup || !managerCompletedTasksGroup) return;
+
+  managerActiveTasksGroup.innerHTML = "";
+  managerCompletedTasksGroup.innerHTML = "";
+
+  const items = ensureNoteItems(activeNote);
+  const activeItems = items.filter((it) => !it.done);
+  const completedItems = items.filter((it) => it.done);
+
+  if (items.length === 0) {
+    managerActiveTasksGroup.innerHTML = `<div class="empty-tasks-placeholder">No tasks yet. Use the input above to add your first task!</div>`;
+  } else {
+    activeItems.forEach((item) => {
+      managerActiveTasksGroup.appendChild(createManagerTaskRow(item, activeNote));
+    });
+  }
+
+  if (completedItems.length > 0) {
+    managerCompletedTasksSection.style.display = "block";
+    managerCompletedTitle.textContent = `Completed (${completedItems.length})`;
+    completedItems.forEach((item) => {
+      managerCompletedTasksGroup.appendChild(createManagerTaskRow(item, activeNote));
+    });
+  } else {
+    managerCompletedTasksSection.style.display = "none";
+  }
+}
+
+function createManagerTaskRow(item, note) {
+  const row = document.createElement("div");
+  row.className = `task-item-row ${item.done ? "completed" : ""}`;
+  row.dataset.id = item.id;
+
+  const checkbox = document.createElement("button");
+  checkbox.type = "button";
+  checkbox.className = "task-checkbox";
+  checkbox.title = item.done ? "Mark as to-do" : "Mark as completed";
+  checkbox.innerHTML = `
+    <svg class="check-icon" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+  `;
+
+  checkbox.addEventListener("click", (e) => {
+    e.stopPropagation();
+    item.done = !item.done;
+    note.updatedAt = Date.now();
+    syncNoteBody(note);
+    renderEditor();
+    renderNotesList();
+    persistData();
+  });
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "task-text-input";
+  input.value = item.text || "";
+  input.placeholder = "Task description...";
+
+  input.addEventListener("input", (e) => {
+    item.text = e.target.value;
+    note.updatedAt = Date.now();
+    syncNoteBody(note);
+    persistData();
+  });
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const items = ensureNoteItems(note);
+      const currentIndex = items.findIndex((it) => it.id === item.id);
+      const newItem = {
+        id: "item_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
+        text: "",
+        done: false,
+      };
+      items.splice(currentIndex + 1, 0, newItem);
+      note.updatedAt = Date.now();
+      syncNoteBody(note);
+      renderEditor();
+      renderNotesList();
+      persistData();
+
+      setTimeout(() => {
+        const nextRow = document.querySelector(`.task-item-row[data-id="${newItem.id}"] .task-text-input`);
+        if (nextRow) nextRow.focus();
+      }, 20);
+    } else if (e.key === "Backspace" && input.value === "") {
+      e.preventDefault();
+      const items = ensureNoteItems(note);
+      const currentIndex = items.findIndex((it) => it.id === item.id);
+      if (items.length > 1) {
+        items.splice(currentIndex, 1);
+        note.updatedAt = Date.now();
+        syncNoteBody(note);
+        renderEditor();
+        renderNotesList();
+        persistData();
+
+        const prevIndex = Math.max(0, currentIndex - 1);
+        const prevItem = items[prevIndex];
+        if (prevItem) {
+          setTimeout(() => {
+            const prevRow = document.querySelector(`.task-item-row[data-id="${prevItem.id}"] .task-text-input`);
+            if (prevRow) {
+              prevRow.focus();
+              prevRow.setSelectionRange(prevRow.value.length, prevRow.value.length);
+            }
+          }, 20);
+        }
+      } else {
+        items.splice(0, 1);
+        note.updatedAt = Date.now();
+        syncNoteBody(note);
+        renderEditor();
+        renderNotesList();
+        persistData();
+        if (managerQuickAddInput) managerQuickAddInput.focus();
+      }
+    } else if (e.key === "ArrowDown") {
+      const next = row.nextElementSibling?.querySelector(".task-text-input");
+      if (next) {
+        e.preventDefault();
+        next.focus();
+      }
+    } else if (e.key === "ArrowUp") {
+      const prev = row.previousElementSibling?.querySelector(".task-text-input");
+      if (prev) {
+        e.preventDefault();
+        prev.focus();
+      } else if (managerQuickAddInput) {
+        e.preventDefault();
+        managerQuickAddInput.focus();
+      }
+    }
+  });
+
+  const delBtn = document.createElement("button");
+  delBtn.type = "button";
+  delBtn.className = "task-row-del-btn";
+  delBtn.title = "Delete task";
+  delBtn.textContent = "✕";
+
+  delBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const items = ensureNoteItems(note);
+    note.items = items.filter((it) => it.id !== item.id);
+    note.updatedAt = Date.now();
+    syncNoteBody(note);
+    renderEditor();
+    renderNotesList();
+    persistData();
+  });
+
+  row.appendChild(checkbox);
+  row.appendChild(input);
+  row.appendChild(delBtn);
+
+  return row;
 }
 
 function setupListeners() {
@@ -335,78 +552,96 @@ function setupListeners() {
     persistData();
   });
 
-  // Body editor with auto-continuation for checklist items
-  editorBodyTextarea.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      const textarea = e.target;
-      const pos = textarea.selectionStart;
-      const text = textarea.value;
-      const textBefore = text.substring(0, pos);
-      const lastLine = textBefore.split("\n").pop();
+  // Manager Quick Add Task
+  function handleManagerQuickAdd() {
+    if (!managerQuickAddInput) return;
+    const text = managerQuickAddInput.value.trim();
+    if (!text) return;
 
-      // If user hits Enter on an empty checklist item, clean it and exit list mode
-      if (lastLine === "- [ ] " || lastLine === "- [x] ") {
-        e.preventDefault();
-        const lineStart = text.lastIndexOf("\n", pos - 1) + 1;
-        textarea.setRangeText("", lineStart, pos, "end");
-        textarea.dispatchEvent(new Event("input"));
-        return;
-      }
-
-      if (lastLine.startsWith("- [ ] ") || lastLine.startsWith("- [x] ")) {
-        e.preventDefault();
-        const nextTask = "\n- [ ] ";
-        textarea.setRangeText(nextTask, pos, pos, "end");
-        textarea.dispatchEvent(new Event("input"));
-      } else if (/^\d+\.\s/.test(lastLine)) {
-        e.preventDefault();
-        const num = parseInt(lastLine.match(/^(\d+)\./)[1], 10);
-        const nextNum = `\n${num + 1}. `;
-        textarea.setRangeText(nextNum, pos, pos, "end");
-        textarea.dispatchEvent(new Event("input"));
-      } else if (lastLine.startsWith("- ")) {
-        e.preventDefault();
-        const nextBullet = "\n- ";
-        textarea.setRangeText(nextBullet, pos, pos, "end");
-        textarea.dispatchEvent(new Event("input"));
-      }
-    }
-  });
-
-  // Click on a checklist item to toggle [ ] <-> [x]
-  editorBodyTextarea.addEventListener("click", (e) => {
-    const textarea = e.target;
-    const pos = textarea.selectionStart;
-    const text = textarea.value;
-    const lineStart = text.lastIndexOf("\n", pos - 1) + 1;
-    const lineEnd = text.indexOf("\n", pos);
-    const line = text.substring(lineStart, lineEnd === -1 ? text.length : lineEnd);
-
-    // If click is within the checkbox [- [ ] or - [x]]
-    const col = pos - lineStart;
-    if (col <= 6 && (line.startsWith("- [ ] ") || line.startsWith("- [x] "))) {
-      const newLine = line.startsWith("- [ ] ")
-        ? line.replace("- [ ] ", "- [x] ")
-        : line.replace("- [x] ", "- [ ] ");
-
-      const before = text.substring(0, lineStart);
-      const after = text.substring(lineEnd === -1 ? text.length : lineEnd);
-      textarea.value = before + newLine + after;
-      textarea.setSelectionRange(pos, pos);
-      textarea.dispatchEvent(new Event("input"));
-    }
-  });
-
-  editorBodyTextarea.addEventListener("input", (e) => {
     const note = getActiveNote();
     if (!note) return;
-    note.body = e.target.value;
+
+    const items = ensureNoteItems(note);
+    const newItem = {
+      id: "item_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
+      text: text,
+      done: false,
+    };
+    items.push(newItem);
     note.updatedAt = Date.now();
-    editorMetaTime.textContent = "edited just now";
+    syncNoteBody(note);
+
+    managerQuickAddInput.value = "";
     renderEditor();
     renderNotesList();
     persistData();
-  });
+    managerQuickAddInput.focus();
+  }
+
+  if (managerQuickAddInput) {
+    managerQuickAddInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleManagerQuickAdd();
+      } else if (e.key === "ArrowDown") {
+        const firstInput = managerActiveTasksGroup?.querySelector(".task-text-input");
+        if (firstInput) {
+          e.preventDefault();
+          firstInput.focus();
+        }
+      }
+    });
+  }
+
+  if (btnManagerQuickAdd) {
+    btnManagerQuickAdd.addEventListener("click", () => {
+      if (managerQuickAddInput && managerQuickAddInput.value.trim()) {
+        handleManagerQuickAdd();
+      } else if (managerQuickAddInput) {
+        managerQuickAddInput.focus();
+      }
+    });
+  }
+
+  // Toggle Completed section in Manager
+  if (btnManagerToggleCompleted && managerCompletedTasksSection) {
+    btnManagerToggleCompleted.addEventListener("click", () => {
+      managerCompletedTasksSection.classList.toggle("collapsed");
+    });
+  }
+
+  // Clear Done button in Manager
+  if (btnManagerClearDone) {
+    btnManagerClearDone.addEventListener("click", () => {
+      const note = getActiveNote();
+      if (!note) return;
+      const items = ensureNoteItems(note);
+      note.items = items.filter((it) => !it.done);
+      note.updatedAt = Date.now();
+      syncNoteBody(note);
+      renderEditor();
+      renderNotesList();
+      persistData();
+    });
+  }
+
+  // Mark all / uncheck all button in Manager
+  if (btnManagerMarkAll) {
+    btnManagerMarkAll.addEventListener("click", () => {
+      const note = getActiveNote();
+      if (!note) return;
+      const items = ensureNoteItems(note);
+      const hasUncompleted = items.some((it) => !it.done);
+      items.forEach((it) => {
+        it.done = hasUncompleted;
+      });
+      note.updatedAt = Date.now();
+      syncNoteBody(note);
+      renderEditor();
+      renderNotesList();
+      persistData();
+    });
+  }
 
   // Deck pin toggle
   btnToggleDeck.addEventListener("click", () => {
@@ -422,7 +657,7 @@ function setupListeners() {
     btnToggleDeck.click();
   });
 
-  // Delete task
+  // Delete task list
   btnDeleteNote.addEventListener("click", () => {
     const note = getActiveNote();
     if (!note) return;
@@ -434,6 +669,9 @@ function setupListeners() {
             id: "task_" + Date.now(),
             title: "Daily Tasks",
             color: "butter",
+            items: [
+              { id: "item_" + Date.now() + "_1", text: "Add your first task", done: false }
+            ],
             body: "- [ ] Add your first task",
             onDeck: true,
             archived: false,
@@ -470,39 +708,11 @@ function setupListeners() {
   btnExportNote.addEventListener("click", () => {
     const note = getActiveNote();
     if (!note) return;
-    const md = `# ${note.title}\n\n${note.body}\n`;
+    const items = ensureNoteItems(note);
+    const lines = items.map((it) => `${it.done ? "- [x]" : "- [ ]"} ${it.text}`).join("\n");
+    const md = `# ${note.title}\n\n${lines}\n`;
     navigator.clipboard.writeText(md).then(() => {
-      alert("Task markdown copied to clipboard!");
-    });
-  });
-
-  // Formatting Toolbar Buttons
-  document.querySelectorAll(".fmt-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const fmt = btn.dataset.format;
-      const textarea = editorBodyTextarea;
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const selected = textarea.value.substring(start, end);
-
-      let insert = "";
-      if (fmt === "bold") insert = `**${selected || "bold text"}**`;
-      else if (fmt === "italic") insert = `*${selected || "italic text"}*`;
-      else if (fmt === "underline") insert = `<u>${selected || "underlined text"}</u>`;
-      else if (fmt === "strike") insert = `~~${selected || "strikethrough text"}~~`;
-      else if (fmt === "checklist") insert = `\n- [ ] ${selected || "New task"}`;
-      else if (fmt === "bullets") insert = `\n- ${selected || "bullet item"}`;
-      else if (fmt === "link") insert = `[${selected || "title"}](https://)`;
-      else if (fmt === "font") {
-        textarea.style.fontFamily = textarea.style.fontFamily.includes("Segoe UI")
-          ? "'Segoe Print', 'Ink Free', sans-serif"
-          : "-apple-system, 'Segoe UI', Roboto, sans-serif";
-        return;
-      }
-
-      textarea.setRangeText(insert, start, end, "end");
-      textarea.dispatchEvent(new Event("input"));
-      textarea.focus();
+      alert("Task list copied to clipboard as markdown!");
     });
   });
 

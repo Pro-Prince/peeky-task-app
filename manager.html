@@ -169,29 +169,45 @@
         </div>
 
         <div class="editor-title-row">
-          <input type="text" class="editor-title-input" id="editorTitleInput" placeholder="Untitled Task" />
-          <span class="editor-meta-time" id="editorMetaTime">edited 3h</span>
+          <input type="text" class="editor-title-input" id="editorTitleInput" placeholder="List title..." />
+          <span class="editor-meta-time" id="editorMetaTime">edited now</span>
         </div>
 
-        <div class="editor-body-wrapper">
-          <textarea class="editor-body-textarea" id="editorBodyTextarea" placeholder="Write tasks, checklist, or thoughts..."></textarea>
+        <!-- Manager Quick Add Task Bar -->
+        <div class="quick-add-task-row manager-quick-add">
+          <button class="quick-add-icon-btn" id="btnManagerQuickAdd" title="Add task">+</button>
+          <input 
+            type="text" 
+            class="quick-add-input" 
+            id="managerQuickAddInput" 
+            placeholder="Add a new task to this list... (press Enter)"
+            autocomplete="off"
+          />
         </div>
 
-        <!-- Bottom Formatting Bar & Color Swatches -->
+        <!-- Manager Scrollable Task Items -->
+        <div class="task-items-scroll manager-tasks-scroll" id="managerTaskItemsContainer">
+          <!-- Active Tasks -->
+          <div class="tasks-group active-tasks" id="managerActiveTasksGroup"></div>
+
+          <!-- Collapsible Completed Section -->
+          <div class="completed-tasks-section" id="managerCompletedTasksSection" style="display: none;">
+            <button class="completed-toggle-btn" id="btnManagerToggleCompleted" type="button">
+              <span class="completed-chevron" id="managerCompletedChevron">▾</span>
+              <span id="managerCompletedTitle">Completed (0)</span>
+            </button>
+            <div class="tasks-group completed-tasks" id="managerCompletedTasksGroup"></div>
+          </div>
+        </div>
+
+        <!-- Bottom Task Actions & Color Swatches -->
         <footer class="editor-bottom-bar">
-          <div class="format-toolbar">
-            <button class="fmt-btn" data-format="bold" title="Bold"><b>B</b></button>
-            <button class="fmt-btn" data-format="italic" title="Italic"><i>I</i></button>
-            <button class="fmt-btn" data-format="underline" title="Underline"><u>U</u></button>
-            <button class="fmt-btn" data-format="strike" title="Strikethrough"><s>S</s></button>
-            <span class="fmt-divider"></span>
-            <button class="fmt-btn" data-format="checklist" title="Insert Checklist Item">☑</button>
-            <button class="fmt-btn" data-format="bullets" title="Bullet list">•≡</button>
-            <button class="fmt-btn" data-format="link" title="Insert link">🔗</button>
-            <button class="fmt-btn" data-format="font" title="Font style">Aa</button>
+          <div class="task-actions-toolbar">
+            <button class="mgr-action-btn" id="btnManagerClearDone" title="Clear all completed tasks">Clear done</button>
+            <button class="mgr-action-btn" id="btnManagerMarkAll" title="Mark all tasks done / undone">Mark all done</button>
           </div>
 
-          <div class="editor-date-stamp" id="editorDateStamp">Created 20 Oct 2026 · Updated 3h ago</div>
+          <div class="editor-date-stamp" id="editorDateStamp">Created 20 Oct 2026 · Updated now</div>
 
           <div class="color-palette-tray">
             <div class="palette-dots" id="paletteDots">

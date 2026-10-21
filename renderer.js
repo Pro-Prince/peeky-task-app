@@ -90,7 +90,14 @@ const cardSaveStatus = document.getElementById("cardSaveStatus");
 const btnMinimizeCard = document.getElementById("btnMinimizeCard");
 const btnTuckCard = document.getElementById("btnTuckCard");
 const cardProgressBarFill = document.getElementById("cardProgressBarFill");
-const cardBodyTextarea = document.getElementById("cardBodyTextarea");
+const quickAddInput = document.getElementById("quickAddInput");
+const btnQuickAddIcon = document.getElementById("btnQuickAddIcon");
+const taskItemsContainer = document.getElementById("taskItemsContainer");
+const activeTasksGroup = document.getElementById("activeTasksGroup");
+const completedTasksSection = document.getElementById("completedTasksSection");
+const completedTasksGroup = document.getElementById("completedTasksGroup");
+const btnToggleCompleted = document.getElementById("btnToggleCompleted");
+const completedSectionTitle = document.getElementById("completedSectionTitle");
 const cardColorSwatches = document.getElementById("cardColorSwatches");
 const btnCardDelete = document.getElementById("btnCardDelete");
 const btnClearCompleted = document.getElementById("btnClearCompleted");
@@ -105,6 +112,45 @@ const railTabsTrack = document.getElementById("railTabsTrack");
 const btnAddNote = document.getElementById("btnAddNote");
 const btnOpenManager = document.getElementById("btnOpenManager");
 const btnFlipEdge = document.getElementById("btnFlipEdge");
+
+// Ensure note has structured items array
+function ensureNoteItems(note) {
+  if (!note) return [];
+  if (Array.isArray(note.items)) {
+    return note.items;
+  }
+  const items = [];
+  const lines = (note.body || "").split("\n");
+  lines.forEach((line, idx) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    const isChecked = trimmed.startsWith("- [x]") || trimmed.startsWith("[x]") || trimmed.startsWith("✓");
+    const isUnchecked = trimmed.startsWith("- [ ]") || trimmed.startsWith("[ ]") || trimmed.startsWith("[]");
+    let text = trimmed;
+    if (isChecked) {
+      text = trimmed.replace(/^(-\s*\[x\]|\[x\]|✓)\s*/i, "");
+    } else if (isUnchecked) {
+      text = trimmed.replace(/^(-\s*\[\s*\]|\[\s*\]|\[\])\s*/i, "");
+    } else if (trimmed.startsWith("- ") || trimmed.startsWith("• ")) {
+      text = trimmed.substring(2);
+    } else if (/^\d+\.\s/.test(trimmed)) {
+      text = trimmed.replace(/^\d+\.\s/, "");
+    }
+    items.push({
+      id: "item_" + (note.id || "n") + "_" + idx + "_" + Math.random().toString(36).substr(2, 4),
+      text: text,
+      done: isChecked,
+    });
+  });
+  note.items = items;
+  syncNoteBody(note);
+  return items;
+}
+
+function syncNoteBody(note) {
+  if (!note || !Array.isArray(note.items)) return;
+  note.body = note.items.map((it) => (it.done ? "- [x] " : "- [ ] ") + (it.text || "")).join("\n");
+}
 
 // Save to disk & broadcast
 function persistData() {
@@ -130,16 +176,16 @@ function renderRailTabs() {
 
   const deckNotes = getDeckNotes();
   deckNotes.forEach((note) => {
+    const items = ensureNoteItems(note);
+    const total = items.length;
+    const done = items.filter((it) => it.done).length;
+    const isCompleted = total > 0 && done === total;
+
     const tab = document.createElement("div");
     tab.className = `rail-tab ${state.isCardOpen && note.id === state.activeNoteId ? "active" : ""}`;
     const colorInfo = COLOR_MAP[note.color] || COLOR_MAP.butter;
     tab.style.backgroundColor = colorInfo.bg;
     tab.title = note.title || "Untitled";
-
-    const lines = (note.body || "").split("\n");
-    const total = lines.filter((l) => l.trim().startsWith("- [ ]") || l.trim().startsWith("- [x]")).length;
-    const done = lines.filter((l) => l.trim().startsWith("- [x]")).length;
-    const isCompleted = total > 0 && done === total;
 
     const label = document.createElement("span");
     label.className = "rail-tab-label";
@@ -155,7 +201,6 @@ function renderRailTabs() {
 
     tab.addEventListener("click", () => {
       if (state.activeNoteId === note.id && state.isCardOpen) {
-        // Toggle tuck
         setCardOpenState(false);
       } else {
         state.activeNoteId = note.id;
@@ -170,7 +215,7 @@ function renderRailTabs() {
   });
 }
 
-// Render Note Card matching Screenshot 5
+// Render To-Do Task Card
 function renderCard() {
   const activeNote = getActiveNote();
   if (!activeNote) {
@@ -179,17 +224,13 @@ function renderCard() {
   }
 
   const colorInfo = COLOR_MAP[activeNote.color] || COLOR_MAP.mint;
-
-  // Apply note background color
   noteCard.style.backgroundColor = colorInfo.bg;
 
-  // Inputs
   cardTitleInput.value = activeNote.title || "Untitled list";
-  cardBodyTextarea.value = activeNote.body || "";
-
-  // Status & Progress
   cardSaveStatus.textContent = "Saved · now";
+
   updateProgressBadge(activeNote);
+  renderTaskItems(activeNote);
 
   // Active color dot
   const dots = cardColorSwatches.querySelectorAll(".swatch-dot");
@@ -201,7 +242,6 @@ function renderCard() {
     }
   });
 
-  // Hide undo drawer on note switch
   undoDrawer.style.display = "none";
 }
 
@@ -209,16 +249,9 @@ function updateProgressBadge(activeNote) {
   const cardProgressPill = document.getElementById("cardProgressPill");
   if (!cardProgressPill) return;
 
-  if (!activeNote || !activeNote.body) {
-    cardProgressPill.style.display = "none";
-    if (cardProgressBarFill) cardProgressBarFill.style.width = "0%";
-    if (btnMarkComplete) btnMarkComplete.textContent = "Mark all done";
-    return;
-  }
-
-  const lines = activeNote.body.split("\n");
-  const total = lines.filter((l) => l.trim().startsWith("- [ ]") || l.trim().startsWith("- [x]")).length;
-  const done = lines.filter((l) => l.trim().startsWith("- [x]")).length;
+  const items = ensureNoteItems(activeNote);
+  const total = items.length;
+  const done = items.filter((it) => it.done).length;
 
   if (total > 0) {
     const pct = Math.round((done / total) * 100);
@@ -244,6 +277,176 @@ function updateProgressBadge(activeNote) {
     if (cardProgressBarFill) cardProgressBarFill.style.width = "0%";
     if (btnMarkComplete) btnMarkComplete.textContent = "Mark all done";
   }
+}
+
+function renderTaskItems(activeNote) {
+  if (!activeTasksGroup || !completedTasksGroup) return;
+
+  activeTasksGroup.innerHTML = "";
+  completedTasksGroup.innerHTML = "";
+
+  const items = ensureNoteItems(activeNote);
+  const activeItems = items.filter((it) => !it.done);
+  const completedItems = items.filter((it) => it.done);
+
+  if (items.length === 0) {
+    activeTasksGroup.innerHTML = `<div class="empty-tasks-placeholder">No tasks yet. Type above to add your first task!</div>`;
+  } else {
+    activeItems.forEach((item) => {
+      activeTasksGroup.appendChild(createTaskRowElement(item, activeNote));
+    });
+  }
+
+  if (completedItems.length > 0) {
+    completedTasksSection.style.display = "block";
+    completedSectionTitle.textContent = `Completed (${completedItems.length})`;
+    completedItems.forEach((item) => {
+      completedTasksGroup.appendChild(createTaskRowElement(item, activeNote));
+    });
+  } else {
+    completedTasksSection.style.display = "none";
+  }
+}
+
+function createTaskRowElement(item, note) {
+  const row = document.createElement("div");
+  row.className = `task-item-row ${item.done ? "completed" : ""}`;
+  row.dataset.id = item.id;
+
+  // Checkbox button
+  const checkbox = document.createElement("button");
+  checkbox.type = "button";
+  checkbox.className = "task-checkbox";
+  checkbox.title = item.done ? "Mark as to-do" : "Mark as completed";
+  checkbox.innerHTML = `
+    <svg class="check-icon" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+  `;
+
+  checkbox.addEventListener("click", (e) => {
+    e.stopPropagation();
+    item.done = !item.done;
+    note.updatedAt = Date.now();
+    syncNoteBody(note);
+    updateProgressBadge(note);
+    renderRailTabs();
+    persistData();
+    renderTaskItems(note);
+  });
+
+  // Text input
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "task-text-input";
+  input.value = item.text || "";
+  input.placeholder = "Task description...";
+
+  input.addEventListener("input", (e) => {
+    item.text = e.target.value;
+    note.updatedAt = Date.now();
+    syncNoteBody(note);
+    persistData();
+  });
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const items = ensureNoteItems(note);
+      const currentIndex = items.findIndex((it) => it.id === item.id);
+      const newItem = {
+        id: "item_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
+        text: "",
+        done: false,
+      };
+      items.splice(currentIndex + 1, 0, newItem);
+      note.updatedAt = Date.now();
+      syncNoteBody(note);
+      updateProgressBadge(note);
+      renderRailTabs();
+      persistData();
+      renderTaskItems(note);
+
+      setTimeout(() => {
+        const nextRow = document.querySelector(`.task-item-row[data-id="${newItem.id}"] .task-text-input`);
+        if (nextRow) nextRow.focus();
+      }, 20);
+    } else if (e.key === "Backspace" && input.value === "") {
+      e.preventDefault();
+      const items = ensureNoteItems(note);
+      const currentIndex = items.findIndex((it) => it.id === item.id);
+      if (items.length > 1) {
+        items.splice(currentIndex, 1);
+        note.updatedAt = Date.now();
+        syncNoteBody(note);
+        updateProgressBadge(note);
+        renderRailTabs();
+        persistData();
+        renderTaskItems(note);
+
+        const prevIndex = Math.max(0, currentIndex - 1);
+        const prevItem = items[prevIndex];
+        if (prevItem) {
+          setTimeout(() => {
+            const prevRow = document.querySelector(`.task-item-row[data-id="${prevItem.id}"] .task-text-input`);
+            if (prevRow) {
+              prevRow.focus();
+              prevRow.setSelectionRange(prevRow.value.length, prevRow.value.length);
+            }
+          }, 20);
+        }
+      } else {
+        items.splice(0, 1);
+        note.updatedAt = Date.now();
+        syncNoteBody(note);
+        updateProgressBadge(note);
+        renderRailTabs();
+        persistData();
+        renderTaskItems(note);
+        if (quickAddInput) quickAddInput.focus();
+      }
+    } else if (e.key === "ArrowDown") {
+      const next = row.nextElementSibling?.querySelector(".task-text-input");
+      if (next) {
+        e.preventDefault();
+        next.focus();
+      }
+    } else if (e.key === "ArrowUp") {
+      const prev = row.previousElementSibling?.querySelector(".task-text-input");
+      if (prev) {
+        e.preventDefault();
+        prev.focus();
+      } else if (quickAddInput) {
+        e.preventDefault();
+        quickAddInput.focus();
+      }
+    }
+  });
+
+  // Delete button
+  const delBtn = document.createElement("button");
+  delBtn.type = "button";
+  delBtn.className = "task-row-del-btn";
+  delBtn.title = "Delete task";
+  delBtn.textContent = "✕";
+
+  delBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const items = ensureNoteItems(note);
+    note.items = items.filter((it) => it.id !== item.id);
+    note.updatedAt = Date.now();
+    syncNoteBody(note);
+    updateProgressBadge(note);
+    renderRailTabs();
+    persistData();
+    renderTaskItems(note);
+  });
+
+  row.appendChild(checkbox);
+  row.appendChild(input);
+  row.appendChild(delBtn);
+
+  return row;
 }
 
 // Toggle or Set Card Open / Tucked state
@@ -315,106 +518,64 @@ function setupListeners() {
     persistData();
   });
 
-  // Body textarea - auto checklist continuation on Enter, Tab indent
-  cardBodyTextarea.addEventListener("keydown", (e) => {
-    const textarea = e.target;
-    const pos = textarea.selectionStart;
-    const text = textarea.value;
+  // Quick Add Task Input
+  function handleQuickAdd() {
+    if (!quickAddInput) return;
+    const text = quickAddInput.value.trim();
+    if (!text) return;
 
-    if (e.key === "Tab") {
-      e.preventDefault();
-      const lineStart = text.lastIndexOf("\n", pos - 1) + 1;
-      const lineEnd = text.indexOf("\n", pos);
-      const line = text.substring(lineStart, lineEnd === -1 ? text.length : lineEnd);
-
-      if (e.shiftKey) {
-        // Outdent 2 spaces
-        if (line.startsWith("  ")) {
-          textarea.setRangeText("", lineStart, lineStart + 2, "preserve");
-          textarea.dispatchEvent(new Event("input"));
-        }
-      } else {
-        // Indent 2 spaces
-        textarea.setRangeText("  ", lineStart, lineStart, "preserve");
-        textarea.dispatchEvent(new Event("input"));
-      }
-      return;
-    }
-
-    if (e.key === "Enter") {
-      const textBefore = text.substring(0, pos);
-      const lastLine = textBefore.split("\n").pop();
-
-      // If user hits Enter on an empty task bullet, clear it and exit list mode
-      if (lastLine === "- [ ] " || lastLine === "- [x] ") {
-        e.preventDefault();
-        const lineStart = text.lastIndexOf("\n", pos - 1) + 1;
-        textarea.setRangeText("", lineStart, pos, "end");
-        textarea.dispatchEvent(new Event("input"));
-        return;
-      }
-      if (lastLine === "- ") {
-        e.preventDefault();
-        const lineStart = text.lastIndexOf("\n", pos - 1) + 1;
-        textarea.setRangeText("", lineStart, pos, "end");
-        textarea.dispatchEvent(new Event("input"));
-        return;
-      }
-
-      if (lastLine.startsWith("- [ ] ") || lastLine.startsWith("- [x] ")) {
-        e.preventDefault();
-        const nextTask = "\n- [ ] ";
-        textarea.setRangeText(nextTask, pos, pos, "end");
-        textarea.dispatchEvent(new Event("input"));
-      } else if (/^\d+\.\s/.test(lastLine)) {
-        e.preventDefault();
-        const num = parseInt(lastLine.match(/^(\d+)\./)[1], 10);
-        const nextNum = `\n${num + 1}. `;
-        textarea.setRangeText(nextNum, pos, pos, "end");
-        textarea.dispatchEvent(new Event("input"));
-      } else if (lastLine.startsWith("- ")) {
-        e.preventDefault();
-        const nextBullet = "\n- ";
-        textarea.setRangeText(nextBullet, pos, pos, "end");
-        textarea.dispatchEvent(new Event("input"));
-      }
-    }
-  });
-
-  cardBodyTextarea.addEventListener("input", (e) => {
     const activeNote = getActiveNote();
     if (!activeNote) return;
-    activeNote.body = e.target.value;
+
+    const items = ensureNoteItems(activeNote);
+    const newItem = {
+      id: "item_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
+      text: text,
+      done: false,
+    };
+    items.push(newItem);
     activeNote.updatedAt = Date.now();
-    cardSaveStatus.textContent = "Saved · now";
+    syncNoteBody(activeNote);
+
+    quickAddInput.value = "";
     updateProgressBadge(activeNote);
     renderRailTabs();
     persistData();
-  });
+    renderTaskItems(activeNote);
+    quickAddInput.focus();
+  }
 
-  // Click on a checklist item to toggle [ ] <-> [x]
-  cardBodyTextarea.addEventListener("click", (e) => {
-    const textarea = e.target;
-    const pos = textarea.selectionStart;
-    const text = textarea.value;
-    const lineStart = text.lastIndexOf("\n", pos - 1) + 1;
-    const lineEnd = text.indexOf("\n", pos);
-    const line = text.substring(lineStart, lineEnd === -1 ? text.length : lineEnd);
+  if (quickAddInput) {
+    quickAddInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleQuickAdd();
+      } else if (e.key === "ArrowDown") {
+        const firstInput = activeTasksGroup?.querySelector(".task-text-input");
+        if (firstInput) {
+          e.preventDefault();
+          firstInput.focus();
+        }
+      }
+    });
+  }
 
-    // If click is within the checkbox [- [ ] or - [x]]
-    const col = pos - lineStart;
-    if (col <= 6 && (line.startsWith("- [ ] ") || line.startsWith("- [x] "))) {
-      const newLine = line.startsWith("- [ ] ")
-        ? line.replace("- [ ] ", "- [x] ")
-        : line.replace("- [x] ", "- [ ] ");
+  if (btnQuickAddIcon) {
+    btnQuickAddIcon.addEventListener("click", () => {
+      if (quickAddInput && quickAddInput.value.trim()) {
+        handleQuickAdd();
+      } else if (quickAddInput) {
+        quickAddInput.focus();
+      }
+    });
+  }
 
-      const before = text.substring(0, lineStart);
-      const after = text.substring(lineEnd === -1 ? text.length : lineEnd);
-      textarea.value = before + newLine + after;
-      textarea.setSelectionRange(pos, pos);
-      textarea.dispatchEvent(new Event("input"));
-    }
-  });
+  // Toggle Completed tasks section
+  if (btnToggleCompleted && completedTasksSection) {
+    btnToggleCompleted.addEventListener("click", () => {
+      completedTasksSection.classList.toggle("collapsed");
+    });
+  }
 
   // Minimize / Tuck / Close Buttons
   btnMinimizeCard.addEventListener("click", () => {
@@ -435,16 +596,15 @@ function setupListeners() {
       const activeNote = getActiveNote();
       if (!activeNote) return;
 
-      const lines = (activeNote.body || "").split("\n");
-      const remaining = lines.filter((line) => !line.trim().startsWith("- [x] "));
-      activeNote.body = remaining.join("\n");
+      const items = ensureNoteItems(activeNote);
+      activeNote.items = items.filter((it) => !it.done);
       activeNote.updatedAt = Date.now();
+      syncNoteBody(activeNote);
 
-      cardBodyTextarea.value = activeNote.body;
-      cardSaveStatus.textContent = "Saved · now";
       updateProgressBadge(activeNote);
       renderRailTabs();
       persistData();
+      renderTaskItems(activeNote);
     });
   }
 
@@ -453,51 +613,18 @@ function setupListeners() {
     const activeNote = getActiveNote();
     if (!activeNote) return;
 
-    if (activeNote.body.includes("- [ ] ")) {
-      activeNote.body = activeNote.body.replace(/- \[ \] /g, "- [x] ");
-    } else if (activeNote.body.includes("- [x] ")) {
-      activeNote.body = activeNote.body.replace(/- \[x\] /g, "- [ ] ");
-    } else {
-      activeNote.body += "\n- [x] Completed task";
-    }
+    const items = ensureNoteItems(activeNote);
+    const hasUncompleted = items.some((it) => !it.done);
+    items.forEach((it) => {
+      it.done = hasUncompleted;
+    });
 
-    cardBodyTextarea.value = activeNote.body;
     activeNote.updatedAt = Date.now();
-    cardSaveStatus.textContent = "Saved · now";
+    syncNoteBody(activeNote);
     updateProgressBadge(activeNote);
     renderRailTabs();
     persistData();
-  });
-
-  // Formatting Buttons on Floating Card
-  document.querySelectorAll(".card-fmt-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const fmt = btn.dataset.fmt;
-      const textarea = cardBodyTextarea;
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const selected = textarea.value.substring(start, end);
-
-      let insert = "";
-      if (fmt === "bold") insert = `**${selected || "bold"}**`;
-      else if (fmt === "italic") insert = `*${selected || "italic"}*`;
-      else if (fmt === "underline") insert = `<u>${selected || "text"}</u>`;
-      else if (fmt === "strike") insert = `~~${selected || "text"}~~`;
-      else if (fmt === "checklist") insert = `\n- [ ] ${selected || "task"}`;
-      else if (fmt === "bullets") insert = `\n- ${selected || "item"}`;
-      else if (fmt === "numbers") insert = `\n1. ${selected || "item"}`;
-      else if (fmt === "link") insert = `[${selected || "title"}](https://)`;
-      else if (fmt === "font") {
-        textarea.style.fontFamily = textarea.style.fontFamily.includes("Segoe UI")
-          ? "'Segoe Print', 'Ink Free', sans-serif"
-          : "-apple-system, 'Segoe UI', Roboto, sans-serif";
-        return;
-      }
-
-      textarea.setRangeText(insert, start, end, "end");
-      textarea.dispatchEvent(new Event("input"));
-      textarea.focus();
-    });
+    renderTaskItems(activeNote);
   });
 
   // Color swatches click
@@ -518,12 +645,15 @@ function setupListeners() {
     persistData();
   });
 
-  // Add Task Button (+) matching Screenshot 5
+  // Add Task List Button (+) matching Screenshot 5
   btnAddNote.addEventListener("click", () => {
     const newNote = {
       id: "task_" + Date.now(),
-      title: "Tasks",
-      color: "mint", // Cyan/Mint default matching Screenshot 5!
+      title: "New List",
+      color: "mint",
+      items: [
+        { id: "item_" + Date.now() + "_1", text: "", done: false }
+      ],
       body: "- [ ] ",
       onDeck: true,
       archived: false,
@@ -539,8 +669,12 @@ function setupListeners() {
     persistData();
 
     setTimeout(() => {
-      cardBodyTextarea.focus();
-      cardBodyTextarea.setSelectionRange(6, 6);
+      const firstInput = document.querySelector(".task-text-input");
+      if (firstInput) {
+        firstInput.focus();
+      } else if (quickAddInput) {
+        quickAddInput.focus();
+      }
     }, 50);
   });
 

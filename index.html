@@ -38,32 +38,35 @@
             <div class="card-progress-bar-fill" id="cardProgressBarFill"></div>
           </div>
 
-          <!-- Card Body: Multi-line task / note editor -->
-          <div class="card-body-wrapper">
-            <textarea 
-              class="card-body-textarea" 
-              id="cardBodyTextarea" 
-              placeholder="Add tasks... (type - [ ] or hit Enter for next task)"
-            ></textarea>
+          <!-- Quick Add Task Bar -->
+          <div class="quick-add-task-row">
+            <button class="quick-add-icon-btn" id="btnQuickAddIcon" title="Add task">+</button>
+            <input 
+              type="text" 
+              class="quick-add-input" 
+              id="quickAddInput" 
+              placeholder="Add a task... (press Enter)" 
+              autocomplete="off"
+            />
           </div>
 
-          <!-- Card Footer Toolbar matching Screenshot 5 -->
-          <div class="card-footer-toolbar">
-            <!-- Formatting tools row -->
-            <div class="card-fmt-row">
-              <button class="card-fmt-btn" data-fmt="bold" title="Bold"><b>B</b></button>
-              <button class="card-fmt-btn" data-fmt="italic" title="Italic"><i>I</i></button>
-              <button class="card-fmt-btn" data-fmt="underline" title="Underline"><u>U</u></button>
-              <button class="card-fmt-btn" data-fmt="strike" title="Strikethrough"><s>S</s></button>
-              <span class="card-fmt-sep"></span>
-              <button class="card-fmt-btn" data-fmt="checklist" title="Checklist item">☑</button>
-              <button class="card-fmt-btn" data-fmt="bullets" title="Bullet list">•≡</button>
-              <button class="card-fmt-btn" data-fmt="numbers" title="Numbered list">1≡</button>
-              <span class="card-fmt-sep"></span>
-              <button class="card-fmt-btn" data-fmt="link" title="Insert link">🔗</button>
-              <button class="card-fmt-btn" data-fmt="font" title="Font style">Aa</button>
-              <button class="card-fmt-btn" data-fmt="more" title="More">···</button>
+          <!-- Scrollable Task Items Container -->
+          <div class="task-items-scroll" id="taskItemsContainer">
+            <!-- Active To-Do Tasks -->
+            <div class="tasks-group active-tasks" id="activeTasksGroup"></div>
+
+            <!-- Collapsible Completed Section -->
+            <div class="completed-tasks-section" id="completedTasksSection" style="display: none;">
+              <button class="completed-toggle-btn" id="btnToggleCompleted" type="button">
+                <span class="completed-chevron" id="completedChevron">▾</span>
+                <span id="completedSectionTitle">Completed (0)</span>
+              </button>
+              <div class="tasks-group completed-tasks" id="completedTasksGroup"></div>
             </div>
+          </div>
+
+          <!-- Card Footer Toolbar -->
+          <div class="card-footer-toolbar">
 
             <!-- Bottom row: 8 color swatches + Delete, Clear done, Mark complete, Close -->
             <div class="card-bottom-actions-row">
