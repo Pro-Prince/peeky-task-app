@@ -56,7 +56,8 @@
       "identityName": "PrincePatel.PeekyTask",
       "publisher": "CN=A6707FFE-1FD1-4D1A-B70D-8CC00342F84D",
       "publisherDisplayName": "Prince Patel",
-      "applicationId": "PrincePatel.PeekyTask"
+      "applicationId": "PrincePatel.PeekyTask",
+      "displayName": "Peeky Task"
     }
   }
 }
