@@ -158,11 +158,6 @@ const cardEdgeRight = document.getElementById("cardEdgeRight");
 const fontPillSelector = document.getElementById("fontPillSelector");
 const chkHideFullscreen = document.getElementById("chkHideFullscreen");
 const chkStartup = document.getElementById("chkStartup");
-const dataPathInput = document.getElementById("dataPathInput");
-const btnCopyDataPath = document.getElementById("btnCopyDataPath");
-const btnOpenDataFolder = document.getElementById("btnOpenDataFolder");
-const btnExportBackup = document.getElementById("btnExportBackup");
-const btnImportBackup = document.getElementById("btnImportBackup");
 const settingsLicenseCard = document.getElementById("settingsLicenseCard");
 const settingsLicenseIcon = document.getElementById("settingsLicenseIcon");
 const settingsLicenseTitle = document.getElementById("settingsLicenseTitle");
@@ -175,7 +170,6 @@ const btnSettingsBuy = document.getElementById("btnSettingsBuy");
 const btnAboutPrivacy = document.getElementById("btnAboutPrivacy");
 const btnAboutSupport = document.getElementById("btnAboutSupport");
 const btnAboutFeatures = document.getElementById("btnAboutFeatures");
-const btnAboutWebsite = document.getElementById("btnAboutWebsite");
 
 // Dynamic 7-Day Trial Calculation
 function getTrialStatus() {
@@ -1325,54 +1319,6 @@ function setupListeners() {
     });
   }
 
-  // Copy Data Path
-  if (btnCopyDataPath && dataPathInput) {
-    btnCopyDataPath.addEventListener("click", () => {
-      navigator.clipboard.writeText(dataPathInput.value).then(() => {
-        btnCopyDataPath.textContent = "Copied! ✓";
-        setTimeout(() => { btnCopyDataPath.textContent = "Copy path"; }, 2000);
-      });
-    });
-  }
-
-  // Open Data Folder button
-  if (btnOpenDataFolder) {
-    btnOpenDataFolder.addEventListener("click", () => {
-      if (window.peekyApi && window.peekyApi.openDataFolder) {
-        window.peekyApi.openDataFolder();
-      }
-    });
-  }
-
-  // Export Backup button
-  if (btnExportBackup) {
-    btnExportBackup.addEventListener("click", async () => {
-      if (window.peekyApi && window.peekyApi.exportBackup) {
-        const success = await window.peekyApi.exportBackup(state);
-        if (success) {
-          alert("Backup saved successfully!");
-        }
-      }
-    });
-  }
-
-  // Import Backup button
-  if (btnImportBackup) {
-    btnImportBackup.addEventListener("click", async () => {
-      if (window.peekyApi && window.peekyApi.importBackup) {
-        const restored = await window.peekyApi.importBackup();
-        if (restored && Array.isArray(restored.notes)) {
-          state.notes = restored.notes;
-          if (restored.activeNoteId) state.activeNoteId = restored.activeNoteId;
-          renderNotesList();
-          renderEditor();
-          persistData();
-          alert("Tasks restored successfully from backup!");
-        }
-      }
-    });
-  }
-
   // Settings License Actions
   if (btnSettingsEnterKey) {
     btnSettingsEnterKey.addEventListener("click", () => {
@@ -1401,7 +1347,7 @@ function setupListeners() {
   if (btnAboutSupport) {
     btnAboutSupport.addEventListener("click", () => {
       if (window.peekyApi && window.peekyApi.openExternal) {
-        window.peekyApi.openExternal("https://peeky-task.vercel.app/#faq");
+        window.peekyApi.openExternal("mailto:princepatel5807@gmail.com?subject=Peeky%20Task%20Support");
       }
     });
   }
@@ -1410,14 +1356,6 @@ function setupListeners() {
     btnAboutFeatures.addEventListener("click", () => {
       if (window.peekyApi && window.peekyApi.openExternal) {
         window.peekyApi.openExternal("https://peeky-task.vercel.app/#features");
-      }
-    });
-  }
-
-  if (btnAboutWebsite) {
-    btnAboutWebsite.addEventListener("click", () => {
-      if (window.peekyApi && window.peekyApi.openExternal) {
-        window.peekyApi.openExternal("https://peeky-task.vercel.app/");
       }
     });
   }
@@ -1548,6 +1486,12 @@ if (window.matchMedia) {
   });
 }
 
+function applyEdgeCardUI(edge) {
+  const curEdge = edge || state.edge || "right";
+  if (cardEdgeLeft) cardEdgeLeft.classList.toggle("selected", curEdge === "left");
+  if (cardEdgeRight) cardEdgeRight.classList.toggle("selected", curEdge === "right");
+}
+
 async function init() {
   if (window.peekyApi && window.peekyApi.loadData) {
     try {
@@ -1579,20 +1523,31 @@ async function init() {
     persistData();
   }
 
-  // Fetch actual data file path from main process if available
-  if (window.peekyApi && window.peekyApi.getDataPath && dataPathInput) {
-    try {
-      const p = await window.peekyApi.getDataPath();
-      if (p) dataPathInput.value = p;
-    } catch (err) {}
-  }
-
   setupListeners();
   applyTheme(state.theme || "dark");
   applyFont(state.font || "handwritten");
+  applyEdgeCardUI(state.edge || "right");
   renderNotesList();
   renderEditor();
   updateTrialUI();
+
+  if (window.peekyApi && window.peekyApi.onDataUpdated) {
+    window.peekyApi.onDataUpdated((data) => {
+      if (data) {
+        if (data.notes) state.notes = data.notes;
+        if (data.trial) state.trial = data.trial;
+        if (data.font) applyFont(data.font);
+        if (data.theme) applyTheme(data.theme);
+        if (data.edge) {
+          state.edge = data.edge;
+          applyEdgeCardUI(data.edge);
+        }
+        renderNotesList();
+        renderEditor();
+        updateTrialUI();
+      }
+    });
+  }
 
   // Keep countdown updated every minute
   setInterval(updateTrialUI, 60000);

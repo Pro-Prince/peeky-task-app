@@ -58,12 +58,18 @@ if (btnChooseRight && btnChooseLeft) {
     selectedEdge = "right";
     btnChooseRight.classList.add("active");
     btnChooseLeft.classList.remove("active");
+    if (window.peekyApi && window.peekyApi.dockEdge) {
+      window.peekyApi.dockEdge("right");
+    }
   });
 
   btnChooseLeft.addEventListener("click", () => {
     selectedEdge = "left";
     btnChooseLeft.classList.add("active");
     btnChooseRight.classList.remove("active");
+    if (window.peekyApi && window.peekyApi.dockEdge) {
+      window.peekyApi.dockEdge("left");
+    }
   });
 }
 

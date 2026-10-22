@@ -3,106 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Peeky Task</title>
+  <title>Peeky Task - Deck</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="edge-right">
-  <!-- Desktop Overlay Stage: 100% transparent background -->
+<body class="edge-right font-handwritten">
+  <!-- Desktop Edge Stage: 100% transparent background -->
   <div class="overlay-stage" id="overlayStage">
-
-    <!-- Active Floating Note Card (Floats beside the active tab matching Screenshot 5) -->
-    <div class="note-card-container" id="noteCardContainer">
-      <div class="note-card" id="noteCard">
-        <!-- Main Card Content Area -->
-        <div class="card-content">
-          <!-- Card Header: Title & Quick Actions -->
-          <div class="card-header">
-            <input 
-              type="text" 
-              class="card-title-input" 
-              id="cardTitleInput" 
-              value="Untitled list" 
-              placeholder="List title..." 
-              autocomplete="off"
-            />
-            <div class="card-header-actions">
-              <span class="task-progress-pill" id="cardProgressPill" style="display: none;">0/0 done</span>
-              <span class="card-save-status" id="cardSaveStatus">Saved · now</span>
-              <button class="card-header-btn" id="btnMinimizeCard" title="Minimize">−</button>
-              <button class="card-header-btn" id="btnTuckCard" title="Close">✕</button>
-            </div>
-          </div>
-
-          <div class="card-header-divider"></div>
-          <div class="card-progress-bar-track" id="cardProgressBarTrack">
-            <div class="card-progress-bar-fill" id="cardProgressBarFill"></div>
-          </div>
-
-          <!-- Quick Add Task Bar -->
-          <div class="quick-add-task-row">
-            <button class="quick-add-icon-btn" id="btnQuickAddIcon" title="Add task">+</button>
-            <input 
-              type="text" 
-              class="quick-add-input" 
-              id="quickAddInput" 
-              placeholder="Add a task... (press Enter)" 
-              autocomplete="off"
-            />
-          </div>
-
-          <!-- Scrollable Task Items Container -->
-          <div class="task-items-scroll" id="taskItemsContainer">
-            <!-- Active To-Do Tasks -->
-            <div class="tasks-group active-tasks" id="activeTasksGroup"></div>
-
-            <!-- Collapsible Completed Section -->
-            <div class="completed-tasks-section" id="completedTasksSection" style="display: none;">
-              <button class="completed-toggle-btn" id="btnToggleCompleted" type="button">
-                <span class="completed-chevron" id="completedChevron">▾</span>
-                <span id="completedSectionTitle">Completed (0)</span>
-              </button>
-              <div class="tasks-group completed-tasks" id="completedTasksGroup"></div>
-            </div>
-          </div>
-
-          <!-- Card Footer Toolbar -->
-          <div class="card-footer-toolbar">
-
-            <!-- Bottom row: 8 color swatches + Delete, Clear done, Mark complete, Close -->
-            <div class="card-bottom-actions-row">
-              <div class="card-color-swatches" id="cardColorSwatches">
-                <span class="swatch-dot" data-color="mint" style="background:#B9E7D0" title="Mint"></span>
-                <span class="swatch-dot" data-color="sky" style="background:#BAE4E7" title="Sky"></span>
-                <span class="swatch-dot" data-color="butter" style="background:#FBE08D" title="Butter"></span>
-                <span class="swatch-dot" data-color="peach" style="background:#FBD4A8" title="Peach"></span>
-                <span class="swatch-dot" data-color="blush" style="background:#F9C9D6" title="Blush"></span>
-                <span class="swatch-dot" data-color="lilac" style="background:#DCC9F2" title="Lilac"></span>
-                <span class="swatch-dot" data-color="blue" style="background:#C2DDF6" title="Blue"></span>
-                <span class="swatch-dot" data-color="slate" style="background:#D9DFE8" title="Slate"></span>
-              </div>
-
-              <div class="card-text-actions">
-                <button class="card-action-text-btn danger" id="btnCardDelete">Delete</button>
-                <button class="card-action-text-btn" id="btnClearCompleted" title="Clear completed tasks">Clear done</button>
-                <button class="card-action-text-btn" id="btnMarkComplete">Mark all done</button>
-                <button class="card-action-text-btn" id="btnCloseCard">Close</button>
-              </div>
-            </div>
-
-            <!-- 10-Second Undo Progress Bar -->
-            <div class="undo-drawer" id="undoDrawer" style="display: none;">
-              <div class="undo-drawer-row">
-                <span class="undo-msg">Task deleted. 10s to undo.</span>
-                <button class="btn-undo-action" id="btnCardUndo">Undo</button>
-              </div>
-              <div class="undo-bar-track">
-                <div class="undo-bar-drain" id="undoBarDrain"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Screen-Edge Tab Rail (Vertical column flush against screen bezel) -->
     <div class="edge-rail rested" id="edgeRail">

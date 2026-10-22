@@ -89,19 +89,6 @@
             </svg>
             <span>About</span>
           </button>
-
-          <div class="sidebar-user-block">
-            <div class="sidebar-user-avatar">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-            </div>
-            <div class="sidebar-user-text">
-              <span class="sidebar-user-status">Not signed in</span>
-              <span class="sidebar-user-sub">Local storage</span>
-            </div>
-          </div>
         </div>
       </aside>
 
@@ -410,33 +397,7 @@
             </div>
           </div>
 
-          <!-- Section 3: Data Storage & Backups -->
-          <div class="view-section">
-            <h2 class="section-heading">Data Storage & Backups</h2>
-            <div class="settings-card-group">
-              <div class="subgroup-desc" style="margin-bottom: 12px;">Tasks are stored locally on your PC. Nothing is ever sent to any remote servers.</div>
-              <div class="settings-path-row">
-                <input type="text" class="settings-path-input" id="dataPathInput" readonly value="%APPDATA%\peeky-task\peeky-task-data.json" />
-                <button class="settings-btn-inline" id="btnCopyDataPath">Copy path</button>
-              </div>
-              <div class="settings-actions-row">
-                <button class="settings-btn-action" id="btnOpenDataFolder">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                  <span>Open Data Folder</span>
-                </button>
-                <button class="settings-btn-action" id="btnExportBackup">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="15"></line></svg>
-                  <span>Export Backup</span>
-                </button>
-                <button class="settings-btn-action" id="btnImportBackup">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                  <span>Restore Backup</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Section 4: License Status -->
+          <!-- Section 3: License Status -->
           <div class="view-section">
             <h2 class="section-heading">License Status</h2>
             <div class="settings-card-group">
@@ -485,18 +446,6 @@
               <button class="about-pill-button" id="btnAboutPrivacy">Privacy policy</button>
               <button class="about-pill-button" id="btnAboutSupport">Contact support</button>
               <button class="about-pill-button" id="btnAboutFeatures">Features & Guide</button>
-            </div>
-          </div>
-
-          <!-- Section: Credits -->
-          <div class="view-section">
-            <h2 class="section-heading">Credits</h2>
-            <div class="about-credits-card">
-              <div class="credits-intro">Inspired by the minimalist desktop widget concept</div>
-              <button class="credits-website-pill" id="btnAboutWebsite">peeky-task.vercel.app</button>
-              <div class="credits-footnote">
-                Task text font is customizable in handwritten, normal, rounded, and typewriter. Icons are Segoe Fluent Icons, part of Windows.
-              </div>
             </div>
           </div>
         </div>

@@ -34,12 +34,15 @@
       "renderer.js",
       "manager.js",
       "onboarding.js",
+      "note.js",
       "index.html",
       "manager.html",
       "onboarding.html",
+      "note.html",
       "styles.css",
       "manager.css",
       "onboarding.css",
+      "note.css",
       "assets/**/*"
     ],
     "win": {

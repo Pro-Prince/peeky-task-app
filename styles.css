@@ -1,4 +1,4 @@
-/* Peeky Task - Native Desktop Overlay Styles */
+/* Peeky Task - Screen Edge Deck Styles */
 :root {
   --c-butter: #FBE08D;
   --c-blue: #C2DDF6;
@@ -44,29 +44,24 @@ html, body {
 
 body.edge-left .overlay-stage {
   justify-content: flex-start;
-  flex-direction: row;
 }
 
 /* ================= 1. SCREEN-EDGE TAB RAIL ================= */
 .edge-rail {
-  order: 2;
   width: auto;
   height: auto;
-  max-height: 90vh;
+  max-height: 94vh;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   pointer-events: auto; /* rail is interactive */
   z-index: 50;
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  padding: 10px 0;
-  box-shadow: none !important;
+  padding: 8px 0;
 }
 
 body.edge-left .edge-rail {
-  order: 1;
   align-items: flex-start;
-  box-shadow: none !important;
 }
 
 .rail-tabs-track {
@@ -75,12 +70,10 @@ body.edge-left .edge-rail {
   gap: 4px;
   align-items: flex-end;
   transition: gap 0.2s ease;
-  box-shadow: none !important;
 }
 
 body.edge-left .rail-tabs-track {
   align-items: flex-start;
-  box-shadow: none !important;
 }
 
 /* Individual Vertical Sticky Tab */
@@ -97,14 +90,14 @@ body.edge-left .rail-tabs-track {
               box-shadow 0.2s ease;
 }
 
-/* --- STATE A: RESTED POSITION (Default when not touched) --- */
+/* --- STATE A: RESTED POSITION (Default flush slivers when not touched) --- */
 .edge-rail.rested .rail-tabs-track {
   gap: 8px;
 }
 
 .edge-rail.rested .rail-tab {
   width: 7px;
-  height: 20px;
+  height: 22px;
   border-radius: 3.5px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
   margin-right: 0px;
@@ -121,6 +114,10 @@ body.edge-left .edge-rail.rested .rail-tab {
   opacity: 0;
 }
 
+.edge-rail.rested .tab-peek-preview {
+  display: none !important;
+}
+
 .edge-rail.rested .rail-actions-container {
   opacity: 0 !important;
   pointer-events: none !important;
@@ -130,13 +127,13 @@ body.edge-left .edge-rail.rested .rail-tab {
   transition: opacity 0.18s ease, transform 0.18s ease, max-height 0.18s ease;
 }
 
-/* --- STATE B: HOVERED / EXPANDED POSITION (When touched) --- */
+/* --- STATE B: HOVERED / EXPANDED POSITION (When mouse enters rail) --- */
 .edge-rail:not(.rested) .rail-tabs-track {
   gap: 6px;
 }
 
 .edge-rail:not(.rested) .rail-tab {
-  width: 28px;
+  width: 30px;
   height: 74px;
   border-radius: 8px 0 0 8px; /* right edge default */
   box-shadow: -2px 2px 7px rgba(0, 0, 0, 0.18);
@@ -159,23 +156,13 @@ body.edge-left .edge-rail:not(.rested) .rail-tab:hover {
   box-shadow: 4px 3px 10px rgba(0, 0, 0, 0.25);
 }
 
-.edge-rail:not(.rested) .rail-tab.active {
-  transform: translateX(-6px);
-  box-shadow: -6px 4px 14px rgba(0, 0, 0, 0.3);
-}
-
-body.edge-left .edge-rail:not(.rested) .rail-tab.active {
-  transform: translateX(6px);
-  box-shadow: 6px 4px 14px rgba(0, 0, 0, 0.3);
-}
-
 /* Vertical Rotated Text Label */
 .rail-tab-label {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--note-ink);
   white-space: nowrap;
@@ -186,7 +173,82 @@ body.edge-left .edge-rail:not(.rested) .rail-tab.active {
   transition: opacity 0.18s ease;
 }
 
-/* Rail Actions Container (3 buttons) */
+/* ================= 2. PEEK PREVIEW CARD (Matching Screenshot 5) ================= */
+.tab-peek-preview {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%) translateX(12px) scale(0.95);
+  width: 220px;
+  max-height: 180px;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: -6px 8px 24px rgba(0, 0, 0, 0.28), 0 2px 6px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-right: 12px;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  overflow: hidden;
+}
+
+body.edge-left .tab-peek-preview {
+  right: auto;
+  left: 100%;
+  margin-right: 0;
+  margin-left: 12px;
+  transform: translateY(-50%) translateX(-12px) scale(0.95);
+  box-shadow: 6px 8px 24px rgba(0, 0, 0, 0.28), 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.rail-tab:hover .tab-peek-preview {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) translateX(0) scale(1);
+}
+
+.peek-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--note-ink);
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.peek-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.peek-item {
+  font-size: 11.5px;
+  color: var(--note-ink);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.peek-item.done {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.peek-footer {
+  margin-top: 8px;
+  font-size: 10px;
+  color: var(--note-ink-muted);
+}
+
+/* ================= 3. RAIL ACTIONS CONTAINER ================= */
 .rail-actions-container {
   display: flex;
   flex-direction: column;
@@ -269,527 +331,23 @@ body.edge-left .rail-icon-btn {
   transform: scale(1.08);
 }
 
-/* ================= 2. ACTIVE FLOATING NOTE CARD ================= */
-.note-card-container {
-  order: 1;
-  margin-right: 14px;
-  pointer-events: auto; /* card is interactive */
-  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-body.edge-left .note-card-container {
-  order: 2;
-  margin-right: 0;
-  margin-left: 14px;
-}
-
-.note-card {
-  width: 300px;
-  min-height: 200px;
-  max-height: 380px;
-  border-radius: 14px;
-  box-shadow: 0 10px 32px -4px rgba(0, 0, 0, 0.28), 0 4px 12px -2px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transition: background-color 0.25s ease;
-  animation: cardFlyIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes cardFlyIn {
-  from {
-    opacity: 0;
-    transform: translateX(16px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-body.edge-left .note-card {
-  animation-name: cardFlyInLeft;
-}
-
-@keyframes cardFlyInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-16px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-/* Main Card Content */
-.card-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px 6px 14px;
-}
-
-.card-title-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  font-size: 14.5px;
-  font-weight: 700;
-  color: var(--note-ink);
-  letter-spacing: -0.01em;
-  font-family: inherit;
-}
-
-.card-title-input::placeholder {
-  color: rgba(42, 52, 66, 0.4);
-}
-
-.card-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.card-save-status {
-  font-size: 10.5px;
-  color: rgba(42, 52, 66, 0.6);
-  margin-right: 6px;
-}
-
-.task-progress-pill {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 1.5px 6px;
-  border-radius: 8px;
-  background: rgba(42, 52, 66, 0.12);
-  color: var(--note-ink);
-  margin-right: 4px;
-  transition: all 0.2s ease;
-}
-
-.card-header-btn {
-  background: transparent;
-  border: none;
-  color: rgba(42, 52, 66, 0.5);
-  font-size: 13px;
-  cursor: pointer;
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-}
-
-.card-header-btn:hover {
-  background: rgba(0, 0, 0, 0.08);
-  color: var(--note-ink);
-}
-
-.card-header-divider {
-  height: 1px;
-  background: rgba(42, 52, 66, 0.12);
-  margin: 0 14px;
-}
-
-/* Subtle 2.5px To-Do Progress Bar */
-.card-progress-bar-track {
-  height: 2.5px;
-  margin: 0 14px;
-  background: rgba(42, 52, 66, 0.08);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.card-progress-bar-fill {
-  height: 100%;
-  width: 0%;
-  background: #2E7D32;
-  border-radius: 2px;
-  transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
-}
-
-/* Quick Add Task Row */
-.quick-add-task-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px 6px 14px;
-  border-bottom: 1px solid rgba(42, 52, 66, 0.08);
-  background: rgba(0, 0, 0, 0.02);
-}
-
-.quick-add-icon-btn {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 1.5px dashed rgba(42, 52, 66, 0.35);
-  background: transparent;
-  color: var(--note-ink);
-  font-size: 13px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.quick-add-icon-btn:hover {
-  border-style: solid;
-  border-color: var(--note-ink);
-  background: rgba(255, 255, 255, 0.6);
-  transform: scale(1.1);
-}
-
-.quick-add-input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: 12.5px;
-  font-family: inherit;
-  font-weight: 500;
-  color: var(--note-ink);
-}
-
-.quick-add-input::placeholder {
-  color: rgba(42, 52, 66, 0.45);
-}
-
-/* Scrollable Task Items Container */
-.task-items-scroll {
-  flex: 1;
-  min-height: 110px;
-  max-height: 250px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 6px 10px 10px 10px;
-  display: flex;
-  flex-direction: column;
-}
-
-.task-items-scroll::-webkit-scrollbar {
-  width: 5px;
-}
-
-.task-items-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.task-items-scroll::-webkit-scrollbar-thumb {
-  background: rgba(42, 52, 66, 0.15);
-  border-radius: 4px;
-}
-
-.task-items-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(42, 52, 66, 0.3);
-}
-
-.tasks-group {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-/* Individual Task Item Row */
-.task-item-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 3px 6px;
-  border-radius: 6px;
-  transition: background-color 0.15s ease;
-  position: relative;
-}
-
-.task-item-row:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-
-/* Task Checkbox */
-.task-checkbox {
-  width: 15px;
-  height: 15px;
-  border-radius: 4.5px;
-  border: 1.5px solid rgba(42, 52, 66, 0.45);
-  background: rgba(255, 255, 255, 0.4);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  flex-shrink: 0;
-  padding: 0;
-}
-
-.task-checkbox:hover {
-  border-color: var(--note-ink);
-  background: #ffffff;
-  transform: scale(1.08);
-}
-
-.task-checkbox .check-icon {
-  display: none;
-  stroke: #ffffff;
-  stroke-width: 3.5;
-}
-
-.task-item-row.completed .task-checkbox {
-  background: #2E7D32;
-  border-color: #2E7D32;
-}
-
-.task-item-row.completed .task-checkbox .check-icon {
-  display: block;
-}
-
-/* Task Text Input */
-.task-text-input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  outline: none;
-  font-size: 12.5px;
-  font-family: inherit;
-  font-weight: 500;
-  color: var(--note-ink);
-  line-height: 1.35;
-  padding: 1px 0;
-  transition: color 0.15s ease, opacity 0.15s ease;
-}
-
-.task-item-row.completed .task-text-input {
-  text-decoration: line-through;
-  color: rgba(42, 52, 66, 0.5);
-  font-weight: 400;
-}
-
-/* Task Row Delete Button (shown on hover) */
-.task-row-del-btn {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  border: none;
-  background: transparent;
-  color: rgba(42, 52, 66, 0.4);
-  cursor: pointer;
-  font-size: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: all 0.15s ease;
-  flex-shrink: 0;
-}
-
-.task-item-row:hover .task-row-del-btn {
-  opacity: 1;
-}
-
-.task-row-del-btn:hover {
-  background: rgba(239, 68, 68, 0.15);
-  color: #dc2626;
-}
-
-/* Collapsible Completed Section */
-.completed-tasks-section {
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px dashed rgba(42, 52, 66, 0.15);
-}
-
-.completed-toggle-btn {
-  background: transparent;
-  border: none;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: rgba(42, 52, 66, 0.65);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 4px;
-  margin-bottom: 4px;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.completed-toggle-btn:hover {
-  color: var(--note-ink);
-  background: rgba(0, 0, 0, 0.04);
-}
-
-.completed-chevron {
-  font-size: 11px;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  display: inline-block;
-}
-
-.completed-tasks-section.collapsed .completed-chevron {
-  transform: rotate(-90deg);
-}
-
-.completed-tasks-section.collapsed .completed-tasks {
-  display: none;
-}
-
-/* Empty Tasks Placeholder */
-.empty-tasks-placeholder {
-  padding: 20px 12px;
-  text-align: center;
-  font-size: 12px;
-  color: rgba(42, 52, 66, 0.5);
-  font-style: italic;
-}
-
-/* Card Footer Toolbar */
-.card-footer-toolbar {
-  padding: 6px 14px 10px 14px;
-  border-top: 1px solid rgba(42, 52, 66, 0.1);
-  display: flex;
-  flex-direction: column;
-}
-
-.card-bottom-actions-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.card-color-swatches {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.swatch-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  transition: transform 0.15s ease;
-}
-
-.swatch-dot:hover {
-  transform: scale(1.25);
-}
-
-.swatch-dot.active {
-  outline: 2px solid #2A3442;
-  outline-offset: 1.5px;
-}
-
-.card-text-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.card-action-text-btn {
-  background: transparent;
-  border: none;
-  font-size: 11.5px;
-  font-weight: 500;
-  cursor: pointer;
-  color: #2A3442;
-  transition: opacity 0.15s ease;
-}
-
-.card-action-text-btn.danger {
-  color: #B93A33;
-}
-
-.card-action-text-btn:hover {
-  opacity: 0.75;
-  text-decoration: underline;
-}
-
-/* 10-Second Undo Drawer inside Card */
-.undo-drawer {
-  margin-top: 6px;
-  background: rgba(0, 0, 0, 0.08);
-  border-radius: 8px;
-  padding: 6px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.undo-drawer-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.undo-msg {
-  font-size: 11px;
-  color: #B93A33;
-  font-weight: 600;
-}
-
-.btn-undo-action {
-  background: rgba(0, 0, 0, 0.12);
-  border: none;
-  color: var(--note-ink);
-  font-size: 10.5px;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.undo-bar-track {
-  height: 2.5px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.undo-bar-drain {
-  height: 100%;
-  background: #B93A33;
-  width: 100%;
-  transform-origin: left;
-  transition: width 10s linear;
-}
-
-/* ================= 4. TASK FONTS (Handwritten, Normal, Rounded, Typewriter) ================= */
-body.font-handwritten .task-text-input,
-body.font-handwritten .card-title-input,
-body.font-handwritten .quick-add-input {
+/* Fonts */
+body.font-handwritten .peek-title,
+body.font-handwritten .peek-item {
   font-family: "Comic Sans MS", "Caveat", "Segoe Print", cursive, sans-serif !important;
 }
 
-body.font-normal .task-text-input,
-body.font-normal .card-title-input,
-body.font-normal .quick-add-input {
+body.font-normal .peek-title,
+body.font-normal .peek-item {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
-body.font-rounded .task-text-input,
-body.font-rounded .card-title-input,
-body.font-rounded .quick-add-input {
+body.font-rounded .peek-title,
+body.font-rounded .peek-item {
   font-family: "Comfortaa", "Quicksand", "Nunito", "Segoe UI", sans-serif !important;
 }
 
-body.font-typewriter .task-text-input,
-body.font-typewriter .card-title-input,
-body.font-typewriter .quick-add-input {
+body.font-typewriter .peek-title,
+body.font-typewriter .peek-item {
   font-family: "Courier New", Consolas, Monaco, monospace !important;
 }
-

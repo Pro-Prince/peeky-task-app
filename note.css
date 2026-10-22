@@ -1,0 +1,556 @@
+/* Peeky Task - Centered Floating Note Card */
+:root {
+  --c-butter: #FBE08D;
+  --c-blue: #C2DDF6;
+  --c-mint: #B9E7D0;
+  --c-blush: #F9C9D6;
+  --c-lilac: #DCC9F2;
+  --c-peach: #FBD4A8;
+  --c-sky: #BAE4E7;
+  --c-slate: #D9DFE8;
+
+  --note-ink: #2A3442;
+  --note-ink-muted: #66748A;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+html, body {
+  background: transparent !important;
+  color: var(--note-ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+}
+
+.note-window-frame {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.note-card {
+  width: 100%;
+  height: 100%;
+  max-width: 350px;
+  max-height: 440px;
+  border-radius: 16px;
+  background-color: var(--c-mint);
+  box-shadow: 0 16px 38px -4px rgba(0, 0, 0, 0.35), 0 6px 16px -2px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: background-color 0.22s ease;
+  animation: cardPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cardPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Drag Header */
+.card-drag-header {
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px 0 14px;
+}
+
+.drag-region {
+  flex: 1;
+  height: 100%;
+  -webkit-app-region: drag;
+  cursor: grab;
+}
+
+.card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  -webkit-app-region: no-drag;
+}
+
+.card-header-btn {
+  background: transparent;
+  border: none;
+  color: rgba(42, 52, 66, 0.45);
+  font-size: 13px;
+  cursor: pointer;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.card-header-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--note-ink);
+}
+
+.card-header-btn.close:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #DC2626;
+}
+
+/* Main Content */
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 2px;
+  min-height: 0;
+  -webkit-app-region: no-drag;
+}
+
+/* Title Row */
+.card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 16px 8px 16px;
+  gap: 12px;
+}
+
+.card-title-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--note-ink);
+  letter-spacing: -0.01em;
+  font-family: inherit;
+}
+
+.card-title-input::placeholder {
+  color: rgba(42, 52, 66, 0.35);
+}
+
+.card-title-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.card-save-status {
+  font-size: 10.5px;
+  color: rgba(42, 52, 66, 0.55);
+}
+
+.task-progress-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 9px;
+  background: rgba(42, 52, 66, 0.12);
+  color: var(--note-ink);
+  transition: all 0.2s ease;
+}
+
+/* Progress bar */
+.card-progress-bar-track {
+  height: 2.5px;
+  margin: 0 16px 8px 16px;
+  background: rgba(42, 52, 66, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.card-progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: #2E7D32;
+  border-radius: 2px;
+  transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
+}
+
+/* Quick Add Row */
+.quick-add-task-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 14px 6px 14px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(42, 52, 66, 0.08);
+}
+
+.quick-add-icon-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(42, 52, 66, 0.4);
+  background: transparent;
+  color: var(--note-ink);
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.quick-add-icon-btn:hover {
+  border-style: solid;
+  border-color: var(--note-ink);
+  background: rgba(255, 255, 255, 0.8);
+  transform: scale(1.1);
+}
+
+.quick-add-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--note-ink);
+}
+
+.quick-add-input::placeholder {
+  color: rgba(42, 52, 66, 0.45);
+}
+
+/* Scrollable Task Items */
+.task-items-scroll {
+  flex: 1;
+  min-height: 140px;
+  max-height: 250px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 14px 10px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.task-items-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.task-items-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.task-items-scroll::-webkit-scrollbar-thumb {
+  background: rgba(42, 52, 66, 0.16);
+  border-radius: 4px;
+}
+
+.tasks-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* Task Item Row */
+.task-item-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 8px;
+  border-radius: 7px;
+  transition: background-color 0.15s ease;
+  position: relative;
+}
+
+.task-item-row:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.task-checkbox {
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  border: 1.5px solid rgba(42, 52, 66, 0.45);
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.task-checkbox:hover {
+  border-color: var(--note-ink);
+  background: #ffffff;
+  transform: scale(1.08);
+}
+
+.task-checkbox .check-icon {
+  display: none;
+  stroke: #ffffff;
+  stroke-width: 3.5;
+}
+
+.task-item-row.completed .task-checkbox {
+  background: #2E7D32;
+  border-color: #2E7D32;
+}
+
+.task-item-row.completed .task-checkbox .check-icon {
+  display: block;
+}
+
+.task-text-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--note-ink);
+  line-height: 1.35;
+  padding: 1px 0;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.task-item-row.completed .task-text-input {
+  text-decoration: line-through;
+  color: rgba(42, 52, 66, 0.5);
+  font-weight: 400;
+}
+
+.task-row-del-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: none;
+  background: transparent;
+  color: rgba(42, 52, 66, 0.4);
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.task-item-row:hover .task-row-del-btn {
+  opacity: 1;
+}
+
+.task-row-del-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #DC2626;
+}
+
+/* Completed Section */
+.completed-tasks-section {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(42, 52, 66, 0.15);
+}
+
+.completed-toggle-btn {
+  background: transparent;
+  border: none;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(42, 52, 66, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.completed-toggle-btn:hover {
+  color: var(--note-ink);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.completed-chevron {
+  font-size: 11px;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.completed-tasks-section.collapsed .completed-chevron {
+  transform: rotate(-90deg);
+}
+
+.completed-tasks-section.collapsed .completed-tasks {
+  display: none;
+}
+
+.empty-tasks-placeholder {
+  padding: 24px 12px;
+  text-align: center;
+  font-size: 12.5px;
+  color: rgba(42, 52, 66, 0.45);
+  font-style: italic;
+}
+
+/* Footer Toolbar */
+.card-footer-toolbar {
+  padding: 8px 16px 12px 16px;
+  border-top: 1px solid rgba(42, 52, 66, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.card-bottom-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-color-swatches {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.swatch-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  transition: transform 0.15s ease;
+}
+
+.swatch-dot:hover {
+  transform: scale(1.25);
+}
+
+.swatch-dot.active {
+  outline: 2px solid #2A3442;
+  outline-offset: 1.5px;
+}
+
+.card-text-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-action-text-btn {
+  background: transparent;
+  border: none;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #2A3442;
+  transition: opacity 0.15s ease;
+}
+
+.card-action-text-btn.danger {
+  color: #B93A33;
+}
+
+.card-action-text-btn:hover {
+  opacity: 0.75;
+  text-decoration: underline;
+}
+
+/* Undo Drawer */
+.undo-drawer {
+  margin-top: 6px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.undo-drawer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.undo-msg {
+  font-size: 11px;
+  color: #B93A33;
+  font-weight: 600;
+}
+
+.btn-undo-action {
+  background: rgba(0, 0, 0, 0.12);
+  border: none;
+  color: var(--note-ink);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.undo-bar-track {
+  height: 2.5px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.undo-bar-drain {
+  height: 100%;
+  background: #B93A33;
+  width: 100%;
+  transform-origin: left;
+  transition: width 10s linear;
+}
+
+/* Fonts */
+body.font-handwritten .task-text-input,
+body.font-handwritten .card-title-input,
+body.font-handwritten .quick-add-input {
+  font-family: "Comic Sans MS", "Caveat", "Segoe Print", cursive, sans-serif !important;
+}
+
+body.font-normal .task-text-input,
+body.font-normal .card-title-input,
+body.font-normal .quick-add-input {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+body.font-rounded .task-text-input,
+body.font-rounded .card-title-input,
+body.font-rounded .quick-add-input {
+  font-family: "Comfortaa", "Quicksand", "Nunito", "Segoe UI", sans-serif !important;
+}
+
+body.font-typewriter .task-text-input,
+body.font-typewriter .card-title-input,
+body.font-typewriter .quick-add-input {
+  font-family: "Courier New", Consolas, Monaco, monospace !important;
+}

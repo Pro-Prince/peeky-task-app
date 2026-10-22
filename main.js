@@ -1,17 +1,18 @@
-const { app, BrowserWindow, ipcMain, screen, Tray, Menu, globalShortcut, shell, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, screen, Tray, Menu, globalShortcut, shell } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
 app.commandLine.appendSwitch("disable-features", "CalculateNativeWinOcclusion");
 
 let deckWindow = null;
+let noteWindow = null;
 let managerWindow = null;
 let onboardingWindow = null;
 let tray = null;
 let isAlwaysOnTop = true;
 let currentEdge = "right"; // "left" | "right"
-let isCardOpen = true; // Start with active task card open so user sees it right away!
 let isDeckHovered = false;
+let isDeckPeeking = false;
 
 const dataFilePath = path.join(app.getPath("userData"), "peeky-task-data.json");
 
@@ -45,16 +46,16 @@ function getDisplayBounds() {
 }
 
 function getTargetDeckWidth() {
-  if (isCardOpen) return 390; // 300px compact card + 28px rail + 18px gap + 44px soft shadow padding
-  if (isDeckHovered) return 56;
-  return 24; // Rested pill sliver width flush against edge
+  if (isDeckPeeking) return 280; // expanded to show attached peek preview card
+  if (isDeckHovered) return 52;  // expanded to show vertical tab labels
+  return 24;                     // rested flush slivers
 }
 
 function repositionDeckWindow() {
   if (!deckWindow) return;
   const workArea = getDisplayBounds();
   const width = getTargetDeckWidth();
-  const height = Math.min(740, workArea.height - 30);
+  const height = Math.min(680, workArea.height - 30);
   const targetX = currentEdge === "right" ? workArea.x + workArea.width - width : workArea.x;
   const targetY = workArea.y + Math.round((workArea.height - height) / 2);
 
@@ -66,11 +67,11 @@ function repositionDeckWindow() {
   });
 }
 
-// 1. CREATE FLOATING SCREEN-EDGE DECK WINDOW
+// 1. CREATE SCREEN-EDGE DECK WINDOW
 function createDeckWindow() {
   const workArea = getDisplayBounds();
   const width = getTargetDeckWidth();
-  const height = Math.min(740, workArea.height - 30);
+  const height = Math.min(680, workArea.height - 30);
   const posX = currentEdge === "right" ? workArea.x + workArea.width - width : workArea.x;
   const posY = workArea.y + Math.round((workArea.height - height) / 2);
 
@@ -101,9 +102,6 @@ function createDeckWindow() {
 
   deckWindow.once("ready-to-show", () => {
     deckWindow.show();
-    if (isCardOpen) {
-      deckWindow.webContents.send("open-card");
-    }
   });
 
   deckWindow.on("closed", () => {
@@ -111,7 +109,65 @@ function createDeckWindow() {
   });
 }
 
-// 2. CREATE FIRST-LAUNCH ONBOARDING WINDOW (Matching Screenshots 1, 2, 3)
+// 2. CREATE CENTERED FLOATING TASK CARD WINDOW (Matching Image 5)
+function createNoteWindow() {
+  if (noteWindow) return;
+
+  const workArea = getDisplayBounds();
+  const width = 360;
+  const height = 460;
+  const posX = Math.round(workArea.x + (workArea.width - width) / 2);
+  const posY = Math.round(workArea.y + (workArea.height - height) / 2);
+
+  noteWindow = new BrowserWindow({
+    width: width,
+    height: height,
+    x: posX,
+    y: posY,
+    title: "Peeky Task",
+    frame: false,
+    transparent: true,
+    hasShadow: true,
+    roundedCorners: true,
+    backgroundColor: "#00000000",
+    alwaysOnTop: isAlwaysOnTop,
+    skipTaskbar: false,
+    resizable: false,
+    show: false,
+    icon: path.join(__dirname, "assets", "app-icon.png"),
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+
+  noteWindow.loadFile("note.html");
+
+  noteWindow.on("close", (event) => {
+    if (!app.isQuitting) {
+      event.preventDefault();
+      noteWindow.hide();
+    }
+  });
+
+  noteWindow.on("closed", () => {
+    noteWindow = null;
+  });
+}
+
+function showNoteCard(noteId) {
+  if (!noteWindow) {
+    createNoteWindow();
+  }
+  if (noteId && noteWindow.webContents) {
+    noteWindow.webContents.send("show-note-card", noteId);
+  }
+  noteWindow.show();
+  noteWindow.focus();
+}
+
+// 3. CREATE FIRST-LAUNCH ONBOARDING WINDOW
 function createOnboardingWindow() {
   if (onboardingWindow) {
     onboardingWindow.show();
@@ -153,7 +209,7 @@ function createOnboardingWindow() {
   });
 }
 
-// 3. CREATE MAIN MANAGER WINDOW (Dark theme task dashboard)
+// 4. CREATE MAIN MANAGER WINDOW
 function createManagerWindow(showImmediately = true) {
   if (managerWindow) {
     if (showImmediately) {
@@ -193,7 +249,6 @@ function createManagerWindow(showImmediately = true) {
     }
   });
 
-  // Closing Manager Window only hides it so Deck stays alive!
   managerWindow.on("close", (event) => {
     if (!app.isQuitting) {
       event.preventDefault();
@@ -206,7 +261,7 @@ function createManagerWindow(showImmediately = true) {
   });
 }
 
-// 4. SYSTEM TRAY
+// 5. SYSTEM TRAY
 function createTray() {
   const iconPath = path.join(__dirname, "assets", "app-icon.png");
   try {
@@ -235,10 +290,14 @@ function createTray() {
         label: "Stick to " + (currentEdge === "right" ? "Left Edge" : "Right Edge"),
         click: () => {
           currentEdge = currentEdge === "right" ? "left" : "right";
+          const userData = loadUserData() || {};
+          userData.edge = currentEdge;
+          saveUserData(userData);
           repositionDeckWindow();
           if (deckWindow) {
             deckWindow.webContents.send("edge-changed", currentEdge);
           }
+          broadcastDataUpdate(userData);
           createTray();
         },
       },
@@ -248,10 +307,8 @@ function createTray() {
         checked: isAlwaysOnTop,
         click: (menuItem) => {
           isAlwaysOnTop = menuItem.checked;
-          if (deckWindow) {
-            deckWindow.setAlwaysOnTop(isAlwaysOnTop);
-            deckWindow.webContents.send("always-on-top-changed", isAlwaysOnTop);
-          }
+          if (deckWindow) deckWindow.setAlwaysOnTop(isAlwaysOnTop);
+          if (noteWindow) noteWindow.setAlwaysOnTop(isAlwaysOnTop);
         },
       },
       { type: "separator" },
@@ -275,6 +332,19 @@ function createTray() {
   }
 }
 
+// Broadcast changes across all windows
+function broadcastDataUpdate(data, senderWebContents) {
+  if (deckWindow && deckWindow.webContents !== senderWebContents) {
+    deckWindow.webContents.send("data-updated", data);
+  }
+  if (managerWindow && managerWindow.webContents !== senderWebContents) {
+    managerWindow.webContents.send("data-updated", data);
+  }
+  if (noteWindow && noteWindow.webContents !== senderWebContents) {
+    noteWindow.webContents.send("data-updated", data);
+  }
+}
+
 const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
@@ -288,12 +358,6 @@ if (!gotTheLock) {
     } else {
       createManagerWindow(true);
     }
-    isCardOpen = true;
-    repositionDeckWindow();
-    if (deckWindow) {
-      deckWindow.show();
-      deckWindow.webContents.send("open-card");
-    }
   });
 
   app.whenReady().then(() => {
@@ -304,34 +368,38 @@ if (!gotTheLock) {
       currentEdge = "right"; // default on right
     }
 
-    isCardOpen = true;
+    if (userData && userData.launchAtStartup !== undefined) {
+      try {
+        app.setLoginItemSettings({ openAtLogin: !!userData.launchAtStartup });
+      } catch (e) {}
+    }
+
     createDeckWindow();
+    createNoteWindow();
 
     if (!userData || !userData.hasSeenOnboarding) {
       createOnboardingWindow();
+    } else {
+      showNoteCard();
     }
 
     createTray();
 
     try {
-      // 1. Alt+Space: Toggle task pill / summon manager
+      // 1. Alt+Space: Toggle centered task card
       globalShortcut.register("Alt+Space", () => {
-        if (!managerWindow || !managerWindow.isVisible()) {
-          createManagerWindow(true);
+        if (noteWindow && noteWindow.isVisible()) {
+          noteWindow.hide();
         } else {
-          managerWindow.hide();
+          showNoteCard();
         }
       });
 
-      // 2. Ctrl+Alt+T: Quick add task (opens floating deck and focuses quick add)
+      // 2. Ctrl+Alt+T: Quick add task (opens centered note and focuses quick add)
       globalShortcut.register("CommandOrControl+Alt+T", () => {
-        isCardOpen = true;
-        repositionDeckWindow();
-        if (deckWindow) {
-          deckWindow.show();
-          deckWindow.focus();
-          deckWindow.webContents.send("open-card");
-          deckWindow.webContents.send("focus-quick-add");
+        showNoteCard();
+        if (noteWindow) {
+          noteWindow.webContents.send("focus-quick-add");
         }
       });
 
@@ -358,23 +426,18 @@ app.on("will-quit", () => {
   globalShortcut.unregisterAll();
 });
 
-// Broadcast changes between Deck Window and Manager Window
-function broadcastDataUpdate(data, senderWebContents) {
-  if (deckWindow && deckWindow.webContents !== senderWebContents) {
-    deckWindow.webContents.send("data-updated", data);
-  }
-  if (managerWindow && managerWindow.webContents !== senderWebContents) {
-    managerWindow.webContents.send("data-updated", data);
-  }
-}
-
 // IPC Handlers
 ipcMain.on("launch-sticky-tasks", (event, edge) => {
   if (edge === "left" || edge === "right") {
     currentEdge = edge;
   } else {
-    currentEdge = "right"; // default on right
+    currentEdge = "right";
   }
+
+  const userData = loadUserData() || {};
+  userData.edge = currentEdge;
+  userData.hasSeenOnboarding = true;
+  saveUserData(userData);
 
   if (onboardingWindow) {
     onboardingWindow.close();
@@ -385,15 +448,14 @@ ipcMain.on("launch-sticky-tasks", (event, edge) => {
     managerWindow.hide();
   }
 
-  isCardOpen = true;
   repositionDeckWindow();
 
   if (deckWindow) {
     deckWindow.show();
-    deckWindow.focus();
     deckWindow.webContents.send("edge-changed", currentEdge);
-    deckWindow.webContents.send("open-card");
   }
+  showNoteCard();
+  broadcastDataUpdate(userData, event.sender);
 });
 
 ipcMain.on("open-manager", () => {
@@ -408,12 +470,22 @@ ipcMain.on("open-onboarding", () => {
   createOnboardingWindow();
 });
 
+ipcMain.on("open-note-card", (event, noteId) => {
+  showNoteCard(noteId);
+});
+
+ipcMain.on("close-note-card", () => {
+  if (noteWindow) noteWindow.hide();
+});
+
 ipcMain.on("window-close", (event) => {
   const sender = BrowserWindow.fromWebContents(event.sender);
   if (sender === managerWindow) {
     managerWindow.hide();
   } else if (sender === deckWindow) {
     deckWindow.hide();
+  } else if (sender === noteWindow) {
+    noteWindow.hide();
   } else if (sender === onboardingWindow) {
     onboardingWindow.close();
   }
@@ -422,22 +494,30 @@ ipcMain.on("window-close", (event) => {
 ipcMain.on("window-set-always-on-top", (event, alwaysOnTop) => {
   isAlwaysOnTop = !!alwaysOnTop;
   if (deckWindow) deckWindow.setAlwaysOnTop(isAlwaysOnTop);
+  if (noteWindow) noteWindow.setAlwaysOnTop(isAlwaysOnTop);
 });
 
 ipcMain.on("dock-edge", (event, edge) => {
   if (edge === "left" || edge === "right") {
     currentEdge = edge;
+    const userData = loadUserData() || {};
+    userData.edge = edge;
+    saveUserData(userData);
     repositionDeckWindow();
+    if (deckWindow) {
+      deckWindow.webContents.send("edge-changed", currentEdge);
+    }
+    broadcastDataUpdate(userData, event.sender);
   }
-});
-
-ipcMain.on("set-card-open", (event, open) => {
-  isCardOpen = !!open;
-  repositionDeckWindow();
 });
 
 ipcMain.on("set-deck-hovered", (event, hovered) => {
   isDeckHovered = !!hovered;
+  repositionDeckWindow();
+});
+
+ipcMain.on("set-deck-peeking", (event, peeking) => {
+  isDeckPeeking = !!peeking;
   repositionDeckWindow();
 });
 
@@ -452,13 +532,9 @@ ipcMain.handle("data-save", async (event, data) => {
 });
 
 ipcMain.on("open-external", (event, url) => {
-  if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
+  if (url && (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("mailto:"))) {
     shell.openExternal(url);
   }
-});
-
-ipcMain.on("open-data-folder", () => {
-  shell.openPath(app.getPath("userData"));
 });
 
 ipcMain.handle("get-login-item-settings", () => {
@@ -472,50 +548,11 @@ ipcMain.handle("get-login-item-settings", () => {
 ipcMain.handle("set-login-item-settings", (event, openAtLogin) => {
   try {
     app.setLoginItemSettings({ openAtLogin: !!openAtLogin });
+    const userData = loadUserData() || {};
+    userData.launchAtStartup = !!openAtLogin;
+    saveUserData(userData);
     return app.getLoginItemSettings().openAtLogin;
   } catch (e) {
     return false;
   }
 });
-
-ipcMain.handle("get-data-path", () => {
-  return dataFilePath;
-});
-
-ipcMain.handle("export-tasks-file", async (event, data) => {
-  try {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    const res = await dialog.showSaveDialog(win, {
-      title: "Export Peeky Task Backup",
-      defaultPath: "peeky-task-backup.json",
-      filters: [{ name: "JSON Backup", extensions: ["json"] }],
-    });
-    if (!res.canceled && res.filePath) {
-      fs.writeFileSync(res.filePath, JSON.stringify(data, null, 2), "utf-8");
-      return true;
-    }
-  } catch (err) {
-    console.error("Error exporting backup:", err);
-  }
-  return false;
-});
-
-ipcMain.handle("import-tasks-file", async (event) => {
-  try {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    const res = await dialog.showOpenDialog(win, {
-      title: "Import Peeky Task Backup",
-      filters: [{ name: "JSON Backup", extensions: ["json"] }],
-      properties: ["openFile"],
-    });
-    if (!res.canceled && res.filePaths.length > 0) {
-      const raw = fs.readFileSync(res.filePaths[0], "utf-8");
-      const parsed = JSON.parse(raw);
-      return parsed;
-    }
-  } catch (err) {
-    console.error("Error importing backup:", err);
-  }
-  return null;
-});
-
