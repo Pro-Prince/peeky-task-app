@@ -136,12 +136,12 @@ function renderRailTabs() {
 
   // Dynamic capacity calculation based on screen height
   const availHeight = window.innerHeight || 650;
-  const actionsHeight = 75;
-  const tabSlotHeight = 65;
-  const maxTabs = Math.max(7, Math.floor((availHeight - actionsHeight) / tabSlotHeight));
+  const actionsHeight = 84;
+  const tabSlotHeight = 76;
+  const maxTabs = Math.max(4, Math.floor((availHeight - actionsHeight) / tabSlotHeight));
 
   if (btnAddNote) {
-    btnAddNote.style.display = "flex";
+    btnAddNote.style.display = deckNotes.length >= maxTabs ? "none" : "flex";
   }
 
   const visibleDeckNotes = deckNotes.slice(0, maxTabs);
@@ -248,12 +248,26 @@ function setupListeners() {
       if (window.peekyApi && window.peekyApi.setDeckHovered) {
         window.peekyApi.setDeckHovered(false);
       }
-    }, 350);
+    }, 450);
   });
 
   // Add Note Button (+)
   if (btnAddNote) {
     btnAddNote.addEventListener("click", () => {
+      // Check trial expiration
+      const trial = state.trial || {};
+      const trialStartedAt = Number(trial.trialStartedAt) || Date.now();
+      const trialDurationMs = 7 * 24 * 60 * 60 * 1000;
+      const isExpired = !trial.isLicensed && (Date.now() - trialStartedAt > trialDurationMs);
+      if (isExpired) {
+        if (confirm("Your 7-day free trial has expired! Editing is locked. Would you like to buy Peeky Task to unlock lifetime editing?")) {
+          if (window.peekyApi && window.peekyApi.openExternal) {
+            window.peekyApi.openExternal("https://peeky-task.vercel.app/buy");
+          }
+        }
+        return;
+      }
+
       const newNote = {
         id: "task_" + Date.now(),
         title: "Untitled note",

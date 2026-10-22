@@ -71,6 +71,43 @@ html, body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+/* Modern Minimalist Fluent Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+body.theme-light * {
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+body.theme-light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+}
+
+body.theme-light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.35);
+}
+
 .app-window {
   display: flex;
   flex-direction: column;
@@ -1654,18 +1691,16 @@ html, body {
   gap: 16px;
 }
 
-/* --- Theme Preview Cards Grid --- */
+/* --- Theme Preview Cards Grid (Matching User Screenshot) --- */
 .theme-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 16px;
   margin-top: 6px;
-  width: 100%;
 }
 
 .theme-option-card {
-  width: 100%;
-  height: 120px;
+  width: 144px;
+  height: 114px;
   border-radius: 10px;
   background: var(--bg-app);
   border: 2px solid transparent;
@@ -1676,7 +1711,7 @@ html, body {
   justify-content: center;
   padding: 10px;
   transition: all 0.18s ease;
-  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .theme-option-card:hover {
@@ -1829,18 +1864,16 @@ html, body {
   background: #FBE08D;
 }
 
-/* --- Screen Edge Option Cards Grid --- */
+/* --- Screen Edge Option Cards Grid (Matching User Screenshot) --- */
 .edge-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
   gap: 16px;
   margin-top: 6px;
-  width: 100%;
 }
 
 .edge-option-card {
-  width: 100%;
-  height: 120px;
+  width: 144px;
+  height: 114px;
   border-radius: 10px;
   background: var(--bg-app);
   border: 2px solid transparent;
@@ -1851,7 +1884,7 @@ html, body {
   justify-content: center;
   padding: 10px;
   transition: all 0.18s ease;
-  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .edge-option-card:hover {

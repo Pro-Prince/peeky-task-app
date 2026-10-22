@@ -295,7 +295,25 @@ function createTaskRowElement(item, note) {
   return row;
 }
 
+function isEditingLocked() {
+  const trial = state.trial || {};
+  if (trial.isLicensed) return false;
+  const now = Date.now();
+  const trialStartedAt = Number(trial.trialStartedAt) || now;
+  const trialDurationMs = 7 * 24 * 60 * 60 * 1000;
+  return (now - trialStartedAt) > trialDurationMs;
+}
+
 function handleQuickAdd() {
+  if (isEditingLocked()) {
+    if (confirm("Your 7-day free trial has expired! Editing is locked. Would you like to buy Peeky Task to unlock lifetime editing?")) {
+      if (window.peekyApi && window.peekyApi.openExternal) {
+        window.peekyApi.openExternal("https://peeky-task.vercel.app/buy");
+      }
+    }
+    return;
+  }
+
   const text = (quickAddInput.value || "").trim();
   if (!text) return;
 
@@ -327,6 +345,10 @@ function closeWindow() {
 function setupListeners() {
   // Title Input
   cardTitleInput.addEventListener("input", (e) => {
+    if (isEditingLocked()) {
+      alert("Your 7-day free trial has ended. Editing is locked. Buy a license or enter your key in Manager to edit.");
+      return;
+    }
     const activeNote = getActiveNote();
     if (!activeNote) return;
     activeNote.title = e.target.value;

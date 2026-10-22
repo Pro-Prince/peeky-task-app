@@ -119,29 +119,12 @@ body.edge-left .edge-rail.rested .rail-tab {
 }
 
 .edge-rail.rested .rail-actions-container {
-  opacity: 0.92;
-  pointer-events: auto;
-  transform: none;
-  max-height: 120px;
-}
-
-.edge-rail.rested .add-note-circle-btn {
-  width: 18px;
-  height: 18px;
-  font-size: 13px;
-  margin-top: 6px;
-  margin-right: 1px;
-  opacity: 0.95;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
-}
-
-body.edge-left .edge-rail.rested .add-note-circle-btn {
-  margin-right: 0;
-  margin-left: 1px;
-}
-
-.edge-rail.rested .rail-settings-group {
-  display: none;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(8px) scale(0.9);
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.2s ease, transform 0.2s ease, max-height 0.2s ease;
 }
 
 /* --- STATE B: HOVERED / EXPANDED POSITION (When mouse enters rail) --- */
@@ -155,6 +138,11 @@ body.edge-left .edge-rail.rested .add-note-circle-btn {
   border-radius: 8px 0 0 8px; /* right edge default */
   box-shadow: -2px 2px 7px rgba(0, 0, 0, 0.18);
   margin-right: 0;
+  transition: width 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+              height 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s ease;
+  will-change: transform;
 }
 
 body.edge-left .edge-rail:not(.rested) .rail-tab {
@@ -164,13 +152,13 @@ body.edge-left .edge-rail:not(.rested) .rail-tab {
 }
 
 .edge-rail:not(.rested) .rail-tab:hover {
-  transform: translateX(-4px);
-  box-shadow: -4px 3px 10px rgba(0, 0, 0, 0.25);
+  transform: translateX(-5px);
+  box-shadow: -5px 4px 12px rgba(0, 0, 0, 0.26);
 }
 
 body.edge-left .edge-rail:not(.rested) .rail-tab:hover {
-  transform: translateX(4px);
-  box-shadow: 4px 3px 10px rgba(0, 0, 0, 0.25);
+  transform: translateX(5px);
+  box-shadow: 5px 4px 12px rgba(0, 0, 0, 0.26);
 }
 
 /* Vertical Rotated Text Label */
@@ -195,18 +183,20 @@ body.edge-left .edge-rail:not(.rested) .rail-tab:hover {
   position: absolute;
   right: 100%;
   top: 50%;
-  transform: translateY(-50%) translateX(8px) scale(0.97);
+  transform: translateY(-50%) translateX(6px) scale(0.96);
   width: 220px;
   max-height: 180px;
   border-radius: 12px;
   padding: 12px 14px;
-  box-shadow: -6px 8px 24px rgba(0, 0, 0, 0.28), 0 2px 6px rgba(0, 0, 0, 0.12);
+  box-shadow: -8px 10px 28px rgba(0, 0, 0, 0.32), 0 2px 8px rgba(0, 0, 0, 0.15);
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-  transition: opacity 0.14s ease,
-              transform 0.14s ease,
-              visibility 0.14s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   margin-right: 12px;
   display: flex;
   flex-direction: column;
@@ -220,8 +210,8 @@ body.edge-left .tab-peek-preview {
   left: 100%;
   margin-right: 0;
   margin-left: 12px;
-  transform: translateY(-50%) translateX(-8px) scale(0.97);
-  box-shadow: 6px 8px 24px rgba(0, 0, 0, 0.28), 0 2px 6px rgba(0, 0, 0, 0.12);
+  transform: translateY(-50%) translateX(-6px) scale(0.96);
+  box-shadow: 8px 10px 28px rgba(0, 0, 0, 0.32), 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .rail-tab:hover .tab-peek-preview {
