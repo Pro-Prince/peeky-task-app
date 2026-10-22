@@ -53,10 +53,10 @@
       "icon": "assets/app-icon.ico"
     },
     "appx": {
-      "identityName": "PeekyTask",
-      "publisher": "CN=PeekyTask",
-      "publisherDisplayName": "Peeky Task",
-      "applicationId": "PeekyTask"
+      "identityName": "PrincePatel.PeekyTask",
+      "publisher": "CN=A6707FFE-1FD1-4D1A-B70D-8CC00342F84D",
+      "publisherDisplayName": "Prince Patel",
+      "applicationId": "PrincePatel.PeekyTask"
     }
   }
 }
