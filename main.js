@@ -46,8 +46,7 @@ function getDisplayBounds() {
 }
 
 function getTargetDeckWidth() {
-  if (isDeckPeeking) return 280; // expanded to show attached peek preview card
-  if (isDeckHovered) return 52;  // expanded to show vertical tab labels
+  if (isDeckHovered) return 290; // expanded to show vertical tab labels + attached peek preview card
   return 24;                     // rested flush slivers
 }
 
@@ -114,8 +113,8 @@ function createNoteWindow() {
   if (noteWindow) return;
 
   const workArea = getDisplayBounds();
-  const width = 360;
-  const height = 460;
+  const width = 380;
+  const height = 380;
   const posX = Math.round(workArea.x + (workArea.width - width) / 2);
   const posY = Math.round(workArea.y + (workArea.height - height) / 2);
 
@@ -512,13 +511,14 @@ ipcMain.on("dock-edge", (event, edge) => {
 });
 
 ipcMain.on("set-deck-hovered", (event, hovered) => {
-  isDeckHovered = !!hovered;
-  repositionDeckWindow();
+  if (isDeckHovered !== !!hovered) {
+    isDeckHovered = !!hovered;
+    repositionDeckWindow();
+  }
 });
 
 ipcMain.on("set-deck-peeking", (event, peeking) => {
   isDeckPeeking = !!peeking;
-  repositionDeckWindow();
 });
 
 ipcMain.handle("data-load", async () => {

@@ -168,7 +168,6 @@ const btnSettingsBuy = document.getElementById("btnSettingsBuy");
 
 // About View Elements (Screenshot 2)
 const btnAboutPrivacy = document.getElementById("btnAboutPrivacy");
-const btnAboutSupport = document.getElementById("btnAboutSupport");
 const btnAboutFeatures = document.getElementById("btnAboutFeatures");
 
 // Dynamic 7-Day Trial Calculation
@@ -1344,13 +1343,6 @@ function setupListeners() {
     });
   }
 
-  if (btnAboutSupport) {
-    btnAboutSupport.addEventListener("click", () => {
-      if (window.peekyApi && window.peekyApi.openExternal) {
-        window.peekyApi.openExternal("mailto:princepatel5807@gmail.com?subject=Peeky%20Task%20Support");
-      }
-    });
-  }
 
   if (btnAboutFeatures) {
     btnAboutFeatures.addEventListener("click", () => {

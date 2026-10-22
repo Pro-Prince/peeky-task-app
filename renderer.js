@@ -135,13 +135,13 @@ function renderRailTabs() {
   const deckNotes = getDeckNotes();
 
   // Dynamic capacity calculation based on screen height
-  const availHeight = window.innerHeight - 30;
-  const actionsHeight = 92;
-  const tabSlotHeight = 80;
-  const maxTabs = Math.max(2, Math.floor((availHeight - actionsHeight) / tabSlotHeight));
+  const availHeight = window.innerHeight || 650;
+  const actionsHeight = 75;
+  const tabSlotHeight = 65;
+  const maxTabs = Math.max(7, Math.floor((availHeight - actionsHeight) / tabSlotHeight));
 
   if (btnAddNote) {
-    btnAddNote.style.display = deckNotes.length >= maxTabs ? "none" : "flex";
+    btnAddNote.style.display = "flex";
   }
 
   const visibleDeckNotes = deckNotes.slice(0, maxTabs);
@@ -204,19 +204,6 @@ function renderRailTabs() {
     peekCard.appendChild(peekFooter);
 
     tab.appendChild(peekCard);
-
-    // Hover to Peek
-    tab.addEventListener("mouseenter", () => {
-      if (window.peekyApi && window.peekyApi.setDeckPeeking) {
-        window.peekyApi.setDeckPeeking(true);
-      }
-    });
-
-    tab.addEventListener("mouseleave", () => {
-      if (window.peekyApi && window.peekyApi.setDeckPeeking) {
-        window.peekyApi.setDeckPeeking(false);
-      }
-    });
 
     // Click to Open in Middle of Screen (Image 5)
     tab.addEventListener("click", () => {

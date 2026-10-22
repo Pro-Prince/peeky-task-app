@@ -1569,7 +1569,7 @@ html, body {
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  padding: 8px 36px 36px 14px;
+  padding: 8px 24px 36px 14px;
   overflow-y: auto;
 }
 
@@ -1594,13 +1594,15 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 22px;
-  max-width: 880px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .view-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
 }
 
 .section-heading {
@@ -1618,6 +1620,8 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .subgroup-header {
@@ -1652,14 +1656,16 @@ html, body {
 
 /* --- Theme Preview Cards Grid --- */
 .theme-cards-grid {
-  display: flex;
-  gap: 14px;
-  margin-top: 4px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 6px;
+  width: 100%;
 }
 
 .theme-option-card {
-  width: 148px;
-  height: 114px;
+  width: 100%;
+  height: 120px;
   border-radius: 10px;
   background: var(--bg-app);
   border: 2px solid transparent;
@@ -1670,6 +1676,7 @@ html, body {
   justify-content: center;
   padding: 10px;
   transition: all 0.18s ease;
+  box-sizing: border-box;
 }
 
 .theme-option-card:hover {
@@ -1824,14 +1831,16 @@ html, body {
 
 /* --- Screen Edge Option Cards Grid --- */
 .edge-cards-grid {
-  display: flex;
-  gap: 14px;
-  margin-top: 4px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 6px;
+  width: 100%;
 }
 
 .edge-option-card {
-  width: 148px;
-  height: 114px;
+  width: 100%;
+  height: 120px;
   border-radius: 10px;
   background: var(--bg-app);
   border: 2px solid transparent;
@@ -1842,6 +1851,7 @@ html, body {
   justify-content: center;
   padding: 10px;
   transition: all 0.18s ease;
+  box-sizing: border-box;
 }
 
 .edge-option-card:hover {

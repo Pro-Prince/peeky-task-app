@@ -119,12 +119,29 @@ body.edge-left .edge-rail.rested .rail-tab {
 }
 
 .edge-rail.rested .rail-actions-container {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transform: translateY(8px) scale(0.9);
-  max-height: 0;
-  overflow: hidden;
-  transition: opacity 0.18s ease, transform 0.18s ease, max-height 0.18s ease;
+  opacity: 0.92;
+  pointer-events: auto;
+  transform: none;
+  max-height: 120px;
+}
+
+.edge-rail.rested .add-note-circle-btn {
+  width: 18px;
+  height: 18px;
+  font-size: 13px;
+  margin-top: 6px;
+  margin-right: 1px;
+  opacity: 0.95;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+body.edge-left .edge-rail.rested .add-note-circle-btn {
+  margin-right: 0;
+  margin-left: 1px;
+}
+
+.edge-rail.rested .rail-settings-group {
+  display: none;
 }
 
 /* --- STATE B: HOVERED / EXPANDED POSITION (When mouse enters rail) --- */
@@ -178,7 +195,7 @@ body.edge-left .edge-rail:not(.rested) .rail-tab:hover {
   position: absolute;
   right: 100%;
   top: 50%;
-  transform: translateY(-50%) translateX(12px) scale(0.95);
+  transform: translateY(-50%) translateX(8px) scale(0.97);
   width: 220px;
   max-height: 180px;
   border-radius: 12px;
@@ -186,13 +203,16 @@ body.edge-left .edge-rail:not(.rested) .rail-tab:hover {
   box-shadow: -6px 8px 24px rgba(0, 0, 0, 0.28), 0 2px 6px rgba(0, 0, 0, 0.12);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  visibility: hidden;
+  transition: opacity 0.14s ease,
+              transform 0.14s ease,
+              visibility 0.14s ease;
   margin-right: 12px;
   display: flex;
   flex-direction: column;
   z-index: 100;
   overflow: hidden;
+  will-change: opacity, transform;
 }
 
 body.edge-left .tab-peek-preview {
@@ -200,12 +220,13 @@ body.edge-left .tab-peek-preview {
   left: 100%;
   margin-right: 0;
   margin-left: 12px;
-  transform: translateY(-50%) translateX(-12px) scale(0.95);
+  transform: translateY(-50%) translateX(-8px) scale(0.97);
   box-shadow: 6px 8px 24px rgba(0, 0, 0, 0.28), 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .rail-tab:hover .tab-peek-preview {
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
   transform: translateY(-50%) translateX(0) scale(1);
 }
