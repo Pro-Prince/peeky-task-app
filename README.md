@@ -9,7 +9,7 @@
 ![Packaging](https://img.shields.io/badge/package-MSIX%20%2F%20AppX-525252?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-F59E0B?style=flat-square)
 
-**[→ Get on Microsoft Store](https://github.com/Pro-Prince/peeky-task-app/releases)**
+**[→ Get on Microsoft Store](https://apps.microsoft.com/search?query=Peeky+Task)**
 
 </div>
 
@@ -17,7 +17,15 @@
 
 ## Overview
 
-Peeky Task is a minimalist, transparent daily task and to-do widget designed to live quietly on the edge of your screen. Built with Windows 11 Fluent Design principles, Peeky Task provides a frictionless to-do list experience that stays completely out of your way until you need it. When idle, it collapses into ultra-thin 7px color pill slivers flush against your screen bezel; when touched or hovered, it fans out into interactive sticky tabs with real-time checklist progress, markdown checklists, and a full task management dashboard.
+Peeky Task is a minimalist, transparent daily task and to-do widget built natively for Windows 10 & 11 that lives quietly on the edge of your screen. Instead of forcing you to switch windows or cluttering your taskbar with heavy project management suites, Peeky Task stays completely out of your way until you need it. When at rest, it collapses into ultra-thin 7px pastel color pills flush against your screen bezel; when hovered or touched, it smoothly fans out into leaning interactive sticky tabs with real-time checklist progress, markdown checklists, and a full task management dashboard. 100% offline, zero telemetry, and never interrupts your flow.
+
+---
+
+## Microsoft Store
+
+🔗 **[apps.microsoft.com/search?query=Peeky+Task](https://apps.microsoft.com/search?query=Peeky+Task)**
+
+> Packaged as a certified Windows Store MSIX/AppX application. 100% local, isolated sandbox, automatic updates, and zero background telemetry.
 
 ---
 
@@ -25,20 +33,20 @@ Peeky Task is a minimalist, transparent daily task and to-do widget designed to 
 
 - **Screen-Edge Rested & Hover States** — collapses into tiny 7px vertical color slivers flush against the screen bezel when idle; fans out smoothly into full tabs with action buttons when touched
 - **Interactive Checklists** — click directly on `- [ ] ` or `- [x] ` to check off tasks with immediate strikethrough, haptic visual feedback, and animated progress updates
-- **Dynamic Task Progress Bar** — subtle 2.5px progress meter right under the card header that fills dynamically and turns emerald green when all tasks are complete
+- **Dynamic Task Progress Bar** — subtle progress meter right under the card header that fills dynamically and turns emerald green when all tasks are complete
 - **Glanceable Rail Stats** — sticky tabs on your screen bezel display completion ratios (`Groceries · 2/3` or `✓ Groceries`) without opening the card
 - **Frictionless Keyboard Flow** — pressing `Enter` automatically continues `- [ ] ` for seamless typing; pressing `Enter` on an empty checkbox cleans it up and exits list mode
 - **Screen Edge Docking** — dock your tasks to either the **Right edge** (default) or **Left edge** with a single click
 - **8 Signature Pastel Swatches** — Mint, Sky, Butter, Peach, Blush, Lilac, Blue, and Slate with active swatch highlight
 - **10-Second Undo Protection** — deleting tasks provides a non-blocking toast with an animated draining progress bar to restore accidental deletions
 - **Full Task Dashboard** — press `Alt + Space` anywhere in Windows or click `⊞` to open the full manager window with search, filtering (All, On Deck, Completed), and markdown export
-- **100% Offline & Private** — all data is stored locally in `%APPDATA%/PeekyTask/peeky-task-data.json`. Zero telemetry, zero cloud tracking
+- **100% Offline & Private** — all data is stored locally on your PC in `%APPDATA%/PeekyTask/peeky-task-data.json`. Zero telemetry, zero cloud tracking
 
 ---
 
 ## Tech Stack
 
-| Technology | Role |
+| Technology | Purpose |
 |---|---|
 | Electron 33 | Desktop runtime and multi-window management |
 | Node.js | Local file persistence and IPC synchronization |
@@ -54,6 +62,7 @@ Peeky Task is a minimalist, transparent daily task and to-do widget designed to 
 - **Dynamic 3-Tier Window Resizing Engine:** Window bounds dynamically transition between 16px (rested pills), 44px (hovered tabs with action controls), and 530px (open floating card).
 - **Debounced Leave Timer:** A 350ms leave timer collapses tabs back to rested mode when the mouse leaves, preventing accidental dismissals.
 - **Dual-Window Data Synchronization:** IPC broadcast engine ensures instant bidirectional synchronization between the screen-edge sticky widget and the full manager dashboard.
+- **Local JSON Persistence:** All task state, colors, order, and completion timestamps are saved atomically to the local app data folder with automatic corrupted file fallbacks.
 
 ---
 
@@ -82,6 +91,15 @@ Users need quick access to sticky notes while also wanting a searchable master a
 | `Ctrl + .` | Cycle Card Color Palette |
 | `Escape` | Tuck / Close Floating Card |
 | `Tab` / `Shift + Tab` | Indent / Outdent Checklist Item |
+
+---
+
+## Web Showcase
+
+The official website & interactive demo for Peeky Task is live.
+
+🔗 **[peekytask.in](https://peekytask.in)**<br>
+📂 **[Web Repository](https://github.com/Pro-Prince/peeky-task-web)**
 
 ---
 
