@@ -46,6 +46,7 @@
       "assets/**/*"
     ],
     "win": {
+      "executableName": "PeekyTask",
       "target": [
         "nsis",
         "appx"
@@ -57,7 +58,9 @@
       "publisher": "CN=A6707FFE-1FD1-4D1A-B70D-8CC00342F84D",
       "publisherDisplayName": "Prince Patel",
       "applicationId": "PrincePatel.PeekyTask",
-      "displayName": "Peeky Task"
+      "displayName": "Peeky Task",
+      "minVersion": "10.0.17763.0",
+      "maxVersionTested": "10.0.22621.0"
     }
   }
 }
