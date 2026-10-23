@@ -98,7 +98,7 @@ Users need quick access to sticky notes while also wanting a searchable master a
 
 The official website & interactive demo for Peeky Task is live.
 
-🔗 **[peekytask.in](https://peekytask.in)**<br>
+🔗 **[peeky-task.vercel.app](https://peeky-task.vercel.app/)**<br>
 📂 **[Web Repository](https://github.com/Pro-Prince/peeky-task-web)**
 
 ---
