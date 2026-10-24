@@ -9,6 +9,8 @@ const COLOR_MAP = {
   slate:  { bg: "#D9DFE8", edge: "#C8D1DD", name: "Slate" },
 };
 
+const COLOR_KEYS = Object.keys(COLOR_MAP);
+
 const DEFAULT_NOTES = [
   {
     id: "n1",
@@ -236,6 +238,9 @@ function setupListeners() {
       leaveTimer = null;
     }
     edgeRail.classList.remove("rested");
+    if (window.peekyApi && window.peekyApi.setIgnoreMouseEvents) {
+      window.peekyApi.setIgnoreMouseEvents(false);
+    }
     if (window.peekyApi && window.peekyApi.setDeckHovered) {
       window.peekyApi.setDeckHovered(true);
     }
@@ -245,10 +250,13 @@ function setupListeners() {
     if (leaveTimer) clearTimeout(leaveTimer);
     leaveTimer = setTimeout(() => {
       edgeRail.classList.add("rested");
+      if (window.peekyApi && window.peekyApi.setIgnoreMouseEvents) {
+        window.peekyApi.setIgnoreMouseEvents(true, { forward: true });
+      }
       if (window.peekyApi && window.peekyApi.setDeckHovered) {
         window.peekyApi.setDeckHovered(false);
       }
-    }, 450);
+    }, 240);
   });
 
   // Add Note Button (+)
@@ -256,11 +264,11 @@ function setupListeners() {
     btnAddNote.addEventListener("click", () => {
       // Check trial expiration
       const trial = state.trial || {};
-      const trialStartedAt = Number(trial.trialStartedAt) || Date.now();
+      const trialStartedAt = Number(trial.trialStartedAt) || (Date.now() - 24 * 3600 * 1000);
       const trialDurationMs = 7 * 24 * 60 * 60 * 1000;
       const isExpired = !trial.isLicensed && (Date.now() - trialStartedAt > trialDurationMs);
       if (isExpired) {
-        if (confirm("Your 7-day free trial has expired! Editing is locked. Would you like to buy Peeky Task to unlock lifetime editing?")) {
+        if (confirm("Your 7-day free trial has expired! Editing is locked. Your tasks stay readable and exportable, but to add or edit tasks please buy a license or enter your key.\n\nWould you like to visit the purchase page now?")) {
           if (window.peekyApi && window.peekyApi.openExternal) {
             window.peekyApi.openExternal("https://peeky-task.vercel.app/buy");
           }
@@ -268,17 +276,21 @@ function setupListeners() {
         return;
       }
 
+      const unused = COLOR_KEYS[Math.floor(Math.random() * COLOR_KEYS.length)] || "mint";
       const newNote = {
         id: "task_" + Date.now(),
         title: "Untitled note",
-        color: COLOR_KEYS[Math.floor(Math.random() * COLOR_KEYS.length)],
+        color: unused,
+        items: [
+          { id: "item_" + Date.now() + "_1", text: "", done: false }
+        ],
         body: "- [ ] ",
         onDeck: true,
         archived: false,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
-      state.notes.push(newNote);
+      state.notes.unshift(newNote);
       state.activeNoteId = newNote.id;
       renderRailTabs();
       persistData();
@@ -348,6 +360,9 @@ async function init() {
   applyEdge(state.edge || "right");
   renderRailTabs();
   setupListeners();
+  if (window.peekyApi && window.peekyApi.setIgnoreMouseEvents) {
+    window.peekyApi.setIgnoreMouseEvents(true, { forward: true });
+  }
 }
 
 document.addEventListener("DOMContentLoaded", init);

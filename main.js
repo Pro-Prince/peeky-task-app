@@ -29,10 +29,17 @@ function loadUserData() {
   return null;
 }
 
-// Save local user data
+// Save local user data with merging
 function saveUserData(data) {
   try {
-    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), "utf-8");
+    let existing = {};
+    if (fs.existsSync(dataFilePath)) {
+      try {
+        existing = JSON.parse(fs.readFileSync(dataFilePath, "utf-8")) || {};
+      } catch (e) {}
+    }
+    const merged = { ...existing, ...data };
+    fs.writeFileSync(dataFilePath, JSON.stringify(merged, null, 2), "utf-8");
     return true;
   } catch (err) {
     console.error("Error saving data:", err);
@@ -46,8 +53,7 @@ function getDisplayBounds() {
 }
 
 function getTargetDeckWidth() {
-  if (isDeckHovered) return 290; // expanded to show vertical tab labels + attached peek preview card
-  return 24;                     // rested flush slivers
+  return 290; // Fixed width ensures zero OS window resize stutter/flicker
 }
 
 function repositionDeckWindow() {
@@ -58,12 +64,15 @@ function repositionDeckWindow() {
   const targetX = currentEdge === "right" ? workArea.x + workArea.width - width : workArea.x;
   const targetY = workArea.y + Math.round((workArea.height - height) / 2);
 
-  deckWindow.setBounds({
-    x: targetX,
-    y: targetY,
-    width: width,
-    height: height,
-  });
+  const current = deckWindow.getBounds();
+  if (current.x !== targetX || current.y !== targetY || current.width !== width || current.height !== height) {
+    deckWindow.setBounds({
+      x: targetX,
+      y: targetY,
+      width: width,
+      height: height,
+    });
+  }
 }
 
 // 1. CREATE SCREEN-EDGE DECK WINDOW
@@ -89,6 +98,8 @@ function createDeckWindow() {
     alwaysOnTop: isAlwaysOnTop,
     skipTaskbar: true,
     resizable: false,
+    autoHideMenuBar: true,
+    show: false,
     icon: path.join(__dirname, "assets", "app-icon.png"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
@@ -97,9 +108,14 @@ function createDeckWindow() {
     },
   });
 
+  deckWindow.setMenuBarVisibility(false);
+  deckWindow.setMenu(null);
   deckWindow.loadFile("index.html");
 
   deckWindow.once("ready-to-show", () => {
+    try {
+      deckWindow.setIgnoreMouseEvents(true, { forward: true });
+    } catch (e) {}
     deckWindow.show();
   });
 
@@ -132,6 +148,7 @@ function createNoteWindow() {
     alwaysOnTop: isAlwaysOnTop,
     skipTaskbar: false,
     resizable: false,
+    autoHideMenuBar: true,
     show: false,
     icon: path.join(__dirname, "assets", "app-icon.png"),
     webPreferences: {
@@ -141,6 +158,8 @@ function createNoteWindow() {
     },
   });
 
+  noteWindow.setMenuBarVisibility(false);
+  noteWindow.setMenu(null);
   noteWindow.loadFile("note.html");
 
   noteWindow.on("close", (event) => {
@@ -188,6 +207,7 @@ function createOnboardingWindow() {
     backgroundColor: "#191C22",
     skipTaskbar: false,
     resizable: false,
+    autoHideMenuBar: true,
     icon: path.join(__dirname, "assets", "app-icon.png"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
@@ -196,6 +216,8 @@ function createOnboardingWindow() {
     },
   });
 
+  onboardingWindow.setMenuBarVisibility(false);
+  onboardingWindow.setMenu(null);
   onboardingWindow.loadFile("onboarding.html");
 
   onboardingWindow.once("ready-to-show", () => {
@@ -229,6 +251,7 @@ function createManagerWindow(showImmediately = true) {
     minHeight: 600,
     title: "Peeky Task",
     frame: true,
+    autoHideMenuBar: true,
     backgroundColor: "#16181D",
     skipTaskbar: false,
     icon: path.join(__dirname, "assets", "app-icon.png"),
@@ -239,6 +262,8 @@ function createManagerWindow(showImmediately = true) {
     },
   });
 
+  managerWindow.setMenuBarVisibility(false);
+  managerWindow.setMenu(null);
   managerWindow.loadFile("manager.html");
 
   managerWindow.once("ready-to-show", () => {
@@ -344,6 +369,64 @@ function broadcastDataUpdate(data, senderWebContents) {
   }
 }
 
+let fullscreenDetectorProcess = null;
+let isFullscreenDetected = false;
+
+function startFullscreenDetector() {
+  if (process.platform !== "win32") return;
+  const scriptPath = path.join(__dirname, "scripts", "detect_fullscreen.ps1");
+  if (!fs.existsSync(scriptPath)) return;
+
+  try {
+    const { spawn } = require("child_process");
+    fullscreenDetectorProcess = spawn("powershell.exe", [
+      "-NoProfile",
+      "-NonInteractive",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      scriptPath
+    ], {
+      windowsHide: true,
+      stdio: ["ignore", "pipe", "ignore"]
+    });
+
+    fullscreenDetectorProcess.stdout.on("data", (chunk) => {
+      const text = chunk.toString();
+      const lines = text.split(/\r?\n/).filter(Boolean);
+      for (const line of lines) {
+        if (line.includes("FS:1")) {
+          onFullscreenChange(true);
+        } else if (line.includes("FS:0")) {
+          onFullscreenChange(false);
+        }
+      }
+    });
+
+    fullscreenDetectorProcess.on("error", (err) => {
+      console.warn("Fullscreen detection process notice:", err);
+    });
+  } catch (err) {
+    console.warn("Failed to spawn fullscreen detector:", err);
+  }
+}
+
+function onFullscreenChange(isFs) {
+  if (isFullscreenDetected === isFs) return;
+  isFullscreenDetected = isFs;
+
+  const userData = loadUserData() || {};
+  if (userData.hideOverFullscreen === false) return;
+
+  if (deckWindow) {
+    if (isFs && deckWindow.isVisible()) {
+      deckWindow.hide();
+    } else if (!isFs && !deckWindow.isVisible()) {
+      deckWindow.show();
+    }
+  }
+}
+
 const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
@@ -360,7 +443,29 @@ if (!gotTheLock) {
   });
 
   app.whenReady().then(() => {
-    const userData = loadUserData();
+    // Remove default OS menu (File, Edit, View, Window, Help) across all windows
+    Menu.setApplicationMenu(null);
+
+    let userData = loadUserData();
+    if (!userData) {
+      userData = {
+        edge: "right",
+        theme: "dark",
+        font: "handwritten",
+        hideOverFullscreen: true,
+        launchAtStartup: false,
+        trial: {
+          isLicensed: false,
+          trialStartedAt: Date.now() - 24 * 3600 * 1000, // 6 days left in trial ending Friday 30 October 2026
+          licenseKey: "",
+        },
+      };
+      saveUserData(userData);
+    } else if (userData.trial && !userData.trial.trialStartedAt && !userData.trial.isLicensed) {
+      userData.trial.trialStartedAt = Date.now() - 24 * 3600 * 1000;
+      saveUserData(userData);
+    }
+
     if (userData && (userData.edge === "left" || userData.edge === "right")) {
       currentEdge = userData.edge;
     } else {
@@ -383,6 +488,7 @@ if (!gotTheLock) {
     }
 
     createTray();
+    startFullscreenDetector();
 
     try {
       // 1. Alt+Space: Toggle centered task card
@@ -422,6 +528,12 @@ if (!gotTheLock) {
 }
 
 app.on("will-quit", () => {
+  if (fullscreenDetectorProcess) {
+    try {
+      fullscreenDetectorProcess.kill();
+    } catch (e) {}
+    fullscreenDetectorProcess = null;
+  }
   globalShortcut.unregisterAll();
 });
 
@@ -511,9 +623,15 @@ ipcMain.on("dock-edge", (event, edge) => {
 });
 
 ipcMain.on("set-deck-hovered", (event, hovered) => {
-  if (isDeckHovered !== !!hovered) {
-    isDeckHovered = !!hovered;
-    repositionDeckWindow();
+  isDeckHovered = !!hovered;
+});
+
+ipcMain.on("set-ignore-mouse-events", (event, ignore, options) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (win && !win.isDestroyed()) {
+    try {
+      win.setIgnoreMouseEvents(!!ignore, options);
+    } catch (e) {}
   }
 });
 

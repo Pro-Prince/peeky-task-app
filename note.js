@@ -152,6 +152,13 @@ function renderCard() {
   noteCard.style.backgroundColor = colorInfo.bg;
 
   cardTitleInput.value = activeNote.title || "Untitled list";
+  if (isEditingLocked()) {
+    cardTitleInput.readOnly = true;
+    if (quickAddInput) quickAddInput.placeholder = "Trial expired · Editing is locked";
+  } else {
+    cardTitleInput.readOnly = false;
+    if (quickAddInput) quickAddInput.placeholder = "Add a task... (press Enter)";
+  }
   cardSaveStatus.textContent = "Saved · now";
 
   updateProgressBadge(activeNote);
@@ -243,6 +250,14 @@ function createTaskRowElement(item, note) {
   checkbox.innerHTML = `<svg class="check-icon" viewBox="0 0 24 24" width="10" height="10" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
 
   checkbox.addEventListener("click", () => {
+    if (isEditingLocked()) {
+      if (confirm("Your 7-day free trial has expired! Editing is locked. Your tasks stay readable and exportable, but to check off or edit tasks please buy a license or enter your key.\n\nWould you like to open the purchase page?")) {
+        if (window.peekyApi && window.peekyApi.openExternal) {
+          window.peekyApi.openExternal("https://peeky-task.vercel.app/buy");
+        }
+      }
+      return;
+    }
     item.done = !item.done;
     note.updatedAt = Date.now();
     syncNoteBody(note);
@@ -256,8 +271,10 @@ function createTaskRowElement(item, note) {
   input.className = "task-text-input";
   input.value = item.text || "";
   input.placeholder = "Task description...";
+  if (isEditingLocked()) input.readOnly = true;
 
   input.addEventListener("input", (e) => {
+    if (isEditingLocked()) return;
     item.text = e.target.value;
     note.updatedAt = Date.now();
     syncNoteBody(note);
@@ -279,6 +296,10 @@ function createTaskRowElement(item, note) {
 
   delBtn.addEventListener("click", (e) => {
     e.stopPropagation();
+    if (isEditingLocked()) {
+      alert("Your 7-day free trial has ended. Editing is locked.");
+      return;
+    }
     const items = ensureNoteItems(note);
     note.items = items.filter((it) => it.id !== item.id);
     note.updatedAt = Date.now();
@@ -299,7 +320,7 @@ function isEditingLocked() {
   const trial = state.trial || {};
   if (trial.isLicensed) return false;
   const now = Date.now();
-  const trialStartedAt = Number(trial.trialStartedAt) || now;
+  const trialStartedAt = Number(trial.trialStartedAt) || (now - 24 * 3600 * 1000);
   const trialDurationMs = 7 * 24 * 60 * 60 * 1000;
   return (now - trialStartedAt) > trialDurationMs;
 }
@@ -408,6 +429,10 @@ function setupListeners() {
   const swatchDots = cardColorSwatches.querySelectorAll(".swatch-dot");
   swatchDots.forEach((dot) => {
     dot.addEventListener("click", () => {
+      if (isEditingLocked()) {
+        alert("Your 7-day free trial has expired! Editing is locked.");
+        return;
+      }
       const activeNote = getActiveNote();
       if (!activeNote) return;
       activeNote.color = dot.dataset.color;
@@ -420,6 +445,10 @@ function setupListeners() {
   // Delete with 10s undo
   if (btnCardDelete) {
     btnCardDelete.addEventListener("click", () => {
+      if (isEditingLocked()) {
+        alert("Your 7-day free trial has expired! Editing is locked.");
+        return;
+      }
       const activeNote = getActiveNote();
       if (!activeNote) return;
 

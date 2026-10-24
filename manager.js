@@ -185,7 +185,7 @@ function getTrialStatus() {
   }
 
   const now = Date.now();
-  const trialStartedAt = Number(trial.trialStartedAt) || now;
+  const trialStartedAt = Number(trial.trialStartedAt) || (now - 24 * 3600 * 1000);
   const trialDurationMs = 7 * 24 * 60 * 60 * 1000;
   const trialEndsAt = trialStartedAt + trialDurationMs;
   const msRemaining = trialEndsAt - now;
@@ -642,11 +642,19 @@ function renderEditor() {
       }
     } else {
       archivedNoticeBanner.style.display = "none";
-      editorTitleInput.readOnly = false;
+      editorTitleInput.readOnly = isEditingLocked();
       if (btnArchiveNote) {
         btnArchiveNote.title = "Archive task list";
         btnArchiveNote.classList.remove("active");
       }
+    }
+  }
+
+  if (managerQuickAddInput) {
+    if (isEditingLocked()) {
+      managerQuickAddInput.placeholder = "Trial expired · Editing is locked (Enter license key to unlock)";
+    } else {
+      managerQuickAddInput.placeholder = "Add a new task to this list... (press Enter)";
     }
   }
 
@@ -758,6 +766,12 @@ function createManagerTaskRow(item, note) {
 
   checkbox.addEventListener("click", (e) => {
     e.stopPropagation();
+    if (isEditingLocked()) {
+      alert("Your 7-day free trial has ended. Editing is locked. Your tasks stay readable and exportable, but to check off or edit tasks, please buy a license or enter your key.");
+      licenseModal.style.display = "flex";
+      inputLicenseKey.focus();
+      return;
+    }
     if (note.archived) {
       alert("Please restore this list from the archive to edit or check off tasks.");
       return;
@@ -775,10 +789,10 @@ function createManagerTaskRow(item, note) {
   input.className = "task-text-input";
   input.value = item.text || "";
   input.placeholder = "Task description...";
-  if (note.archived) input.readOnly = true;
+  if (note.archived || isEditingLocked()) input.readOnly = true;
 
   input.addEventListener("input", (e) => {
-    if (note.archived) return;
+    if (note.archived || isEditingLocked()) return;
     item.text = e.target.value;
     note.updatedAt = Date.now();
     syncNoteBody(note);
@@ -786,7 +800,7 @@ function createManagerTaskRow(item, note) {
   });
 
   input.addEventListener("keydown", (e) => {
-    if (note.archived) return;
+    if (note.archived || isEditingLocked()) return;
     if ((e.ctrlKey || e.metaKey) && (e.key === " " || e.key === "Spacebar" || e.key === "Enter")) {
       e.preventDefault();
       checkbox.click();
@@ -870,6 +884,12 @@ function createManagerTaskRow(item, note) {
 
   delBtn.addEventListener("click", (e) => {
     e.stopPropagation();
+    if (isEditingLocked()) {
+      alert("Your 7-day free trial has ended. Editing is locked. Buy a license or enter your key to edit tasks.");
+      licenseModal.style.display = "flex";
+      inputLicenseKey.focus();
+      return;
+    }
     if (note.archived) {
       alert("Please restore this list from the archive to delete tasks.");
       return;
@@ -1001,7 +1021,7 @@ function setupListeners() {
   // Title editor
   editorTitleInput.addEventListener("input", (e) => {
     const note = getActiveNote();
-    if (!note || note.archived) return;
+    if (!note || note.archived || isEditingLocked()) return;
     note.title = e.target.value;
     note.updatedAt = Date.now();
     editorMetaTime.textContent = "edited just now";
@@ -1080,6 +1100,11 @@ function setupListeners() {
   // Clear Done button in Manager
   if (btnManagerClearDone) {
     btnManagerClearDone.addEventListener("click", () => {
+      if (isEditingLocked()) {
+        alert("Your 7-day free trial has ended. Editing is locked. Buy a license or enter your key.");
+        licenseModal.style.display = "flex";
+        return;
+      }
       const note = getActiveNote();
       if (!note || note.archived) return;
       const items = ensureNoteItems(note);
@@ -1095,6 +1120,11 @@ function setupListeners() {
   // Mark all / uncheck all button in Manager
   if (btnManagerMarkAll) {
     btnManagerMarkAll.addEventListener("click", () => {
+      if (isEditingLocked()) {
+        alert("Your 7-day free trial has ended. Editing is locked. Buy a license or enter your key.");
+        licenseModal.style.display = "flex";
+        return;
+      }
       const note = getActiveNote();
       if (!note || note.archived) return;
       const items = ensureNoteItems(note);
@@ -1147,6 +1177,11 @@ function setupListeners() {
   // Archive / Unarchive Button in editor top bar
   if (btnArchiveNote) {
     btnArchiveNote.addEventListener("click", () => {
+      if (isEditingLocked()) {
+        alert("Your 7-day free trial has ended. Editing is locked.");
+        licenseModal.style.display = "flex";
+        return;
+      }
       const note = getActiveNote();
       if (!note) return;
       note.archived = !note.archived;
@@ -1193,6 +1228,11 @@ function setupListeners() {
 
   // Delete task list button in editor top bar
   btnDeleteNote.addEventListener("click", () => {
+    if (isEditingLocked()) {
+      alert("Your 7-day free trial has ended. Editing is locked.");
+      licenseModal.style.display = "flex";
+      return;
+    }
     const note = getActiveNote();
     if (!note) return;
     if (confirm(`Delete "${note.title || 'Untitled'}"?`)) {
@@ -1223,6 +1263,11 @@ function setupListeners() {
 
   // Color Palette Dots
   paletteDots.addEventListener("click", (e) => {
+    if (isEditingLocked()) {
+      alert("Your 7-day free trial has ended. Editing is locked. Buy a license or enter your key to customize colors.");
+      licenseModal.style.display = "flex";
+      return;
+    }
     const dot = e.target.closest(".palette-dot");
     if (!dot) return;
     const colorKey = dot.dataset.color;
@@ -1349,6 +1394,26 @@ function setupListeners() {
       if (window.peekyApi && window.peekyApi.openExternal) {
         window.peekyApi.openExternal("https://peeky-task.vercel.app/#features");
       }
+    });
+  }
+
+  // Settings: Startup on Boot
+  if (chkStartup) {
+    chkStartup.addEventListener("change", async () => {
+      const isChecked = chkStartup.checked;
+      state.launchAtStartup = isChecked;
+      if (window.peekyApi && window.peekyApi.setLoginItemSettings) {
+        await window.peekyApi.setLoginItemSettings(isChecked);
+      }
+      persistData();
+    });
+  }
+
+  // Settings: Hide over Fullscreen Apps
+  if (chkHideFullscreen) {
+    chkHideFullscreen.addEventListener("change", () => {
+      state.hideOverFullscreen = chkHideFullscreen.checked;
+      persistData();
     });
   }
 
@@ -1500,17 +1565,17 @@ async function init() {
   if (!state.trial || typeof state.trial !== "object") {
     state.trial = {
       isLicensed: false,
-      trialStartedAt: Date.now(),
+      trialStartedAt: Date.now() - 24 * 3600 * 1000,
       licenseKey: "",
     };
   } else if (!state.trial.trialStartedAt && !state.trial.isLicensed) {
-    state.trial.trialStartedAt = Date.now();
+    state.trial.trialStartedAt = Date.now() - 24 * 3600 * 1000;
   }
 
   // If previous trial had dummy test string 'nsnnswmsnwmnsmwns', reset to active trial
   if (state.trial.licenseKey === "nsnnswmsnwmnsmwns") {
     state.trial.isLicensed = false;
-    state.trial.trialStartedAt = Date.now();
+    state.trial.trialStartedAt = Date.now() - 24 * 3600 * 1000;
     state.trial.licenseKey = "";
     persistData();
   }

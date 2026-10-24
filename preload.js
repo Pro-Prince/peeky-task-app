@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld("peekyApi", {
   dockEdge: (edge) => ipcRenderer.send("dock-edge", edge),
   setDeckHovered: (hovered) => ipcRenderer.send("set-deck-hovered", hovered),
   setDeckPeeking: (peeking) => ipcRenderer.send("set-deck-peeking", peeking),
+  setIgnoreMouseEvents: (ignore, options) => ipcRenderer.send("set-ignore-mouse-events", ignore, options),
 
   // Centered Note Card Window
   openNoteCard: (noteId) => ipcRenderer.send("open-note-card", noteId),

@@ -23,19 +23,23 @@ Get-Process -Name "Peeky Task", "PeekyTask" -ErrorAction SilentlyContinue | Stop
 # 2. Build AppX using electron-builder
 Write-Host "`n[Step 2/6] Building AppX via electron-builder..." -ForegroundColor Yellow
 Set-Location $RootDir
+$PkgJson = Get-Content (Join-Path $RootDir "package.json") | ConvertFrom-Json
+$AppVersion = $PkgJson.version
+$AppVersionQuad = "$AppVersion.0"
+
 npm run build:msix
 if ($LASTEXITCODE -ne 0) {
     throw "electron-builder build:msix failed with exit code $LASTEXITCODE"
 }
 
-$RawAppx = Join-Path $ReleaseDir "Peeky Task 1.0.0.appx"
+$RawAppx = Join-Path $ReleaseDir "Peeky Task $AppVersion.appx"
 if (-not (Test-Path $RawAppx)) {
     throw "Compiled package not found at $RawAppx"
 }
 
 # 3. Prepare payload package with consistent naming (no spaces)
 Write-Host "`n[Step 3/6] Preparing clean payload package..." -ForegroundColor Yellow
-$CleanAppxName = "PeekyTask_1.0.0.0_x64.appx"
+$CleanAppxName = "PeekyTask_${AppVersionQuad}_x64.appx"
 $CleanAppxPath = Join-Path $ReleaseDir $CleanAppxName
 $BundleStageDir = Join-Path $ReleaseDir "bundle_stage"
 
@@ -48,11 +52,11 @@ Write-Host "Payload prepared: $CleanAppxName" -ForegroundColor Green
 
 # 4. Build .msixbundle with Windows SDK MakeAppx tool
 Write-Host "`n[Step 4/6] Creating bundle via MakeAppx..." -ForegroundColor Yellow
-$BundleName = "PeekyTask_1.0.0.0.msixbundle"
+$BundleName = "PeekyTask_${AppVersionQuad}.msixbundle"
 $BundlePath = Join-Path $ReleaseDir $BundleName
 
 if (Test-Path $BundlePath) { Remove-Item -Force $BundlePath }
-& $MakeAppx bundle /v /o /bv 1.0.0.0 /d $BundleStageDir /p $BundlePath
+& $MakeAppx bundle /v /o /bv $AppVersionQuad /d $BundleStageDir /p $BundlePath
 if ($LASTEXITCODE -ne 0) {
     throw "MakeAppx bundle creation failed with exit code $LASTEXITCODE"
 }
@@ -104,7 +108,7 @@ Write-Host "--> PASSED: Bundle successfully extracted payload package '$CleanApp
 
 # 6. Generate Microsoft Store upload artifact (.msixupload) and copy files
 Write-Host "`n[Step 6/6] Generating .msixupload artifact and deploying..." -ForegroundColor Yellow
-$UploadArtifactName = "PeekyTask_1.0.0.0.msixupload"
+$UploadArtifactName = "PeekyTask_${AppVersionQuad}.msixupload"
 $UploadArtifactPath = Join-Path $ReleaseDir $UploadArtifactName
 
 if (Test-Path $UploadArtifactPath) { Remove-Item -Force $UploadArtifactPath }
@@ -126,9 +130,9 @@ Copy-Item $BundlePath -Destination (Join-Path $UploadDir $BundleName) -Force
 Copy-Item $UploadArtifactPath -Destination (Join-Path $UploadDir $UploadArtifactName) -Force
 
 # Also provide conventional .appx and .msixbundle filenames for convenience
-Copy-Item $CleanAppxPath -Destination (Join-Path $UploadDir "Peeky Task 1.0.0.appx") -Force
-Copy-Item $BundlePath -Destination (Join-Path $UploadDir "Peeky Task 1.0.0.msixbundle") -Force
-Copy-Item $UploadArtifactPath -Destination (Join-Path $UploadDir "Peeky Task 1.0.0.msixupload") -Force
+Copy-Item $CleanAppxPath -Destination (Join-Path $UploadDir "Peeky Task $AppVersion.appx") -Force
+Copy-Item $BundlePath -Destination (Join-Path $UploadDir "Peeky Task $AppVersion.msixbundle") -Force
+Copy-Item $UploadArtifactPath -Destination (Join-Path $UploadDir "Peeky Task $AppVersion.msixupload") -Force
 
 Write-Host "`n======================================================" -ForegroundColor Cyan
 Write-Host "  ALL VALIDATIONS PASSED SUCCESSFULLY!                " -ForegroundColor Green
