@@ -9,7 +9,7 @@
 ![Packaging](https://img.shields.io/badge/package-MSIX%20%2F%20AppX-525252?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-F59E0B?style=flat-square)
 
-**[→ Get on Microsoft Store](https://apps.microsoft.com/search?query=Peeky+Task)**
+**[→ Get on Microsoft Store](https://apps.microsoft.com/detail/9P93CZD9129H)**
 
 </div>
 
@@ -23,7 +23,7 @@ Peeky Task is a minimalist, transparent daily task and to-do widget built native
 
 ## Microsoft Store
 
-🔗 **[apps.microsoft.com/search?query=Peeky+Task](https://apps.microsoft.com/search?query=Peeky+Task)**
+🔗 **[apps.microsoft.com/detail/9P93CZD9129H](https://apps.microsoft.com/detail/9P93CZD9129H)**
 
 > Packaged as a certified Windows Store MSIX/AppX application. 100% local, isolated sandbox, automatic updates, and zero background telemetry.
 
